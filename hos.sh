@@ -1,2 +1,4 @@
-docker build -t budzap-saas-main:latest .
-docker push hiforkkjxx/budzap-saas-main:latest
+
+git add .
+git commit -am "att"
+git push -u origin main
