@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Listas de Contatos</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@1.16.2/dist/full.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-6">Gerenciar Listas de Contatos</h1>
+        
+        <!-- Criar Nova Lista -->
+        <div class="mb-6">
+            <form id="createListForm" class="flex items-center">
+                <input type="text" id="newListName" placeholder="Nome da Nova Lista" class="input input-bordered w-full max-w-xs mr-2" required>
+                <button type="submit" class="btn btn-primary">Criar Lista</button>
+            </form>
+        </div>
+
+        <!-- Seletor de Lista e Botão de Adicionar Contato -->
+        <div class="flex justify-between items-center mb-4">
+            <select id="listSelector" class="select select-bordered w-full max-w-xs">
+                <option disabled selected>Selecione uma lista</option>
+            </select>
+            <button onclick="showAddContactModal()" class="btn btn-secondary">Adicionar Contato</button>
+        </div>
+
+        <!-- Lista de Contatos -->
+        <div id="contactList" class="overflow-x-auto">
+            <table class="table w-full">
+                <thead>
+                    <tr>
+
+                        <th>Nome</th>
+                        <th>Telefone</th>
+                        <th>Qualidade</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="contactsTableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- Modal para Adicionar/Editar Contato -->
+        <div id="contactModal" class="modal">
+            <div class="modal-box">
+                <h3 class="font-bold text-lg mb-4">Adicionar/Editar Contato</h3>
+                <form id="contactForm">
+                    <input type="hidden" id="contactId">
+                    <input type="text" id="contactName" placeholder="Nome" class="input input-bordered w-full mt-2" required>
+                    <input type="tel" id="contactPhone" placeholder="Número de Telefone" class="input input-bordered w-full mt-2" required>
+                    <input type="url" id="contactPhoto" placeholder="URL da Foto" class="input input-bordered w-full mt-2">
+                    <textarea id="contactDescription" placeholder="Descrição" class="textarea textarea-bordered w-full mt-2"></textarea>
+                    <select id="contactQuality" class="select select-bordered w-full mt-2">
+                        <option value="low_ticket">Low Ticket</option>
+                        <option value="high_ticket">High Ticket</option>
+                    </select>
+                    <div class="modal-action">
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                        <button type="button" class="btn" onclick="closeContactModal()">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let lists = [];
+        let currentListId = null;
+
+        async function loadLists() {
+            const response = await fetch('/contact-lists');
+            lists = await response.json();
+            updateListSelector();
+        }
+
+        function updateListSelector() {
+            const selector = document.getElementById('listSelector');
+            selector.innerHTML = '<option disabled selected>Selecione uma lista</option>' +
+                lists.map(list => `<option value="${list._id}">${list.name}</option>`).join('');
+            
+            selector.onchange = function() {
+                currentListId = this.value;
+                renderContacts();
+            };
+        }
+
+        function renderContacts() {
+            const tbody = document.getElementById('contactsTableBody');
+            const list = lists.find(l => l._id === currentListId);
+            if (!list) return;
+
+            tbody.innerHTML = list.contacts.map(contact => `
+                <tr>
+                 
+                    <td>${contact.name}</td>
+                    <td>${contact.phoneNumber}</td>
+                    <td>${contact.quality === 'high_ticket' ? 'High Ticket' : 'Low Ticket'}</td>
+                    <td>
+                        <button onclick="editContact('${contact._id}')" class="btn btn-xs btn-info mr-1">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteContact('${contact._id}')" class="btn btn-xs btn-error">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('createListForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('newListName').value;
+            const response = await fetch('/contact-lists', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            });
+            if (response.ok) {
+                document.getElementById('newListName').value = '';
+                await loadLists();
+            }
+        };
+
+        function showAddContactModal() {
+            document.getElementById('contactId').value = '';
+            document.getElementById('contactForm').reset();
+            document.getElementById('contactModal').classList.add('modal-open');
+        }
+
+        function closeContactModal() {
+            document.getElementById('contactModal').classList.remove('modal-open');
+        }
+
+        async function editContact(contactId) {
+            const list = lists.find(l => l._id === currentListId);
+            const contact = list.contacts.find(c => c._id === contactId);
+            if (contact) {
+                document.getElementById('contactId').value = contactId;
+                document.getElementById('contactName').value = contact.name;
+                document.getElementById('contactPhone').value = contact.phoneNumber;
+                document.getElementById('contactPhoto').value = contact.photo || '';
+                document.getElementById('contactDescription').value = contact.description || '';
+                document.getElementById('contactQuality').value = contact.quality;
+                document.getElementById('contactModal').classList.add('modal-open');
+            }
+        }
+
+        document.getElementById('contactForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const contactId = document.getElementById('contactId').value;
+            const contact = {
+                name: document.getElementById('contactName').value,
+                phoneNumber: document.getElementById('contactPhone').value,
+                photo: document.getElementById('contactPhoto').value,
+                description: document.getElementById('contactDescription').value,
+                quality: document.getElementById('contactQuality').value
+            };
+
+            let response;
+            if (contactId) {
+                response = await fetch(`/contact-lists/${currentListId}/contacts/${contactId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(contact)
+                });
+            } else {
+                response = await fetch(`/contact-lists/${currentListId}/contacts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(contact)
+                });
+            }
+
+            if (response.ok) {
+                closeContactModal();
+                await loadLists();
+                renderContacts();
+            }
+        };
+
+        async function deleteContact(contactId) {
+            if (confirm('Tem certeza que deseja excluir este contato?')) {
+                const response = await fetch(`/contact-lists/${currentListId}/contacts/${contactId}`, { method: 'DELETE' });
+                if (response.ok) {
+                    await loadLists();
+                    renderContacts();
+                }
+            }
+        }
+
+        loadLists();
+    </script>
+</body>
+</html>

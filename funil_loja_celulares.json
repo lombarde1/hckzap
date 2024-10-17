@@ -1,0 +1,801 @@
+{
+  "id": "9e8606d6-2662-4825-8068-1a14e695812a",
+  "name": "funil_vendedora_conteudo",
+  "nodes": [
+    {
+      "id": "start_node",
+      "type": "start",
+      "content": "",
+      "position": {
+        "left": "50px",
+        "top": "50px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "message_1729071482847",
+      "type": "message",
+      "content": "Oi, tudo bem? 😊\nSou a [Nome da Vendedora], especialista em conteúdo e criadora de  estratégias digitais que te ajudam a vender muito mais.\n\nE você, o que está buscando para o seu negócio online?\n\nGostaria de saber mais sobre como impulsionar suas vendas através de um conteúdo de qualidade?\n\nSe sim, me fala um pouquinho sobre você e o que te motiva a ter um negócio online! ✨",
+      "position": {
+        "left": "200px",
+        "top": "50px"
+      },
+      "delay": 2
+    },
+    {
+      "id": "wait_1729071511920",
+      "type": "wait",
+      "content": "10",
+      "position": {
+        "left": "380px",
+        "top": "50px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "input_1729071523697",
+      "type": "input",
+      "content": "Me conte um pouco sobre você e seu negócio online! 😊",
+      "position": {
+        "left": "560px",
+        "top": "50px"
+      },
+      "delay": 2,
+      "inputKey": "sobre_negocio",
+      "saveResponse": true
+    },
+    {
+      "id": "wait_1729071546343",
+      "type": "wait",
+      "content": "10",
+      "position": {
+        "left": "740px",
+        "top": "50px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "message_1729071558206",
+      "type": "message",
+      "content": "Que legal! 💖\n\nÉ com muito entusiasmo que te ajudo a alcançar seus objetivos!\n\nPara te ajudar da melhor forma, preciso entender um pouco mais sobre suas necessidades. \n\nTenho alguns pacotes de conteúdo incríveis para você escolher! 😉\n\nVeja só:\n\n[Inserir imagem da tabela de pacotes]",
+      "position": {
+        "left": "920px",
+        "top": "50px"
+      },
+      "delay": 2
+    },
+    {
+      "id": "wait_1729071581979",
+      "type": "wait",
+      "content": "10",
+      "position": {
+        "left": "1100px",
+        "top": "50px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "image_1729071593816",
+      "type": "image",
+      "content": "[Link da imagem da tabela]",
+      "position": {
+        "left": "1280px",
+        "top": "50px"
+      },
+      "delay": 2,
+      "caption": "Veja os pacotes de conteúdo que preparei para você! ✨"
+    },
+    {
+      "id": "wait_1729071619937",
+      "type": "wait",
+      "content": "10",
+      "position": {
+        "left": "1460px",
+        "top": "50px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "message_1729071631854",
+      "type": "message",
+      "content": "E qual desses pacotes te chamou mais atenção? 😉",
+      "position": {
+        "left": "1640px",
+        "top": "50px"
+      },
+      "delay": 2
+    },
+    {
+      "id": "wait_1729071652947",
+      "type": "wait",
+      "content": "10",
+      "position": {
+        "left": "1820px",
+        "top": "50px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "input_1729071664947",
+      "type": "input",
+      "content": "Qual pacote te interessou mais? 😊",
+      "position": {
+        "left": "2000px",
+        "top": "50px"
+      },
+      "delay": 2,
+      "inputKey": "pacote_escolhido",
+      "saveResponse": true
+    },
+    {
+      "id": "wait_1729071687559",
+      "type": "wait",
+      "content": "10",
+      "position": {
+        "left": "2180px",
+        "top": "50px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "condition_1729071699532",
+      "type": "condition",
+      "content": "Condição",
+      "position": {
+        "left": "2360px",
+        "top": "50px"
+      },
+      "delay": 0,
+      "variable": "input:pacote_escolhido",
+      "conditionType": "contains",
+      "conditionValue": "Pacote 1",
+      "conditionValues": null
+    },
+    {
+      "id": "condition_1729071712254",
+      "type": "condition",
+      "content": "Condição",
+      "position": {
+        "left": "2360px",
+        "top": "250px"
+      },
+      "delay": 0,
+      "variable": "input:pacote_escolhido",
+      "conditionType": "contains",
+      "conditionValue": "Pacote 2",
+      "conditionValues": null
+    },
+    {
+      "id": "condition_1729071724120",
+      "type": "condition",
+      "content": "Condição",
+      "position": {
+        "left": "2360px",
+        "top": "450px"
+      },
+      "delay": 0,
+      "variable": "input:pacote_escolhido",
+      "conditionType": "contains",
+      "conditionValue": "Pacote 3",
+      "conditionValues": null
+    },
+    {
+      "id": "message_1729071736228",
+      "type": "message",
+      "content": "Que ótimo! O Pacote 1 é perfeito para quem busca [Descrição do Pacote 1].\n\nEle inclui:\n\n[Lista de itens do Pacote 1]\n\nGostaria de saber mais sobre ele? 😊",
+      "position": {
+        "left": "2740px",
+        "top": "50px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "message_1729071748507",
+      "type": "message",
+      "content": "Que ótimo! O Pacote 2 é ideal para quem deseja [Descrição do Pacote 2].\n\nEle inclui:\n\n[Lista de itens do Pacote 2]\n\nGostaria de saber mais sobre ele? 😊",
+      "position": {
+        "left": "2740px",
+        "top": "250px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "message_1729071760403",
+      "type": "message",
+      "content": "Que ótimo! O Pacote 3 é a solução perfeita para quem quer [Descrição do Pacote 3].\n\nEle inclui:\n\n[Lista de itens do Pacote 3]\n\nGostaria de saber mais sobre ele? 😊",
+      "position": {
+        "left": "2740px",
+        "top": "450px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "wait_1729071783108",
+      "type": "wait",
+      "content": "10",
+      "position": {
+        "left": "2920px",
+        "top": "50px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "input_1729071794984",
+      "type": "input",
+      "content": "Gostaria de saber mais sobre o Pacote 1? 😊",
+      "position": {
+        "left": "3100px",
+        "top": "50px"
+      },
+      "delay": 2,
+      "inputKey": "mais_pacote1",
+      "saveResponse": true
+    },
+    {
+      "id": "wait_1729071817689",
+      "type": "wait",
+      "content": "10",
+      "position": {
+        "left": "3280px",
+        "top": "50px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "condition_1729071829605",
+      "type": "condition",
+      "content": "Condição",
+      "position": {
+        "left": "3460px",
+        "top": "50px"
+      },
+      "delay": 0,
+      "variable": "input:mais_pacote1",
+      "conditionType": "contains",
+      "conditionValue": "sim",
+      "conditionValues": null
+    },
+    {
+      "id": "condition_1729071842256",
+      "type": "condition",
+      "content": "Condição",
+      "position": {
+        "left": "3460px",
+        "top": "250px"
+      },
+      "delay": 0,
+      "variable": "input:mais_pacote1",
+      "conditionType": "contains",
+      "conditionValue": "não",
+      "conditionValues": null
+    },
+    {
+      "id": "message_1729071854235",
+      "type": "message",
+      "content": "Que legal! 🤩\n\nVou te enviar um PDF com mais detalhes sobre o Pacote 1 para você analisar com calma.\n\n[Enviar PDF do Pacote 1]",
+      "position": {
+        "left": "3840px",
+        "top": "50px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "message_1729071866579",
+      "type": "message",
+      "content": "Tudo bem! 😉\n\nSe precisar de mais informações, me chame! 🥰\n\nTenha um ótimo dia!",
+      "position": {
+        "left": "3840px",
+        "top": "250px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "wait_1729071889308",
+      "type": "wait",
+      "content": "10",
+      "position": {
+        "left": "4020px",
+        "top": "50px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "input_1729071901211",
+      "type": "input",
+      "content": "Gostaria de saber mais sobre o Pacote 2? 😊",
+      "position": {
+        "left": "4200px",
+        "top": "250px"
+      },
+      "delay": 2,
+      "inputKey": "mais_pacote2",
+      "saveResponse": true
+    },
+    {
+      "id": "wait_1729071923968",
+      "type": "wait",
+      "content": "10",
+      "position": {
+        "left": "4380px",
+        "top": "250px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "condition_1729071935915",
+      "type": "condition",
+      "content": "Condição",
+      "position": {
+        "left": "4560px",
+        "top": "250px"
+      },
+      "delay": 0,
+      "variable": "input:mais_pacote2",
+      "conditionType": "contains",
+      "conditionValue": "sim",
+      "conditionValues": null
+    },
+    {
+      "id": "condition_1729071947879",
+      "type": "condition",
+      "content": "Condição",
+      "position": {
+        "left": "4560px",
+        "top": "450px"
+      },
+      "delay": 0,
+      "variable": "input:mais_pacote2",
+      "conditionType": "contains",
+      "conditionValue": "não",
+      "conditionValues": null
+    },
+    {
+      "id": "message_1729071959852",
+      "type": "message",
+      "content": "Que legal! 🤩\n\nVou te enviar um PDF com mais detalhes sobre o Pacote 2 para você analisar com calma.\n\n[Enviar PDF do Pacote 2]",
+      "position": {
+        "left": "4940px",
+        "top": "250px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "message_1729071972219",
+      "type": "message",
+      "content": "Tudo bem! 😉\n\nSe precisar de mais informações, me chame! 🥰\n\nTenha um ótimo dia!",
+      "position": {
+        "left": "4940px",
+        "top": "450px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "wait_1729071994970",
+      "type": "wait",
+      "content": "10",
+      "position": {
+        "left": "5120px",
+        "top": "250px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "input_1729072006910",
+      "type": "input",
+      "content": "Gostaria de saber mais sobre o Pacote 3? 😊",
+      "position": {
+        "left": "5300px",
+        "top": "450px"
+      },
+      "delay": 2,
+      "inputKey": "mais_pacote3",
+      "saveResponse": true
+    },
+    {
+      "id": "wait_1729072029589",
+      "type": "wait",
+      "content": "10",
+      "position": {
+        "left": "5480px",
+        "top": "450px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "condition_1729072041585",
+      "type": "condition",
+      "content": "Condição",
+      "position": {
+        "left": "5660px",
+        "top": "450px"
+      },
+      "delay": 0,
+      "variable": "input:mais_pacote3",
+      "conditionType": "contains",
+      "conditionValue": "sim",
+      "conditionValues": null
+    },
+    {
+      "id": "condition_1729072053474",
+      "type": "condition",
+      "content": "Condição",
+      "position": {
+        "left": "5660px",
+        "top": "650px"
+      },
+      "delay": 0,
+      "variable": "input:mais_pacote3",
+      "conditionType": "contains",
+      "conditionValue": "não",
+      "conditionValues": null
+    },
+    {
+      "id": "message_1729072065523",
+      "type": "message",
+      "content": "Que legal! 🤩\n\nVou te enviar um PDF com mais detalhes sobre o Pacote 3 para você analisar com calma.\n\n[Enviar PDF do Pacote 3]",
+      "position": {
+        "left": "6040px",
+        "top": "450px"
+      },
+      "delay": 0
+    },
+    {
+      "id": "message_1729072077877",
+      "type": "message",
+      "content": "Tudo bem! 😉\n\nSe precisar de mais informações, me chame! 🥰\n\nTenha um ótimo dia!",
+      "position": {
+        "left": "6040px",
+        "top": "650px"
+      },
+      "delay": 0
+    }
+  ],
+  "connections": [
+    {
+      "sourceId": "start_node",
+      "targetId": "message_1729071482847",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729071482847",
+      "targetId": "wait_1729071511920",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729071511920",
+      "targetId": "input_1729071523697",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "input_1729071523697",
+      "targetId": "wait_1729071546343",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729071546343",
+      "targetId": "message_1729071558206",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729071558206",
+      "targetId": "wait_1729071581979",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729071581979",
+      "targetId": "image_1729071593816",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "image_1729071593816",
+      "targetId": "wait_1729071619937",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729071619937",
+      "targetId": "message_1729071631854",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729071631854",
+      "targetId": "wait_1729071652947",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729071652947",
+      "targetId": "input_1729071664947",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "input_1729071664947",
+      "targetId": "wait_1729071687559",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729071687559",
+      "targetId": "condition_1729071699532",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "condition_1729071699532",
+      "targetId": "message_1729071736228",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "condition_1729071712254",
+      "targetId": "message_1729071748507",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "condition_1729071724120",
+      "targetId": "message_1729071760403",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "condition_1729071699532",
+      "targetId": "condition_1729071712254",
+      "anchors": [
+        "Bottom",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "condition_1729071712254",
+      "targetId": "condition_1729071724120",
+      "anchors": [
+        "Bottom",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729071736228",
+      "targetId": "wait_1729071783108",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729071748507",
+      "targetId": "wait_1729071783108",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729071760403",
+      "targetId": "wait_1729071783108",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729071783108",
+      "targetId": "input_1729071794984",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "input_1729071794984",
+      "targetId": "wait_1729071817689",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729071817689",
+      "targetId": "condition_1729071829605",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "condition_1729071829605",
+      "targetId": "message_1729071854235",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "condition_1729071842256",
+      "targetId": "message_1729071866579",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "condition_1729071829605",
+      "targetId": "condition_1729071842256",
+      "anchors": [
+        "Bottom",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729071854235",
+      "targetId": "wait_1729071889308",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729071866579",
+      "targetId": "wait_1729071889308",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729071889308",
+      "targetId": "input_1729071901211",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "input_1729071901211",
+      "targetId": "wait_1729071923968",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729071923968",
+      "targetId": "condition_1729071935915",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "condition_1729071935915",
+      "targetId": "message_1729071959852",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "condition_1729071947879",
+      "targetId": "message_1729071972219",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "condition_1729071935915",
+      "targetId": "condition_1729071947879",
+      "anchors": [
+        "Bottom",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729071959852",
+      "targetId": "wait_1729071994970",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729071972219",
+      "targetId": "wait_1729071994970",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729071994970",
+      "targetId": "input_1729072006910",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "input_1729072006910",
+      "targetId": "wait_1729072029589",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729072029589",
+      "targetId": "condition_1729072041585",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "condition_1729072041585",
+      "targetId": "message_1729072065523",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "condition_1729072053474",
+      "targetId": "message_1729072077877",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "condition_1729072041585",
+      "targetId": "condition_1729072053474",
+      "anchors": [
+        "Bottom",
+        "Left"
+      ]
+    }
+  ],
+  "exportedAt": "2024-10-15T16:21:16.238Z",
+  "exportVersion": "1.0"
+}

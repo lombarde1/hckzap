@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HocketZap - Revolucione seu Marketing no WhatsApp</title>
+    
+    <!-- Meta tags otimizadas -->
+    <meta name="description" content="HocketZap: A solução definitiva para automação e marketing no WhatsApp. Aumente suas vendas, engaje seus clientes e impulsione seu negócio com nossa plataforma intuitiva e poderosa.">
+    <meta name="keywords" content="WhatsApp, marketing, automação, vendas, engajamento, CRM, mensagens em massa">
+    <meta name="author" content="HocketZap">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.budzap.com/">
+    <meta property="og:title" content="HocketZap - Revolucione seu Marketing no WhatsApp">
+    <meta property="og:description" content="Aumente suas vendas e engaje seus clientes com a plataforma de automação WhatsApp mais poderosa do mercado.">
+    <meta property="og:image" content="https://cdn.pixabay.com/photo/2021/01/11/07/22/whatsapp-5907292_1280.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://www.budzap.com/">
+    <meta property="twitter:title" content="HocketZap - Revolucione seu Marketing no WhatsApp">
+    <meta property="twitter:description" content="Aumente suas vendas e engaje seus clientes com a plataforma de automação WhatsApp mais poderosa do mercado.">
+    <meta property="twitter:image" content="https://cdn.pixabay.com/photo/2021/01/11/07/22/whatsapp-5907292_1280.jpg">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #00A884;
+            --secondary-color: #128C7E;
+            --accent-color: #34B7F1;
+            --background-color: #111B21;
+            --text-color: #E9EDF0;
+            --card-bg: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 168, 132, 0.2) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(52, 183, 241, 0.2) 0%, transparent 20%);
+            background-attachment: fixed;
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+        }
+
+        .feedback-section, .login-section {
+            flex: 1;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .feedback-carousel {
+        overflow: hidden;
+        position: relative;
+        height: 200px;
+        width: 100%;
+    }
+
+    .feedback-slider {
+        display: flex;
+        transition: transform 0.5s ease;
+    }
+
+    .feedback-slide {
+        flex: 0 0 100%;
+        padding: 0 10px;
+        box-sizing: border-box;
+    }
+    
+        .login-box {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .link {
+            color: var(--accent-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .link:hover {
+            color: var(--primary-color);
+        }
+
+       
+
+        .error-message {
+        background-color: rgba(220, 38, 38, 0.1);
+        border-left: 4px solid #DC2626;
+        color: #FECACA;
+        padding: 12px;
+        margin-bottom: 20px;
+        border-radius: 0 5px 5px 0;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        animation: fadeInShake 0.5s ease-out;
+    }
+
+    .error-message i {
+        margin-right: 10px;
+        font-size: 18px;
+    }
+
+    @keyframes fadeInShake {
+        0% {
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+        60% {
+            transform: translateX(5px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+        .feedback-slide.active {
+            opacity: 1;
+        }
+
+        @media (max-width: 1023px) {
+            .container {
+                flex-direction: column-reverse;
+            }
+
+            .feedback-section, .login-section {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Seção de Feedbacks -->
+        <div class="feedback-section">
+            <h2 class="text-3xl font-bold mb-6 text-center">O que nossos clientes dizem</h2>
+            <div class="feedback-carousel">
+                <div class="feedback-slider">
+                    <div class="feedback-slide">
+                        <div class="feedback-card">
+                            <p class="text-lg mb-4">"Estou usando e já consigo ver os resultados, superou minhas expectativas!"</p>
+                            <p class="font-semibold">- Maria Silva</p>
+                        </div>
+                    </div>
+                    <div class="feedback-slide">
+                        <div class="feedback-card">
+                            <p class="text-lg mb-4">"To testando os funis e é incrivel oque se pode fazer!"</p>
+                            <p class="font-semibold">- João Santos</p>
+                        </div>
+                    </div>
+                    <div class="feedback-slide">
+                        <div class="feedback-card">
+                            <p class="text-lg mb-4">"Interface intuitiva e recursos incríveis."</p>
+                            <p class="font-semibold">- Ana Oliveira</p>
+                        </div>
+                    </div>
+                    <div class="feedback-slide">
+                        <div class="feedback-card">
+                            <p class="text-lg mb-4">"Cara, tô usando o HocketZap há um mês e já vi meu faturamento subir 20%. Tá valendo cada centavo!"</p>
+                            <p class="font-semibold">- Carlos Oliveira, Loja de Roupas</p>
+                        </div>
+                    </div>
+                    <div class="feedback-slide">
+                        <div class="feedback-card">
+                            <p class="text-lg mb-4">"Mano, que ferramenta massa! Consigo agendar todas as mensagens da semana em minutos. Tô economizando um tempão!"</p>
+                            <p class="font-semibold">- Fernanda Lima, Influenciadora Digital</p>
+                        </div>
+                    </div>
+                    <div class="feedback-slide">
+                        <div class="feedback-card">
+                            <p class="text-lg mb-4">"Os funis de venda são demais! Tô convertendo muito mais leads em clientes."</p>
+                            <p class="font-semibold">- Ricardo Santos, Corretor de Imóveis</p>
+                        </div>
+                    </div>
+                    <div class="feedback-slide">
+                        <div class="feedback-card">
+                            <p class="text-lg mb-4">"Achei que ia ser complicado, mas a interface é super fácil de usar. Em dois dias já tava mandando ver nas campanhas!"</p>
+                            <p class="font-semibold">- Juliana Mendes, Pequena Empreendedora</p>
+                        </div>
+                    </div>
+                    <div class="feedback-slide">
+                        <div class="feedback-card">
+                            <p class="text-lg mb-4">"O suporte é show de bola! Sempre que tenho dúvida, eles resolvem na hora. Tô impressionado com a atenção ao cliente."</p>
+                            <p class="font-semibold">- André Martins, Agência de Marketing</p>
+                        </div>
+                    </div>
+                    <div class="feedback-slide">
+                        <div class="feedback-card">
+                            <p class="text-lg mb-4">"Meu engajamento com os clientes deu aumentou demais!"</p>
+                            <p class="font-semibold">- Patrícia Rocha, Consultora de Beleza</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+               
+          
+
+        <!-- Seção de Login -->
+        <div class="login-section">
+            <div class="login-box">
+                <div class="text-center mb-8">
+                    <i class="fas fa-robot text-6xl mb-4" style="color: var(--primary-color);"></i>
+                    <h1 class="text-4xl font-bold mb-2">HocketZap</h1>
+                    <p class="text-lg">Irei te fazer vender mais!</p>
+                </div>
+                
+               <% if (typeof error !== 'undefined' && error) { %>
+    <div class="error-message" role="alert">
+        <i class="fas fa-exclamation-circle"></i>
+        <p><%= error %></p>
+    </div>
+<% } %>
+                
+                <form action="/login" method="POST">
+                    <input type="text" id="login" name="login" required class="input-field" placeholder="Username / Email / Telefone">
+                    <input type="password" id="password" name="password" required class="input-field" placeholder="Senha">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                           
+                        </div>
+                        <a href="/reset-password" class="link text-sm">Esqueceu a senha?</a>
+                    </div>
+                    <button type="submit" class="btn-primary w-full">
+                        Entrar
+                    </button>
+                </form>
+                
+                <div class="mt-6 text-center">
+                    <p class="text-sm">
+                        Não tem uma conta?
+                        <a href="/register" class="link">Registre-se</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Animação de entrada
+        gsap.from(".feedback-section", {
+            opacity: 0,
+            x: -50,
+            duration: 1,
+            ease: "power3.out"
+        });
+
+        gsap.from(".login-section", {
+            opacity: 0,
+            x: 50,
+            duration: 1,
+            ease: "power3.out"
+        });
+
+         // Carrossel de feedbacks
+    const slider = document.querySelector('.feedback-slider');
+    const slides = document.querySelectorAll('.feedback-slide');
+    let currentSlide = 0;
+
+    function showSlide(index) {
+        slider.style.transform = `translateX(-${index * 100}%)`;
+        currentSlide = index;
+    }
+
+    function nextSlide() {
+        let next = (currentSlide + 1) % slides.length;
+        showSlide(next);
+    }
+
+    function prevSlide() {
+        let prev = (currentSlide - 1 + slides.length) % slides.length;
+        showSlide(prev);
+    }
+
+    setInterval(nextSlide, 3000);
+    </script>
+</body>
+</html>

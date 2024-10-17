@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rastreador de Infidelidade (Ficticio)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" integrity="sha512-GCJ4p4j+SXCl4kv/AszW7Aocp1/2o+yxeNritoEyGbHJe+aNnr5SwPqo81xZXzy5cR+ZWnY8K11x1e42+LQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js" integrity="sha512-BwHfrr4CRt+ci2IDI1W9t2tbM+jgyfIW/ZJn30kG3WGMp9pbg6z79c+crf+Z6RCH4N/sQjyq07mNnwwzO3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <style>
+        #map { height: 300px; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-8">Descubra a Verdade (Simulação)</h1>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Quem você deseja rastrear (fictício)?</h2>
+            <div class="flex space-x-4">
+                <button id="maridoBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Marido</button>
+                <button id="mulherBtn" class="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded">Mulher</button>
+            </div>
+        </div>
+
+        <div id="whatsappSection" class="hidden bg-white rounded-lg shadow-md p-6 mb-8">
+            <label for="whatsapp" class="block text-gray-700 text-sm font-bold mb-2">Número do WhatsApp (fictício):</label>
+            <input type="text" id="whatsapp" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="+55 (DDD) 9XXXX-XXXX">
+        </div>
+
+        <div id="locationSection" class="hidden bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">Localização Atual (Simulada):</h2>
+            <div id="map"></div>
+            <p id="cidade" class="mt-4 font-bold"></p>
+
+             <button id="desbloquearBtn" class="mt-8 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Desbloquear Dados Fictícios</button>
+            <div id="dadosFictícios" class="hidden mt-4 border border-gray-300 p-4">
+                <p><strong>Nome fictício:</strong> João da Silva</p>
+                <p><strong>Última localização fictícia:</strong> Rua Exemplo, 123 - Cidade Simulada</p>
+                <p><strong>Histórico fictício de locais:</strong> Parque da Cidade, Shopping Center, Restaurante Italiano</p> <p>
+                </p>
+               </div>
+        </div>
+
+    </div>
+
+
+    <script>
+        const maridoBtn = document.getElementById('maridoBtn');
+        const mulherBtn = document.getElementById('mulherBtn');
+        const whatsappSection = document.getElementById('whatsappSection');
+        const locationSection = document.getElementById('locationSection');
+        const desbloquearBtn = document.getElementById("desbloquearBtn");
+        const dadosFicticiosDiv = document.getElementById("dadosFictícios");
+
+        maridoBtn.addEventListener('click', () => {
+            whatsappSection.classList.remove('hidden');
+        });
+
+        mulherBtn.addEventListener('click', () => {
+            whatsappSection.classList.remove('hidden');
+        });
+
+
+        // Simulação de localização (substitua por uma API real)
+        if (navigator.geolocation) {
+             navigator.geolocation.getCurrentPosition(showPosition, showError);
+           } else {
+             //  x.innerHTML = "Geolocalização não é suportada por este navegador.";
+           }
+           
+           function showPosition(position) {
+
+               const lat = position.coords.latitude;  // Substitua por coordenadas reais
+               const lng = position.coords.longitude; // Substitua por coordenadas reais
+               const cidade =  'Cidade Simulada'// Substitua pela cidade real
+
+               document.getElementById('cidade').textContent = cidade;
+
+                 locationSection.classList.remove('hidden');
+            var map = L.map('map').setView([lat, lng], 13);
+
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+               maxZoom: 19,
+                attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map);
+
+            L.marker([lat, lng]).addTo(map)
+
+           }
+
+        function showError(error) {
+           switch(error.code) {
+             case error.PERMISSION_DENIED:
+               alert("Usuário rejeitou a solicitação de Geolocalização.")
+               break;
+             case error.POSITION_UNAVAILABLE:
+               alert("Localização indisponível.")
+               break;
+             case error.TIMEOUT:
+               alert("O tempo limite da requisição expirou.")
+               break;
+             case error.UNKNOWN_ERROR:
+               alert("Erro desconhecido.")
+               break;
+           }
+         }
+         
+         desbloquearBtn.addEventListener("click", () => {
+            dadosFicticiosDiv.classList.remove("hidden");
+        });
+    </script>
+
+</body>
+</html>

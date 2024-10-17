@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eventos do Sistema</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@tailwindcss/forms@0.5.3/dist/forms.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f6f9fc 0%, #e9f1f7 100%);
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .hover-scale {
+            transition: transform 0.3s ease;
+        }
+        .hover-scale:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-8 text-center text-indigo-700 animate-fade-in">Eventos do Sistema</h1>
+
+        <!-- Filtros -->
+        <div class="bg-white shadow-lg rounded-lg px-8 pt-6 pb-8 mb-6 animate-fade-in">
+            <div class="flex flex-wrap -mx-3 mb-6">
+                <div class="w-full md:w-1/4 px-3 mb-6 md:mb-0">
+                    <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="eventType">
+                        <i class="fas fa-filter mr-2"></i>Tipo de Evento
+                    </label>
+                    <select id="eventType" class="block appearance-none w-full bg-gray-100 border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-indigo-500 transition duration-300">
+                        <option value="">Todos</option>
+                        <option value="PAYMENT_GENERATED">Pagamento Gerado</option>
+                        <option value="PAYMENT_PAID">Pagamento Realizado</option>
+                        <option value="PAYMENT_NOT_PAID">Não Pago</option>
+                    </select>
+                </div>
+                <div class="w-full md:w-1/4 px-3 mb-6 md:mb-0">
+                    <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="dateFrom">
+                        <i class="far fa-calendar-alt mr-2"></i>Data Inicial
+                    </label>
+                    <input id="dateFrom" type="date" class="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-300 rounded-lg py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-indigo-500 transition duration-300">
+                </div>
+                <div class="w-full md:w-1/4 px-3 mb-6 md:mb-0">
+                    <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="dateTo">
+                        <i class="far fa-calendar-alt mr-2"></i>Data Final
+                    </label>
+                    <input id="dateTo" type="date" class="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-300 rounded-lg py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-indigo-500 transition duration-300">
+                </div>
+                <div class="w-full md:w-1/4 px-3 flex items-end">
+                    <button onclick="applyFilters()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out hover-scale">
+                        <i class="fas fa-search mr-2"></i>Aplicar Filtros
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Eventos -->
+        <div class="bg-white shadow-lg rounded-lg px-8 pt-6 pb-8 mb-6 overflow-x-auto animate-fade-in">
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-indigo-100 text-indigo-700 uppercase text-sm leading-normal">
+                        <th class="py-3 px-6 text-left rounded-tl-lg"><i class="fas fa-user mr-2"></i>Alvo (WhatsApp)</th>
+                        <th class="py-3 px-6 text-left"><i class="fas fa-tag mr-2"></i>Tipo de Evento</th>
+                        <th class="py-3 px-6 text-left"><i class="fas fa-dollar-sign mr-2"></i>Valor</th>
+                        <th class="py-3 px-6 text-left rounded-tr-lg"><i class="far fa-clock mr-2"></i>Data e Hora</th>
+                    </tr>
+                </thead>
+                <tbody id="eventsTableBody">
+                    <!-- Os eventos serão inseridos aqui dinamicamente -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginação -->
+        <div class="flex justify-center animate-fade-in">
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <button id="prevPage" class="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition duration-300">
+                    <i class="fas fa-chevron-left mr-2"></i>Anterior
+                </button>
+                <button id="nextPage" class="relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition duration-300">
+                    Próxima<i class="fas fa-chevron-right ml-2"></i>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const itemsPerPage = 10;
+
+
+        // Função para formatar o número de telefone
+const formatPhoneNumber = (num) => {
+  const cleaned = num.replace(/\D/g, '');
+  const ddd = parseInt(cleaned.slice(0, 2));
+  return ddd <= 27 ? cleaned.padStart(13, '55') : cleaned.padStart(12, '55');
+};
+
+const formatarNumeroBrasileiro = (numero) => {
+  numero = numero.replace(/\D/g, '');
+  if (!numero.startsWith('55')) return false;
+  
+  numero = numero.slice(2);
+  const ddd = parseInt(numero.slice(0, 2));
+  if (ddd < 11 || ddd > 99) return false;
+
+  if (ddd <= 27) {
+    numero = numero.length < 11 ? numero.slice(0, 2) + '9' + numero.slice(2) : numero.slice(0, 11);
+  } else {
+    numero = numero.length > 10 ? numero.slice(0, 2) + numero.slice(3).slice(0, 8) : numero;
+    if (numero.length < 10) return false;
+  }
+
+  return '55' + numero;
+};
+
+      
+
+        function applyFilters() {
+            currentPage = 1;
+            fetchEvents();
+        }
+
+        async function fetchEvents() {
+            const eventType = document.getElementById('eventType').value;
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+
+
+          
+
+            fetch(`/api-events/events?page=${currentPage}&limit=${itemsPerPage}&eventType=${eventType}&dateFrom=${dateFrom}&dateTo=${dateTo}`)
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('eventsTableBody');
+                    tableBody.innerHTML = '';
+                    data.events.forEach(async(event, index) => {
+                        const formattedNumber = formatPhoneNumber(event.targetId);
+    
+
+    const numfinal = formattedNumber.startsWith('55') 
+      ? await formatarNumeroBrasileiro(formattedNumber)
+      : formattedNumber;
+
+                        const row = document.createElement('tr');
+                        row.className = index % 2 === 0 ? 'bg-gray-50 hover:bg-gray-100 transition duration-300' : 'bg-white hover:bg-gray-100 transition duration-300';
+                        row.innerHTML = `
+                            <td class="py-3 px-6 text-left whitespace-nowrap">${numfinal}</td>
+                            <td class="py-3 px-6 text-left">${getEventTypeIcon(event.eventType)} ${getEventTypeLabel(event.eventType)}</td>
+                            <td class="py-3 px-6 text-left">${event.data.amount ? `R$ ${event.data.amount.toFixed(2)}` : '-'}</td>
+                            <td class="py-3 px-6 text-left">${formatDate(event.timestamp)}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+
+                    document.getElementById('prevPage').disabled = currentPage === 1;
+                    document.getElementById('nextPage').disabled = data.events.length < itemsPerPage;
+                })
+                .catch(error => console.error('Erro ao carregar eventos:', error));
+        }
+
+        function getEventTypeIcon(eventType) {
+            switch(eventType) {
+                case 'PAYMENT_GENERATED': return '<i class="fas fa-file-invoice-dollar text-blue-500 mr-2"></i>';
+                case 'PAYMENT_PAID': return '<i class="fas fa-check-circle text-green-500 mr-2"></i>';
+                case 'PAYMENT_NOT_PAID': return '<i class="fas fa-times-circle text-red-500 mr-2"></i>';
+                default: return '<i class="fas fa-question-circle text-gray-500 mr-2"></i>';
+            }
+        }
+
+        function getEventTypeLabel(eventType) {
+            switch(eventType) {
+                case 'PAYMENT_GENERATED': return 'Pagamento Gerado';
+                case 'PAYMENT_PAID': return 'Pagamento Realizado';
+                case 'PAYMENT_NOT_PAID': return 'Não Pago';
+                default: return eventType;
+            }
+        }
+
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleString('pt-BR', { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit', 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        }
+
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                fetchEvents();
+            }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            currentPage++;
+            fetchEvents();
+        });
+
+        // Carregar eventos iniciais
+        fetchEvents();
+    </script>
+</body>
+</html>

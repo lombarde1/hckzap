@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title !== 'undefined' ? title : 'HocketZap' %></title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="/media/icon.svg">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-eval' http: https: data: blob: 'unsafe-inline';">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+        }
+        .dark {
+            --primary-gradient: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+        }
+
+        .vsl-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .vsl-content {
+            background-color: #ffffff;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 600px;
+            transition: all 0.3s ease;
+        }
+
+        .close-vsl {
+            color: #718096;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .close-vsl:hover,
+        .close-vsl:focus {
+            color: #2D3748;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .bg-gradient {
+            background: var(--primary-gradient);
+        }
+        .text-gradient {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        .card-zoom {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .card-zoom:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.06);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        .animate-slide-in { animation: slideIn 0.5s ease-out; }
+        
+        /* Estilos adicionais para o menu */
+        .sidebar-scroll {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.5) transparent;
+        }
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 2px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-track {
+            background-color: transparent;
+        }
+        .menu-item {
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        .menu-item i {
+            transition: all 0.3s ease;
+        }
+        .menu-item:hover i {
+            transform: scale(1.2);
+        }
+    </style>
+    <%- defineContent('head') %>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <div class="flex flex-col h-screen lg:flex-row">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="bg-gradient text-white w-full lg:w-64 fixed inset-y-0 left-0 transform -translate-x-full lg:relative lg:translate-x-0 transition duration-300 ease-in-out z-20 overflow-hidden">
+            <div class="flex flex-col h-full">
+                <div class="p-5">
+                    <div class="flex items-center justify-center mb-6">
+                        <div class="w-20 h-20 overflow-hidden rounded-full border-2 border-white shadow-lg">
+                            <img src="https://i.pinimg.com/564x/ba/7e/a6/ba7ea6f12bdbd68d5a05308043ae5920.jpg" alt="HocketZap Mascot" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                    <div class="text-center mb-6">
+                        <h2 class="text-xl font-semibold"><%= (user && user.name) || 'Visitante' %></h2>
+                        <% if (user && user.plan) { %>
+                            <div class="mt-2 px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm inline-block">
+                                <span class="font-medium"><%= user.plan.charAt(0).toUpperCase() + user.plan.slice(1) %></span>
+                            </div>
+                            <p class="text-xs mt-2 opacity-75">
+                                Válido até: <%= new Date(user.validUntil || Date.now()).toLocaleDateString() %>
+                            </p>
+                        <% } %>
+                    </div>
+                </div>
+                <nav class="flex-1 sidebar-scroll px-4">
+                    <% const navItems = [
+                        { href: '/dashboard', icon: 'fas fa-chart-line', text: 'Dashboard' },
+                        { href: '/change-plan', icon: 'fas fa-level-up-alt', text: 'Planos' },
+                        { href: '/profile', icon: 'fas fa-user-circle', text: 'Perfil' },
+                        { href: '/notifications', icon: 'fas fa-bell', text: 'Notificações' },
+                        { href: '/whatsapp', icon: 'fab fa-whatsapp', text: 'Instâncias' },
+                        { href: '/chat', icon: 'fas fa-comments', text: 'Whatsapp Web' },
+                        { href: '/contact-lists/painel', icon: 'fas fa-address-book', text: 'Listas de Contatos' },
+                        { href: '/api/whatsapp-campaigns/manage', icon: 'fas fa-shield-alt', text: 'Links Antiban' },
+                        { href: '/integrations/dashboard', icon: 'fas fa-plug', text: 'Integrações' },
+                        { href: '/banco/extrato', icon: 'fas fa-money-check-alt', text: 'Conta Bancária' },
+                        { href: '/funnels/community', icon: 'fas fa-users', text: 'Comunidade de Funis' },
+                        { href: '/funnels', icon: 'fas fa-filter', text: 'Funis' },
+                        { href: '/events', icon: 'fas fa-calendar-alt', text: 'Eventos' },
+                        { href: '/zapvoice/elevenlabs-whatsapp', icon: 'fas fa-microphone-alt', text: 'Gerar Voz' },
+                        { href: '/integrations/hospedar', icon: 'fas fa-cloud-upload-alt', text: 'Hospedar Midia' },
+                        { href: '/auto-response', icon: 'fas fa-robot', text: 'Auto Resposta' },
+                        { href: '/whatsapp/mass-message', icon: 'fas fa-paper-plane', text: 'Spam de mensagens' },
+                    //    { href: '/group', icon: 'fas fa-user-friends', text: 'Gerenciar grupos' }
+                    ] %>
+                    <% navItems.forEach(item => { %>
+                        <a href="<%= user.plan === 'gratuito' && item.href !== '/change-plan' ? '#' : item.href %>" 
+                           class="menu-item flex items-center space-x-3 px-4 py-3 rounded transition duration-200 <%= user.plan === 'gratuito' && item.href !== '/change-plan' ? 'opacity-50 cursor-not-allowed' : '' %>">
+                            <i class="<%= item.icon %> text-xl"></i>
+                            <span class="animate-slide-in"><%= item.text %></span>
+                            <% if (user.plan === 'gratuito' && item.href !== '/change-plan') { %>
+                                <i class="fas fa-lock ml-auto text-sm"></i>
+                            <% } %>
+                        </a>
+                    <% }) %>
+                </nav>
+                <div class="p-4">
+                    <a href="/logout" class="group relative w-full inline-flex items-center justify-center px-6 py-3 overflow-hidden font-bold text-white rounded-lg shadow-2xl transition-all duration-300 ease-out hover:scale-105 active:top-0.5 focus:outline-none">
+                        <span class="absolute inset-0 w-full h-full bg-gradient-to-br from-red-500 via-red-600 to-red-700"></span>
+                        <span class="absolute bottom-0 right-0 block w-64 h-64 mb-32 mr-4 transition duration-500 origin-bottom-left transform rotate-45 translate-x-24 bg-red-800 rounded-full opacity-30 group-hover:rotate-90 ease"></span>
+                        <span class="relative flex items-center">
+                            <i class="fas fa-sign-out-alt mr-2 transition-transform duration-300 group-hover:-translate-x-1"></i>
+                            <span class="transition-all duration-300 group-hover:tracking-wider">Sair</span>
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Content area -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Navbar -->
+            <nav class="bg-white dark:bg-gray-800 shadow-md">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between h-16">
+                        <div class="flex items-center">
+                            <button id="sidebarToggle" class="text-gray-500 hover:text-gray-600 focus:outline-none focus:text-gray-600 lg:hidden" aria-label="Toggle sidebar">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                            <span class="ml-2 text-xl font-bold text-gradient"><%= typeof title !== 'undefined' ? title : 'HocketZap' %></span>
+                        </div>
+                        <div class="flex items-center">
+                            <button id="themeToggle" class="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:shadow-outline transition-colors duration-200">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-gray-800 p-6">
+                <!-- Breadcrumb -->
+                <nav class="text-gray-500 dark:text-gray-400 text-sm mb-4" aria-label="Breadcrumb">
+                    <ol class="list-none p-0 inline-flex">
+                        <li class="flex items-center">
+                            <a href="/" class="hover:text-gray-700 dark:hover:text-gray-200 transition-colors duration-200">Home</a>
+                            <svg class="fill-current w-3 h-3 mx-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z"/></svg>
+                        </li>
+                        <li class="flex items-center">
+                            <span class="text-gray-700 dark:text-gray-200" aria-current="page"><%= typeof title !== 'undefined' ? title : 'Page' %></span>
+                        </li>
+                    </ol>
+                </nav>
+
+                <div class="animate-fade-in">
+                    <%- body %>
+                </div>
+                
+              
+            </main>
+        </div>
+    </div>
+    <% if (user.plan === 'gratuito') { %>
+  <div id="upgradeCard" class="fixed bottom-4 right-4 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-2xl overflow-hidden transition-all duration-300 ease-in-out transform hover:scale-105">
+    <div class="bg-gradient-to-r from-purple-500 to-indigo-600 p-4">
+      <h3 class="text-xl font-bold text-white mb-2">Desbloqueie o Poder Total do HocketZap! 🚀</h3>
+      <p class="text-white text-sm">Você está perdendo recursos incríveis!</p>
+    </div>
+    <div class="p-4">
+      <ul class="text-sm text-gray-600 dark:text-gray-300 mb-4">
+        <li class="flex items-center mb-2">
+          <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+          Automação ilimitada de mensagens
+        </li>
+        <li class="flex items-center mb-2">
+          <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+          Integrações avançadas
+        </li>
+        <li class="flex items-center">
+          <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+          Acesso de qualquer lugar
+        </li>
+      </ul>
+      <a href="/change-plan" class="block w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-center py-2 rounded-lg font-semibold hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg">
+        Upgrade Agora!
+      </a>
+    </div>
+  </div>
+<% } %>
+
+    <%- defineContent('scripts') %>
+    <script>
+let currentUrl;
+
+    // Verifica se a URL atual contém 'change-plan'
+    currentUrl = window.location.href;
+   
+
+
+// Lógica para o card de upgrade
+  const upgradeCard = document.getElementById('upgradeCard');
+  if (upgradeCard) {
+    let isDragging = false;
+    let startX, startY, startLeft, startTop;
+
+    upgradeCard.addEventListener('mousedown', startDrag);
+    upgradeCard.addEventListener('touchstart', startDrag);
+
+    function startDrag(e) {
+      isDragging = true;
+      startX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+      startY = e.type === 'mousedown' ? e.clientY : e.touches[0].clientY;
+      startLeft = upgradeCard.offsetLeft;
+      startTop = upgradeCard.offsetTop;
+
+      document.addEventListener('mousemove', drag);
+      document.addEventListener('touchmove', drag);
+      document.addEventListener('mouseup', stopDrag);
+      document.addEventListener('touchend', stopDrag);
+    }
+
+    function drag(e) {
+      if (!isDragging) return;
+      e.preventDefault();
+
+      const clientX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
+      const clientY = e.type === 'mousemove' ? e.clientY : e.touches[0].clientY;
+
+      const deltaX = clientX - startX;
+      const deltaY = clientY - startY;
+
+      upgradeCard.style.left = `${startLeft + deltaX}px`;
+      upgradeCard.style.top = `${startTop + deltaY}px`;
+    }
+
+    function stopDrag() {
+      isDragging = false;
+      document.removeEventListener('mousemove', drag);
+      document.removeEventListener('touchmove', drag);
+    }
+  }
+
+        // Sidebar toggle logic
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const content = document.querySelector('.flex-1');
+
+        sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('-translate-x-full');
+        });
+
+        // Close sidebar when clicking outside of it on mobile
+        document.addEventListener('click', function(event) {
+            const isClickInsideSidebar = sidebar.contains(event.target);
+            const isClickOnToggle = sidebarToggle.contains(event.target);
+            
+            if (!isClickInsideSidebar && !isClickOnToggle && window.innerWidth < 1024) {
+                sidebar.classList.add('-translate-x-full');
+            }
+        });
+
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', function() {
+            document.documentElement.classList.toggle('dark');
+        });
+
+        // Logout button functionality (you need to implement this)
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            // Implement logout logic here
+            console.log('Logout clicked');
+        });
+
+        // VSL Modal logic for free plan users
+<% if (user.plan === 'gratuito') { %>
+    const vslModal = document.getElementById('vslModal');
+    const closeVsl = document.querySelector('.close-vsl');
+
+    // Show modal when page loads
+    window.onload = function() {
+        vslModal.style.display = "block";
+    }
+
+    // Close modal when clicking on X
+    closeVsl.onclick = function() {
+        vslModal.style.display = "none";
+    }
+
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+        if (event.target == vslModal) {
+            vslModal.style.display = "none";
+        }
+    }
+<% } %>
+
+// Disable links for free plan users
+<% if (user.plan === 'gratuito') { %>
+    document.querySelectorAll('.menu-item').forEach(item => {
+        if (!item.href.includes('/change-plan')) {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Esta funcionalidade está disponível apenas para usuários pagos. Por favor, assine um plano para acessá-la.');
+            });
+        }
+    });
+<% } %>
+
+    </script>
+</body>
+</html>
