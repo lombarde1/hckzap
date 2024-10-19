@@ -1,72 +1,69 @@
-//API DE RECEBIMENTO DE PIX E CHECAGEM DE STATUS  DA PAGBANK
-const axios = require("axios")
+const { TelegramClient } = require('telegram');
+const { StringSession } = require('telegram/sessions');
+const input = require('input');
 
+const apiId = '24489805';
+const apiHash = 'd43d5d995e4120830ec00058591c1546';
+const stringSession = new StringSession(''); // deixe vazio para primeira execução
 
-async function criarPedidoPagSeguro(token, dadosPedido) {
-  try {
-    const resposta = await axios({
-      method: 'post',
-      url: 'https://api.pagseguro.com/orders',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'accept': 'application/json',
-        'content-type': 'application/json'
-      },
-      data: dadosPedido
+async function main() {
+    console.log('Iniciando...');
+
+    const client = new TelegramClient(stringSession, apiId, apiHash, {
+        connectionRetries: 5,
     });
 
-    console.log('Pedido criado com sucesso:', resposta.data);
-    return resposta.data;
-  } catch (erro) {
-    console.error('Erro ao criar pedido:', erro.response ? erro.response.data : erro.message);
-    throw erro;
-  }
+    await client.start({
+        phoneNumber: async () => await input.text('Número de telefone: '),
+        password: async () => await input.text('Senha da conta (se houver): '),
+        phoneCode: async () => await input.text('Código recebido por SMS: '),
+        onError: (err) => console.log(err),
+    });
+
+    console.log('Conectado com sucesso!');
+    console.log(client.session.save()); // Salve esta string para usar nas próximas execuções
+
+    // Função para enviar comando e receber resposta
+    async function sendCommand(command) {
+        const bingsixbot = await client.getInputEntity('@BINGSIXBOT');
+        await client.sendMessage(bingsixbot, { message: command });
+
+        const response = await new Promise((resolve) => {
+            client.addEventHandler((event) => {
+                if (event.message && event.message.peerId.username === 'BINGSIXBOT') {
+                    resolve(event.message);
+                }
+            });
+        });
+
+        console.log('Resposta do bot:', response.message);
+        return response;
+    }
+
+    // Função para clicar em botão
+    async function clickButton(message, buttonText) {
+        const buttons = message.replyMarkup.rows.flatMap(row => row.buttons);
+        const button = buttons.find(btn => btn.text === buttonText);
+        
+        if (button) {
+            await client.invoke({
+                _: 'messages.getBotCallbackAnswer',
+                peer: '@BINGSIXBOT',
+                msgId: message.id,
+                data: button.data,
+            });
+            console.log(`Clicou no botão: ${buttonText}`);
+        } else {
+            console.log(`Botão não encontrado: ${buttonText}`);
+        }
+    }
+
+    // Exemplo de uso
+    const response = await sendCommand('/start');
+    await clickButton(response, 'Algum Botão'); // Substitua 'Algum Botão' pelo texto real do botão
+
+    // Mantenha o processo rodando
+    await new Promise(() => {});
 }
 
-
-// O erro indica que as credenciais são inválidas. Verifique se o token está correto e atualizado.
-const token = '73009779-42ab-4ff0-80a1-d7fea6b1ba081a5fad904a9c93b17edcc4afad624079c217-100f-42f0-9010-7e20d4fb0d2f';
-
-const dadosPedido = {
-  reference_id: "ex-00001",
-  customer: {
-    name: "Jose da Silva",
-    email: "email@test.com",
-    tax_id: "12345678909",
-    phones: [
-      {
-        country: "55",
-        area: "11",
-        number: "999999999",
-        type: "MOBILE"
-      }
-    ]
-  },
-  items: [
-    {
-      reference_id: "referencia do item",
-      name: "nome do item",
-      quantity: 1,
-      unit_amount: 500
-    }
-  ],
-  shipping: {
-    address: {
-      street: "Avenida Brigadeiro Faria Lima",
-      number: "1384",
-      complement: "apto 12",
-      locality: "Pinheiros",
-      city: "São Paulo",
-      region_code: "SP",
-      country: "BRA",
-      postal_code: "01452002"
-    }
-  },
-  notification_urls: [
-    "https://meusite.com/notificacoes"
-  ]
-};
-
-criarPedidoPagSeguro(token, dadosPedido)
-  .then(resultado => console.log(resultado))
-  .catch(erro => console.error('Erro detalhado:', erro.response ? erro.response.data : erro.message));
+main();

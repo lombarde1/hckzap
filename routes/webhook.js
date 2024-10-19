@@ -501,7 +501,7 @@ console.log("Webhook recebido")
           }
       }
 
-      if (event.event === 'messages.upsert') {
+  /*/if (event.event === 'messages.upsert') {
         console.log(`Processando webhook de mensagem para a instancia ${event.instance}`.cyan);
       
         const isGroup = event.data.key.remoteJid.includes("@g.us");
@@ -630,7 +630,7 @@ console.log("Webhook recebido")
             "webhook"
           );
         }
-      }
+      }/*/
       
       async function checkIfNewChat(instanceKey, chatId) {
         return !(await chatExists(instanceKey, chatId));

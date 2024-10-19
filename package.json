@@ -27,6 +27,7 @@
     "express-session": "^1.18.0",
     "express-validator": "^7.2.0",
     "faker": "^6.6.6",
+    "input": "^1.0.1",
     "ioredis": "^5.4.1",
     "json2csv": "^6.0.0-alpha.2",
     "json5": "^2.2.3",
@@ -42,6 +43,7 @@
     "shortid": "^2.2.16",
     "socket.io": "^4.7.5",
     "stripe": "^16.6.0",
+    "telegram": "^2.25.15",
     "uuid": "^10.0.0"
   }
 }

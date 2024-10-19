@@ -117,12 +117,30 @@ exports.createInstance = async (req, res) => {
         const response = await axios.request(config);
 
         if (response.data && response.data.hash) {
+            // Converter datas antes de salvar
+            user.validUntil = user.validUntil ? new Date(user.validUntil) : null;
+            user.manualPlanValidUntil = user.manualPlanValidUntil ? new Date(user.manualPlanValidUntil) : null;
+            user.notifications = user.notifications.map(notification => ({
+              ...notification,
+              timestamp: new Date(notification.timestamp)
+            }));
+            user.whatsappInstances = user.whatsappInstances.map(instance => ({
+              ...instance,
+              createdAt: new Date(instance.createdAt)
+            }));
+            user.funnels = user.funnels.map(funnel => ({
+              ...funnel,
+              createdAt: new Date(funnel.createdAt)
+            }));
+      
             user.whatsappInstances.push({ 
-                name, 
-                key: response.data.hash, 
-                user: req.user.id,
-                number: phoneNumber
+              name, 
+              key: response.data.hash, 
+              user: req.user.id,
+              number: phoneNumber,
+              createdAt: new Date()
             });
+      
             await user.save();
 
             // Configurar o webhook para a nova instância
@@ -169,6 +187,7 @@ exports.createInstance = async (req, res) => {
             res.status(400).json({ error: 'Falha ao criar instância', details: response.data });
         }
     } catch (error) {
+        console.log(error)
         console.error('Erro ao criar instância:', error.response ? error.response.data : error.message);
 
         if (error.response && error.response.status === 403) {

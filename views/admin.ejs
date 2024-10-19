@@ -282,25 +282,24 @@
         // Funções para manipulação de usuários
         
         function openEditModal(userId) {
-            fetch(`/admin/user/${userId}`)
-                .then(response => response.json())
-                .then(user => {
-                    document.getElementById('editUserId').value = user._id;
-                    document.getElementById('editName').value = user.name;
-                    document.getElementById('editEmail').value = user.email;
-                    document.getElementById('editPhone').value = user.phone;
-                    document.getElementById('editUsername').value = user.username;
-                    document.getElementById('editPassword').value = user.password;
-                    document.getElementById('editPlan').value = user.plan;
-                    document.getElementById('editValidUntil').value = user.validUntil ? new Date(user.validUntil).toISOString().split('T')[0] : '';
-                    // Preencha outros campos conforme necessário
-                    document.getElementById('editModal').classList.add('modal-open');
-                })
-                .catch(error => {
-                    console.error('Erro ao carregar dados do usuário:', error);
-                    Swal.fire('Erro', 'Não foi possível carregar os dados do usuário', 'error');
-                });
-        }
+    fetch(`/admin/user/${userId}`)
+        .then(response => response.json())
+        .then(user => {
+            document.getElementById('editUserId').value = user._id;
+            document.getElementById('editName').value = user.name;
+            document.getElementById('editEmail').value = user.email;
+            document.getElementById('editPhone').value = user.phone;
+            document.getElementById('editUsername').value = user.username;
+            document.getElementById('editPassword').value = user.password;
+            document.getElementById('editPlan').value = user.plan;
+            document.getElementById('editValidUntil').value = user.validUntil ? new Date(user.validUntil).toISOString().split('T')[0] : '';
+            document.getElementById('editModal').classList.add('modal-open');
+        })
+        .catch(error => {
+            console.error('Erro ao carregar dados do usuário:', error);
+            Swal.fire('Erro', 'Não foi possível carregar os dados do usuário', 'error');
+        });
+}
 
 function closeEditModal() {
     document.getElementById('editModal').classList.remove('modal-open');
@@ -339,33 +338,47 @@ function deleteUser(userId) {
 
 // Função para salvar as edições do usuário
 document.getElementById('editForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const userId = document.getElementById('editUserId').value;
-            const formData = new FormData(e.target);
+    e.preventDefault();
+    const userId = document.getElementById('editUserId').value;
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
 
-            fetch(`/admin/user/${userId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(Object.fromEntries(formData))
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire('Atualizado!', 'As informações do usuário foram atualizadas com sucesso.', 'success');
+    // Remover a senha se estiver vazia
+    if (!data.password) {
+        delete data.password;
+    }
+
+    fetch(`/admin/user/${userId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                title: 'Atualizado!',
+                text: 'As informações do usuário foram atualizadas com sucesso.',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then((result) => {
+                if (result.isConfirmed) {
                     closeEditModal();
-                    loadUsers(); // Recarrega a lista de usuários
-                    loadDashboardData(); // Atualiza os dados do dashboard
-                } else {
-                    Swal.fire('Erro', 'Não foi possível atualizar as informações do usuário', 'error');
+                    loadUsers();
+                    loadDashboardData();
                 }
-            })
-            .catch(error => {
-                console.error('Erro ao atualizar usuário:', error);
-                Swal.fire('Erro', 'Ocorreu um erro ao tentar atualizar as informações do usuário', 'error');
             });
-        });
+        } else {
+            throw new Error(data.message || 'Erro ao atualizar usuário');
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao atualizar usuário:', error);
+        Swal.fire('Erro', error.message || 'Ocorreu um erro ao tentar atualizar as informações do usuário', 'error');
+    });
+});
 
 // Função para filtrar usuários
 function filterUsers() {

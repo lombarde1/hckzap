@@ -6,6 +6,7 @@ const { ensureAuthenticated } = require('../middleware/auth');
 const statsController = require('../controllers/statsController');
 router.get('/:id/stats', ensureAuthenticated, statsController.getStats);
 router.post('/:id/stats', ensureAuthenticated, statsController.updateStats);
+const multiPlanCheck = require('../middleware/multiPlanCheck');
 
 // Criar nova campanha
 

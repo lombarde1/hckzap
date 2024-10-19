@@ -6,6 +6,7 @@
     <title>Dashboard de Integrações - HocketZap</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
         .integration-card {
             transition: all 0.3s ease;
@@ -54,7 +55,7 @@
                 <div class="text-sm">
                     <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full">
                         <i class="fas fa-plug mr-2"></i>
-                        <span id="activeIntegrations">2</span> Integrações Ativas
+                        <span id="activeIntegrations">Carregando...</span> Integrações Ativas
                     </span>
                 </div>
             </div>
@@ -81,7 +82,7 @@
                             </div>
                         </div>
                         <span id="elevenlabsStatus" class="px-3 py-1 text-sm font-semibold text-gray-800 bg-gray-200 rounded-full flex items-center">
-                            <i class="fas fa-question-circle mr-1"></i> Não configurado
+                            <i class="fas fa-spinner fa-spin mr-1"></i> Verificando...
                         </span>
                     </div>
         <div class="mt-4 space-y-2">
@@ -132,8 +133,8 @@
                     <% } %>
                 </div>
             </div>
-            <span class="px-3 py-1 text-sm font-semibold text-green-800 bg-green-100 rounded-full flex items-center">
-                <i class="fas fa-check-circle mr-1"></i> Ativo
+            <span id="mercadoPagoStatus" class="px-3 py-1 text-sm font-semibold text-gray-800 bg-gray-200 rounded-full flex items-center">
+                <i class="fas fa-spinner fa-spin mr-1"></i> Verificando...
             </span>
         </div>
         <div class="mt-4 space-y-2">
@@ -187,7 +188,7 @@
                 </div>
             </div>
             <span id="mpAppStatus" class="px-3 py-1 text-sm font-semibold text-gray-800 bg-gray-200 rounded-full flex items-center">
-                <i class="fas fa-question-circle mr-1"></i> Não configurado
+                <i class="fas fa-spinner fa-spin mr-1"></i> Verificando...
             </span>
             
         </div>
@@ -267,6 +268,122 @@
     </div>
 
     
+
+    <script>
+        function updateIntegrationStatus(elementId, isConfigured, isActive, configuredText, activeText, notConfiguredText) {
+            const statusElement = document.getElementById(elementId);
+            if (isActive) {
+                statusElement.innerHTML = `<i class="fas fa-check-circle mr-1"></i> ${activeText}`;
+                statusElement.className = 'px-3 py-1 text-sm font-semibold text-green-800 bg-green-100 rounded-full flex items-center';
+            } else if (isConfigured) {
+                statusElement.innerHTML = `<i class="fas fa-exclamation-circle mr-1"></i> ${configuredText}`;
+                statusElement.className = 'px-3 py-1 text-sm font-semibold text-yellow-800 bg-yellow-100 rounded-full flex items-center';
+            } else {
+                statusElement.innerHTML = `<i class="fas fa-times-circle mr-1"></i> ${notConfiguredText}`;
+                statusElement.className = 'px-3 py-1 text-sm font-semibold text-red-800 bg-red-100 rounded-full flex items-center';
+            }
+        }
+
+        async function checkElevenLabsStatus() {
+            try {
+                const response = await axios.get('/integrations/elevenlabs/check-config');
+                updateIntegrationStatus(
+                    'elevenlabsStatus',
+                    response.data.configured,
+                    response.data.active,
+                    'Configurado, não testado',
+                    'Ativo',
+                    'Não configurado'
+                );
+            } catch (error) {
+                console.error('Erro ao verificar status do ElevenLabs:', error);
+            }
+        }
+
+        async function checkMercadoPagoStatus() {
+    try {
+        const response = await axios.get('/integrations/mercadopago/status');
+        const data = response.data;
+        updateIntegrationStatus(
+            'mercadoPagoStatus',
+            data.configured,
+            data.active,
+            'Configurado, não testado',
+            'Ativo',
+            'Não configurado'
+        );
+        
+        // Atualizar o botão de configuração se necessário
+        const configButton = document.querySelector('a[href="/integrations/mercadopago"]');
+        if (configButton) {
+            configButton.textContent = data.configured ? 'Reconfigurar Integração' : 'Configurar Integração';
+        }
+
+        // Exibir mensagem sobre o plano, se aplicável
+        if (data.planMessage) {
+            // Adicione um elemento para exibir esta mensagem no seu HTML
+            const planMessageElement = document.getElementById('mercadoPagoPlanMessage');
+            if (planMessageElement) {
+                planMessageElement.textContent = data.planMessage;
+                planMessageElement.style.display = 'block';
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao verificar status do Mercado Pago:', error);
+        updateIntegrationStatus(
+            'mercadoPagoStatus',
+            false,
+            false,
+            '',
+            '',
+            'Erro ao verificar'
+        );
+    }
+}
+
+
+        async function checkMercadoPagoAppStatus() {
+            try {
+                const response = await axios.get('/integrations/mercadopago-app/status');
+                updateIntegrationStatus(
+                    'mpAppStatus',
+                    response.data.configured,
+                    response.data.active,
+                    'Configurado, não testado',
+                    'Ativo',
+                    'Não configurado'
+                );
+            } catch (error) {
+                console.error('Erro ao verificar status do Mercado Pago App:', error);
+            }
+        }
+
+        async function updateActiveIntegrationsCount() {
+    try {
+        const response = await axios.get('/integrations/active-count');
+        const activeCount = response.data.activeIntegrations;
+        const activeIntegrationsElement = document.getElementById('activeIntegrations');
+        if (activeIntegrationsElement) {
+            activeIntegrationsElement.textContent = activeCount;
+        }
+    } catch (error) {
+        console.error('Erro ao obter contagem de integrações ativas:', error);
+        const activeIntegrationsElement = document.getElementById('activeIntegrations');
+        if (activeIntegrationsElement) {
+            activeIntegrationsElement.textContent = 'Erro';
+        }
+    }
+}
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkElevenLabsStatus();
+            checkMercadoPagoStatus();
+            updateActiveIntegrationsCount();
+            checkMercadoPagoAppStatus();
+        });
+
+        // ... (mantenha as outras funções JavaScript existentes) ...
+    </script>
 
     <script>
 

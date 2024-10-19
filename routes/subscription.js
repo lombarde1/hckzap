@@ -3,7 +3,7 @@ const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const User = require('../models/User');
 const { ensureAuthenticated } = require('../middleware/auth');
-
+const {addUserToGroup} = require("../Helpers/addgp")
 const stripeHelpers = require('../Helpers/stripeHelpers');
 
 
@@ -96,6 +96,8 @@ Se precisar de ajuda chame no número: 51995746157`);
 
             const valorFormatado = formatarValorEmReais(subscription.items.data[0].price.unit_amount);
 
+            await addUserToGroup(user.phone);
+
             await avisar(process.env.numerodono, `🎉 *Nova venda realizada!*
 
 💰 *Valor recebido:* ${valorFormatado}
@@ -104,7 +106,7 @@ Se precisar de ajuda chame no número: 51995746157`);
 👤 *Usuário:* ${user.username}
 📞 *Número:* ${user.phone}
 
-🎊 Parabéns pela venda!`);
+🎊 Parabéns pela venda!`, "darkadm");
 
             if (!updatedUser) {
                 throw new Error('Falha ao atualizar o usuário');
@@ -174,8 +176,8 @@ router.post('/change-plan', ensureAuthenticated, async (req, res) => {
             user.funnelLimit = 25;
             user.autoResponseLimit = 1000;
         } else if (newPlan === 'premium') {
-            user.funnelLimit = Infinity;
-            user.autoResponseLimit = Infinity;
+            user.funnelLimit = 9999999;
+            user.autoResponseLimit = 9999999;
         }
 
         await user.save();

@@ -13,6 +13,8 @@ router.get('/elevenlabs', ensureAuthenticated, (req, res) => {
 });
 
 
+router.get('/mercadopago/status', ensureAuthenticated, integrationController.getMercadoPagoStatus);
+
 // Add this new route
 router.get('/elevenlabs/check-config', ensureAuthenticated, integrationController.checkElevenLabsConfig);
 
@@ -30,9 +32,10 @@ function checkFeatureAccess(userPlan, feature) {
     return PLAN_LIMITS[userPlan][feature];
 }
 
+const multiPlanCheck = require('../middleware/multiPlanCheck');
 
 // Rota para o dashboard de integrações
-router.get('/dashboard', ensureAuthenticated, (req, res) => {
+router.get('/dashboard', ensureAuthenticated, multiPlanCheck(['plus', 'premium']), (req, res) => {
     res.render('integracoes', { 
         user: req.user,
         pageTitle: 'Dashboard de Integrações',
@@ -217,6 +220,7 @@ const uploadMediaToGithub = async (file, type, github) => {
   });
 router.get('/elevenlabs/config', ensureAuthenticated, integrationController.getElevenLabsConfig);
 
+router.get('/active-count', ensureAuthenticated, integrationController.getActiveIntegrationsCount);
 
 router.post('/elevenlabs/save', ensureAuthenticated, integrationController.saveElevenLabsConfig);
 router.post('/elevenlabs/test', ensureAuthenticated, integrationController.testElevenLabsIntegration);

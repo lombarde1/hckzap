@@ -91,14 +91,14 @@ exports.handleAutoResponse = async (instanceKey, chatId, message, source) => {
         }
 
         const autoResponseKey = `auto_response:${instanceKey}:${chatId}`;
-        const currentState = await redisClient.get(autoResponseKey);
+        const currentState = await redisClient.get(`auto_response:${instanceKey}:${chatId}`);
         await saveLastMessage(instanceKey, chatId, message);
 
         
 
         if (currentState) {
             let state = JSON.parse(currentState);
-            console.log('Estado atual:'.yellow, JSON.stringify(state, null, 2));
+            console.log('Estado atual:'.yellow, JSON.stringify(state.status, null, 2));
             
             if (state.status === 'waiting_for_input') {
                 state.userInputs[state.expectedInput] = message;
@@ -146,9 +146,6 @@ exports.handleAutoResponse = async (instanceKey, chatId, message, source) => {
                   } catch (error) {
                     console.error('Erro ao atualizar uso diário ou executar campanha:', error);
                   }
-                console.log(`Executando campanha:`.green, campaign.name);
-                await executeCampaign(instanceKey, chatId, message, campaign);
-                campaignExecuted = true;
                 break;
             }
         }

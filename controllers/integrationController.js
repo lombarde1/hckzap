@@ -229,6 +229,67 @@ exports.testMercadoPagoIntegration = async (req, res) => {
     }
 };
 
+
+exports.getActiveIntegrationsCount = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+
+        let activeCount = 0;
+
+        // Verificar ElevenLabs
+        if (user.elevenlabsIntegrationActive) {
+            activeCount++;
+        }
+
+        // Verificar Mercado Pago
+        if (user.mercadopago && user.mercadopago.integrationActive) {
+            activeCount++;
+        }
+
+        // Verificar Mercado Pago App
+        if (user.mercadopago && user.mercadopago.appAccessToken) {
+            activeCount++;
+        }
+
+        // Adicione mais verificações aqui para outras integrações, se necessário
+
+        res.json({ activeIntegrations: activeCount });
+    } catch (error) {
+        console.error('Erro ao contar integrações ativas:', error);
+        res.status(500).json({ error: 'Erro ao contar integrações ativas' });
+    }
+};
+
+exports.getMercadoPagoStatus = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('mercadopago plan');
+        
+        if (!user) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+
+        const hasAccess = checkFeatureAccess(user.plan, 'api');
+        const isConfigured = !!(user.mercadopago && user.mercadopago.xCsrfToken && user.mercadopago.cookie && user.mercadopago.xNewRelicId);
+        const isActive = user.mercadopago && user.mercadopago.integrationActive;
+
+        res.json({
+            configured: isConfigured,
+            active: isActive,
+            hasAccess: hasAccess,
+            message: isActive ? 'Mercado Pago está ativo e configurado' : 
+                     isConfigured ? 'Mercado Pago está configurado, mas não testado' : 
+                     'Mercado Pago não está configurado',
+            planMessage: hasAccess ? null : 'Seu plano atual não inclui acesso à API do Mercado Pago.'
+        });
+    } catch (error) {
+        console.error('Erro ao verificar status do Mercado Pago:', error);
+        res.status(500).json({ error: 'Falha ao verificar status do Mercado Pago' });
+    }
+};
+
 exports.saveElevenLabsConfig = async (req, res) => {
     try {
         const { apiKey, voiceId } = req.body;

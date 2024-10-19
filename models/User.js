@@ -2,6 +2,21 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
+
+const convertDate = (v) => {
+  if (v && v.$date) {
+    return new Date(v.$date);
+  }
+  return v;
+};
+
+const convertNumber = (v) => {
+  if (v && v.$numberDouble === 'Infinity') {
+    return Infinity;
+  }
+  return v;
+};
+
 const chatSchema = new mongoose.Schema({
   chatId: String,
   name: String,
@@ -147,7 +162,8 @@ const UserSchema = new mongoose.Schema({
   },
   funnelLimit: {
     type: Number,
-    default: 50 // Limite padrão para o plano gratuito
+    default: 50,
+    set: convertNumber,
   },
   funnelUsage: {
     type: Number,
@@ -191,8 +207,10 @@ paymentMapping: {
   default: new Map()
 },
   validUntil: Date,
+  
   stripeCustomerId: String,
   stripeSubscriptionIde: String,
+  
   notifications: [notificationSchema],
   whatsappInstances: [whatsappInstanceSchema],
   funnels: [funnelSchema],
@@ -208,6 +226,9 @@ UserSchema.index({ email: 1 });
 UserSchema.index({ username: 1 });
 
 UserSchema.pre('save', async function(next) {
+  if (this.isModified('funnelLimit') && this.funnelLimit && this.funnelLimit.$numberDouble === 'Infinity') {
+    this.funnelLimit = 9999;
+  }
   if (this.isModified('phone')) {
     this.phone = this.phone.replace(/\D/g, '');
   }

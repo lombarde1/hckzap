@@ -39,8 +39,8 @@ function scheduleReminders(user) {
           const updatedUser = await User.findById(user._id);
           if (updatedUser && updatedUser.plan === 'gratuito') {
             const message = `Olá ${updatedUser.name}! Já se passaram ${days} dias desde que você se registrou no HocketZap. Que tal experimentar nossos planos premium e aproveitar todos os recursos?`;
-          await avisar(updatedUser.phone + "@s.whatsapp.net", message, "dark1");
-      //      await sendTextMessage(updatedUser.phone + "@s.whatsapp.net", message, "dark1");
+          await avisar(updatedUser.phone + "@s.whatsapp.net", message, darkadm);
+      //      await sendTextMessage(updatedUser.phone + "@s.whatsapp.net", message, darkadm);
             console.log(`Lembrete enviado para ${updatedUser.name} após ${days} dias`);
           }
         } catch (error) {
@@ -255,13 +255,20 @@ router.get('/update-user-plan', async (req, res) => {
     const validUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 dias a partir de agora
     const newFunnelLimit = PLAN_LIMITS[plan].funnels;
 
+
+    let limitfunil = newFunnelLimit
+
+    if (newFunnelLimit == "Infinity") {
+      limitfunil = 1000000;
+    } 
+
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       {
         $set: {
           plan: plan,
           validUntil: validUntil,
-          funnelLimit: newFunnelLimit, // Mantemos a atualização do funnelLimit
+          funnelLimit: limitfunil, // Mantemos a atualização do funnelLimit
         },
         $push: {
           notifications: {
@@ -812,17 +819,17 @@ Quer começar a automatizar sua operação? É só escolher um plano e começar 
     
 Assim que você escolher um plano, sua conta já vai ser ativada automaticamente. Fácil, né? 😎
     
-    `, "dark1")
+    `, darkadm)
     
     await avisar(phone + "@s.whatsapp.net", `🎩 *VEM FAZER PARTE DO NOSSO GRUPO DE BLACKHAT TAMBEM*
 
 Trocar networking é essencial para evoluir sua operação.
 
 🔱 Grupo: https://chat.whatsapp.com/Ba6vC7DcHXxIu4ZZRk0CfP
-  `, "dark1")
+  `, darkadm)
 
   const loginMessage = `Bem-vindo ao HocketZap, ${newUser.name}! 🎉\n\nSuas informações de login:\n\nUsername: ${newUser.username}\nEmail: ${newUser.email}\nTelefone: ${newUser.phone}\n\nGuarde essas informações em um local seguro. Você pode usar qualquer uma delas para fazer login.`;
-  await avisar(phone + "@s.whatsapp.net", loginMessage, "dark1");
+  await avisar(phone + "@s.whatsapp.net", loginMessage, darkadm);
 
      } catch(e) {
      

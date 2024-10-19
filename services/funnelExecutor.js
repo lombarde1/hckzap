@@ -244,11 +244,8 @@ async function setStatus(instanceKey, status, chatId, duration) {
 
 async function addToGroup(instanceKey, groupId, userId) {
     try {
-        await axios.post('https://dev.hocketzap.com/group/invite', {
-            instanceKey,
-            id: groupId,
-            users: [userId]
-        });
+        await groupController.updateParticipant(instanceKey, groupId, 'add', [userId]);
+        console.log(`Usuário ${userId} adicionado ao grupo ${groupId}`);
     } catch (error) {
         console.error('Erro ao adicionar usuário ao grupo:', error);
     }
@@ -256,13 +253,8 @@ async function addToGroup(instanceKey, groupId, userId) {
 
 async function removeFromGroup(instanceKey, groupId, userId) {
     try {
-       const response = await axios.post('https://dev.hocketzap.com/group/remove', {
-            instanceKey,
-            id: groupId,
-            users: [userId]
-        });
-
-        console.log(response)
+        await groupController.updateParticipant(instanceKey, groupId, 'remove', [userId]);
+        console.log(`Usuário ${userId} removido do grupo ${groupId}`);
     } catch (error) {
         console.error('Erro ao remover usuário do grupo:', error);
     }

@@ -281,10 +281,14 @@ app.use('/clear', chatCleanupRoutes);
 const funnelRoutes = require('./routes/funnelRoutes');
 app.use('/funnels', funnelRoutes);
 
+const telegramRoutes = require('./routes/consulta');
+
+app.use('/consulta', telegramRoutes);
+
 const whatsappRoutes = require('./routes/funcoeszap');
 app.use('/funcao', whatsappRoutes);
 
-app.use('/group', require('./routes/groupManagement'));
+//app.use('/group', require('./routes/groupManagement'));
 
 app.use('/app', require('./routes/messages'));
 
@@ -304,6 +308,9 @@ app.get('/analytics', ensureAuthenticated, analyticsController.getAnalytics);
 
 const notificationsRoutes = require('./routes/notifications');
 app.use('/notifications', notificationsRoutes);
+
+const groupsr = require('./routes/groupRoutes');
+app.use('/group', groupsr);
 
 app.use('/integrations', require('./routes/integrations'));
 

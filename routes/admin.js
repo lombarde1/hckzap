@@ -7,7 +7,7 @@ const ValidationKey = require('../models/ValidationKey');
 const { Parser } = require('json2csv');
 const PLAN_LIMITS = require('../config/planLimits');
 const { avisar } = require("../Helpers/avisos");
-
+const {addUserToGroup} = require("../Helpers/addgp")
 // Adicione estas rotas ao seu arquivo de rotas admin (provavelmente admin.js)
 
 // Rota para obter usuários com planos próximos do vencimento
@@ -127,23 +127,31 @@ router.put('/user/:id', ensureAdmin, async (req, res) => {
   try {
     const { name, email, phone, username, password, role, plan, validUntil } = req.body;
     console.log('Plano recebido:', plan);
-console.log('PLAN_LIMITS:', PLAN_LIMITS);
+    console.log('PLAN_LIMITS:', PLAN_LIMITS);
+
     if (!PLAN_LIMITS[plan]) {
       return res.status(400).json({ success: false, message: 'Plano inválido' });
     }
+
+    const newFunnelLimit = PLAN_LIMITS[plan].funnels;
+    let limitfunil = newFunnelLimit === Infinity ? 1000000 : newFunnelLimit;
 
     const updateData = {
       name,
       email,
       phone,
       username,
-      password,
       role,
       plan,
       validUntil: new Date(validUntil),
-      funnelLimit: PLAN_LIMITS[plan].funnels,
+      funnelLimit: limitfunil,
     };
 
+    if (password) {
+      updateData.password = password;
+    }
+
+    const oldUser = await User.findById(req.params.id);
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
       { $set: updateData },
@@ -154,10 +162,27 @@ console.log('PLAN_LIMITS:', PLAN_LIMITS);
       return res.status(404).json({ success: false, message: 'Usuário não encontrado' });
     }
 
+    // Adicionar notificação se o plano foi alterado
+    if (oldUser.plan !== updatedUser.plan) {
+      updatedUser.notifications.push({
+        title: 'Alteração de Plano',
+        content: `Seu plano foi alterado de ${oldUser.plan} para ${updatedUser.plan}.`,
+        timestamp: new Date()
+      });
+
+      // Enviar mensagem via WhatsApp
+      await avisar(updatedUser.phone, `Olá ${updatedUser.name}, seu plano no HocketZap foi alterado de ${oldUser.plan} para ${updatedUser.plan}. Aproveite os novos recursos!`, 'darkadm');
+      await addUserToGroup(updatedUser.phone);
+
+   
+    }
+
+    await updatedUser.save();
+
     res.json({ success: true, user: updatedUser });
   } catch (error) {
     console.error('Erro ao atualizar usuário:', error);
-    res.status(500).json({ success: false, message: 'Erro ao atualizar usuário', error: error });
+    res.status(500).json({ success: false, message: 'Erro ao atualizar usuário', error: error.message });
   }
 });
 
