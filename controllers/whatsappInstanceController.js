@@ -463,19 +463,23 @@ async function checkAndDeleteInactiveInstances() {
             });
             
   console.log(response.data.instance.state)
-            if (response.data && response.data.instance.state === 'open') {
-              activeInstances.push(instance);
-            } else {
-              try {
-                await axios.delete(`${API_BASE_URL}/instance/delete/${instance.name}`, {
-                  headers: { 'apikey': APIKEY }
-                });
-              } catch (deleteError) {
-                // Ignora erros de deleção
-              }
-              console.log(`Instância ${instance.name} removida (não está ativa ou não existe na API).`);
-              instancesChanged = true;
-            }
+
+
+
+  if (response.data && response.data.instance.state === 'close') {
+    try {
+        await axios.delete(`${API_BASE_URL}/instance/delete/${instance.name}`, {
+            headers: { 'apikey': APIKEY }
+          });
+        } catch (deleteError) {
+            // Ignora erros de deleção
+          }
+          console.log(`Instância ${instance.name} removida (não está ativa ou não existe na API).`);
+          instancesChanged = true;
+   
+  } else {
+    activeInstances.push(instance);
+  }
           } catch (error) {
             if (error.response && error.response.status === 404) {
               console.log(`Instância ${instance.name} não encontrada na API Evolution. Removendo do MongoDB.`);
