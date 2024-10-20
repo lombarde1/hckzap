@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
-mongoose.connect('mongodb://147.79.111.143:27017/', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect('mongodb://darkvips:lombarde1@147.79.111.143:27017/', { useNewUrlParser: true, useUnifiedTopology: true });
 
 async function createAdminUser() {
     try {

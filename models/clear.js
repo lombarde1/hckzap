@@ -26,7 +26,7 @@ async function clearAllMessages() {
   
 
 // Conecte-se ao MongoDB e execute a função
-mongoose.connect('mongodb://147.79.111.143:27017/', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb://darkvips:lombarde1@147.79.111.143:27017/', { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log('Conectado ao MongoDB');
  return clearAllMessages();

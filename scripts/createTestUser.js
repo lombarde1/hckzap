@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 
 // Conectar ao MongoDB
-mongoose.connect('mongodb://147.79.111.143:27017/', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb://darkvips:lombarde1@147.79.111.143:27017/', { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log('Conectado ao MongoDB');
     createTestUser();

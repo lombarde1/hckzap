@@ -27,7 +27,7 @@ if (!fs.existsSync(uploadsDir)){
 }
 
 // Conectar ao MongoDB
-mongoose.connect('mongodb://147.79.111.143:27017/', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect('mongodb://darkvips:lombarde1@147.79.111.143:27017/hocket', { useNewUrlParser: true, useUnifiedTopology: true, authSource: 'admin'  });
 
 // Configurações
 const expressLayouts = require('express-ejs-layouts');
@@ -134,7 +134,7 @@ app.use(session({
   cookie: {
     maxAge: 1000 * 60 * 60 * 24 * 7 // 1 semana
   },
-  store: MongoStore.create({ mongoUrl: 'mongodb://147.79.111.143:27017/' })
+  store: MongoStore.create({ mongoUrl: 'mongodb://darkvips:lombarde1@147.79.111.143:27017/' })
 }));
 
 // Configurar flash middleware

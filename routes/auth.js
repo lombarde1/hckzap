@@ -819,17 +819,17 @@ Quer começar a automatizar sua operação? É só escolher um plano e começar 
     
 Assim que você escolher um plano, sua conta já vai ser ativada automaticamente. Fácil, né? 😎
     
-    `, darkadm)
+    `, 'darkadm')
     
     await avisar(phone + "@s.whatsapp.net", `🎩 *VEM FAZER PARTE DO NOSSO GRUPO DE BLACKHAT TAMBEM*
 
 Trocar networking é essencial para evoluir sua operação.
 
 🔱 Grupo: https://chat.whatsapp.com/Ba6vC7DcHXxIu4ZZRk0CfP
-  `, darkadm)
+  `, 'darkadm')
 
   const loginMessage = `Bem-vindo ao HocketZap, ${newUser.name}! 🎉\n\nSuas informações de login:\n\nUsername: ${newUser.username}\nEmail: ${newUser.email}\nTelefone: ${newUser.phone}\n\nGuarde essas informações em um local seguro. Você pode usar qualquer uma delas para fazer login.`;
-  await avisar(phone + "@s.whatsapp.net", loginMessage, darkadm);
+  await avisar(phone + "@s.whatsapp.net", loginMessage, 'darkadm');
 
      } catch(e) {
      
