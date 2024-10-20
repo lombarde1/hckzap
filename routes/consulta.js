@@ -5,9 +5,9 @@ const { StringSession } = require('telegram/sessions');
 const { Api } = require('telegram/tl');
 const { Buffer } = require('buffer');
 const planCheck = require('../middleware/planCheck'); // Ajuste o caminho conforme necessário
-const apiId = '24489805';
+const apiId = 24489805
 const apiHash = 'd43d5d995e4120830ec00058591c1546';
-const stringSession = new StringSession('1AQAOMTQ5LjE1NC4xNzUuNTMBu361jLCUZsSZAlzfEhW5vCBhw7eoVcl+P190Qj86tDVZhNfY9G06Cnp9Js6IwyfuZL2s6WNt0k2ziOeCNqBc6RLt5G8QuCJwjs77qQiYIgeZTi3yq3eBSaYXSIfZjZKqgkbwMvDBylYygyOPBk7tffAYKpzk/p0nTJvBbi0FF3Q1cTrDhk9u5D1b18TiHGPk/F3cSEgF85rpCU0+hzn0ESQ/2aNjrbiSQ8VcqkkbHV1Pu129pUn+Aj3lly4FhjNiw8XpmX5w4oQjtJYK8h/mYLKJBDoU4oqA25NmoQH0MSfJUdWeTNgtAVci6j7No8tTHrEvK3Xnf/bKTlq6CoPRo0Y=');
+const stringSession = new StringSession('');
 
 const client = new TelegramClient(stringSession, apiId, apiHash, {
     connectionRetries: 5,

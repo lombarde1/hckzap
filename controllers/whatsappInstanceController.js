@@ -18,30 +18,59 @@ exports.deleteAllInstances = async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
         
-        // Deletar todas as instâncias da API Evolution
+
+
+        await User.collection.dropIndex('whatsappInstances.key_1');
+
+        // 2. Limpar instâncias com chaves nulas
+        await User.updateMany(
+            { 'whatsappInstances.key': null },
+            { $pull: { whatsappInstances: { key: null } } }
+        );
+
+        // 3. Recriar o índice
+        await User.collection.createIndex({ 'whatsappInstances.key': 1 }, { unique: true, sparse: true });
+
+
+        const deletionResults = [];
+
         for (const instance of user.whatsappInstances) {
-            try {
-                await axios.delete(`${API_BASE_URL}/instance/delete/${instance.name}`, {
-                    headers: { 
-                        'apikey': APIKEY
-                    }
-                });
-            } catch (error) {
-                console.error(`Erro ao deletar instância ${instance.name} da API Evolution:`, error);
-                // Continua para a próxima instância mesmo se houver erro
+            if (instance.name) {
+                let deletionResult = { name: instance.name, success: false };
+
+                // Primeiro, tenta desconectar
+                const disconnected = await disconnectInstance(instance.name);
+                
+                // Se desconectou com sucesso ou se a desconexão falhou, tenta deletar
+                if (disconnected || true) {
+                    const deleteResult = await deleteInstance(instance.name);
+                    deletionResult = { ...deletionResult, ...deleteResult };
+                } else {
+                    deletionResult.error = "Falha ao desconectar a instância";
+                }
+
+                deletionResults.push(deletionResult);
             }
         }
 
-        // Limpar todas as instâncias do usuário no banco de dados
+        // Remover todas as instâncias do usuário no banco de dados
+       
         user.whatsappInstances = [];
         await user.save();
 
-        res.json({ message: 'Todas as instâncias foram deletadas com sucesso' });
+        res.json({ 
+            message: 'Operação de deleção concluída', 
+            results: deletionResults,
+            databaseUpdated: true,
+            remainingInstances: user.whatsappInstances.length
+        });
+
     } catch (error) {
         console.error('Erro ao deletar todas as instâncias:', error);
-        res.status(500).json({ error: 'Erro ao deletar todas as instâncias' });
+        res.status(500).json({ error: 'Erro ao deletar todas as instâncias', details: error.message });
     }
 };
+
 
 exports.getInstanceDetails = async (req, res) => {
     try {
@@ -207,7 +236,6 @@ exports.createInstance = async (req, res) => {
         }
     }
 };
-
 exports.listInstances = async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
@@ -218,6 +246,19 @@ exports.listInstances = async (req, res) => {
                 'apikey': APIKEY
             }
         });
+
+        // Criar um conjunto de tokens das instâncias retornadas pela API
+        const apiTokens = new Set(response.data.map(instance => instance.token));
+
+        // Filtrar as instâncias do usuário que não estão presentes na resposta da API
+        const instancesToRemove = user.whatsappInstances.filter(instance => !apiTokens.has(instance.key));
+
+        // Remover as instâncias não presentes na API do documento do usuário
+        if (instancesToRemove.length > 0) {
+            console.log("Apagando instancia sem uso!")
+            user.whatsappInstances = user.whatsappInstances.filter(instance => apiTokens.has(instance.key));
+            await user.save();
+        }
 
         // Mapear as instâncias retornadas pela API para o formato esperado pelo frontend
         const instancesWithStatus = response.data
@@ -241,7 +282,12 @@ exports.listInstances = async (req, res) => {
                 };
             });
 
-        res.json(instancesWithStatus);
+            res.json(instancesWithStatus);
+
+    //    res.json({
+       //     instances: instancesWithStatus,
+         //   removedInstances: instancesToRemove.length
+     //   });
     } catch (error) {
         console.error('Erro ao listar instâncias:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
@@ -312,6 +358,32 @@ exports.disconnectInstance = async (req, res) => {
     }
 };
 
+const disconnectInstance = async (instanceName) => {
+    try {
+        await axios.delete(`${API_BASE_URL}/instance/logout/${instanceName}`, {
+            headers: { 'apikey': APIKEY }
+        });
+        console.log(`Instância ${instanceName} desconectada com sucesso.`);
+        return true;
+    } catch (error) {
+        console.error(`Erro ao desconectar instância ${instanceName}:`, error.response?.data || error.message);
+        return false;
+    }
+};
+
+const deleteInstance = async (instanceName) => {
+    try {
+        await axios.delete(`${API_BASE_URL}/instance/delete/${instanceName}`, {
+            headers: { 'apikey': APIKEY }
+        });
+        console.log(`Instância ${instanceName} deletada com sucesso.`);
+        return { success: true };
+    } catch (error) {
+        console.error(`Erro ao deletar instância ${instanceName}:`, error.response?.data || error.message);
+        return { success: false, error: error.response?.data || error.message };
+    }
+};
+
 exports.deleteInstance = async (req, res) => {
     const user = await User.findById(req.user.id);
     const { instanceId } = req.params;
@@ -370,3 +442,116 @@ exports.checkInstanceStatus = async (req, res) => {
         res.status(500).json({ error: 'Erro ao verificar status da instância' });
     }
 };
+
+const cron = require('node-cron');
+
+
+async function checkAndDeleteInactiveInstances() {
+    try {
+      const users = await User.find({});
+  
+      for (const user of users) {
+        const activeInstances = [];
+        let instancesChanged = false;
+  
+        for (const instance of user.whatsappInstances) {
+          try {
+            const response = await axios.get(`${API_BASE_URL}/instance/connectionState/${instance.name}`, {
+                headers: { 
+                    'apikey': APIKEY
+                }
+            });
+            
+  console.log(response.data.instance.state)
+            if (response.data && response.data.instance.state === 'open') {
+              activeInstances.push(instance);
+            } else {
+              try {
+                await axios.delete(`${API_BASE_URL}/instance/delete/${instance.name}`, {
+                  headers: { 'apikey': APIKEY }
+                });
+              } catch (deleteError) {
+                // Ignora erros de deleção
+              }
+              console.log(`Instância ${instance.name} removida (não está ativa ou não existe na API).`);
+              instancesChanged = true;
+            }
+          } catch (error) {
+            if (error.response && error.response.status === 404) {
+              console.log(`Instância ${instance.name} não encontrada na API Evolution. Removendo do MongoDB.`);
+              instancesChanged = true;
+            } else {
+              console.error(`Erro ao verificar instância ${instance.name}:`, error.message);
+              activeInstances.push(instance);
+            }
+          }
+        }
+  
+        if (instancesChanged) {
+          user.whatsappInstances = activeInstances;
+          try {
+            await user.save();
+            console.log(`Instâncias atualizadas para o usuário ${user._id}. Total de instâncias ativas: ${activeInstances.length}`);
+          } catch (saveError) {
+            if (saveError.name === 'ValidationError') {
+              console.error(`Erro de validação ao salvar usuário ${user._id}:`, saveError.message);
+              // Tente corrigir o número de telefone
+              user.phone = user.phone.replace(/\D/g, '');
+              try {
+                await user.save();
+                console.log(`Usuário ${user._id} salvo após correção do número de telefone.`);
+              } catch (secondSaveError) {
+                console.error(`Falha ao salvar usuário ${user._id} mesmo após correção:`, secondSaveError.message);
+              }
+            } else {
+              console.error(`Erro ao salvar usuário ${user._id}:`, saveError.message);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao verificar e deletar instâncias inativas:', error);
+    }
+  }
+
+// Agendar a execução a cada 10 segundos
+async function deleteInactiveInstances() {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/instance/fetchInstances`, {
+        headers: { 'apikey': APIKEY }
+      });
+  
+      const instances = response.data;
+  
+      const inactiveInstances = instances.filter(instance => 
+        instance.connectionStatus === 'close' || instance.connectionStatus === 'connecting'
+      );
+  
+      console.log(`Encontradas ${inactiveInstances.length} instâncias inativas.`);
+  
+      for (const instance of inactiveInstances) {
+        let deleted = await deleteInstance(instance.name);
+        
+        if (!deleted) {
+          console.log(`Tentando desconectar e deletar novamente a instância ${instance.name}`);
+          await disconnectInstance(instance.name);
+          deleted = await deleteInstance(instance.name);
+          
+          if (!deleted) {
+            console.log(`Falha ao deletar instância ${instance.name} mesmo após desconexão.`);
+          }
+        }
+      }
+  
+      console.log('Processo de deleção concluído.');
+    } catch (error) {
+      console.error('Erro ao buscar ou processar instâncias:', error.message);
+    }
+  }
+  
+
+
+ cron.schedule('*/10 * * * *', () => {
+    console.log('Verificando instâncias inativas...');
+    checkAndDeleteInactiveInstances();
+  });

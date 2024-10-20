@@ -29,7 +29,17 @@ const chatSchema = new mongoose.Schema({
 
 const whatsappInstanceSchema = new mongoose.Schema({
   name: String,
-  key: { type: String, unique: true, required: true },
+  key: { 
+    type: String, 
+    unique: true, 
+    required: true,
+    validate: {
+      validator: function(v) {
+        return v != null && v !== '';
+      },
+      message: props => `A chave da instância WhatsApp não pode ser nula ou vazia`
+    }
+  },
   autoResponse: {
     isActive: { type: Boolean, default: false },
     funnelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Funnel' }
@@ -131,7 +141,10 @@ const UserSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: function(v) {
-        return /^\d{10,15}$/.test(v);
+        // Remove todos os caracteres não numéricos
+        const cleanedNumber = v.replace(/\D/g, '');
+        // Verifica se o número limpo tem entre 10 e 15 dígitos
+        return /^\d{10,15}$/.test(cleanedNumber);
       },
       message: props => `${props.value} não é um número de telefone válido!`
     }
@@ -226,6 +239,8 @@ UserSchema.index({ email: 1 });
 UserSchema.index({ username: 1 });
 
 UserSchema.pre('save', async function(next) {
+  this.whatsappInstances = this.whatsappInstances.filter(instance => instance.key != null);
+
   if (this.isModified('funnelLimit') && this.funnelLimit && this.funnelLimit.$numberDouble === 'Infinity') {
     this.funnelLimit = 9999;
   }
