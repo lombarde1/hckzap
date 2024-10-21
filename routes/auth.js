@@ -95,6 +95,7 @@ router.get('/change-plan', ensureAuthenticated, async (req, res) => {
       return res.status(404).render('error', { message: 'Usuário não encontrado' });
     }
 
+    
     res.render('change-plan', {
         title: 'Planos',
         currentPlan: user.plan,
@@ -811,7 +812,7 @@ router.post('/register', [
 
    await avisar(phone + "@s.whatsapp.net", `👋 Oi, ${name}! Bem vindo ao nosso software! 🎉
 
-Sua conta no Budzap tá prontinha e você já tá no plano gratuito. 💸
+Sua conta da hocketzap tá prontinha e você já tá no plano gratuito. 💸
     
 Quer começar a automatizar sua operação? É só escolher um plano e começar a escalar! 🚀
     

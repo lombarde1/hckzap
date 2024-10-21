@@ -170,7 +170,12 @@ const UserSchema = new mongoose.Schema({
 
   plan: {
     type: String,
-    enum: ['gratuito', 'basico', 'plus', 'premium'],
+    enum: [
+      'gratuito', 
+      'basico_monthly', 'basico_quarterly', 'basico_semiannual',
+      'plus_monthly', 'plus_quarterly', 'plus_semiannual',
+      'premium_monthly', 'premium_quarterly', 'premium_semiannual'
+    ],
     default: 'gratuito'
   },
   funnelLimit: {

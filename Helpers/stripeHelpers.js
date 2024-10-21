@@ -2,18 +2,34 @@
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const User = require('../models/User');
-
+const { avisar } = require("./avisos");
 
 const PRICE_TO_PLAN = {
-    'price_1Pv8IfJd0dkXl3iIPFkZLOPJ': 'basico',
-    'price_1Pzr6UJd0dkXl3iIcRukFSiX': 'plus',
-    'price_1Pzr78Jd0dkXl3iIlDGW1Wvf': 'premium'
+    'price_1PkbaxJd0dkXl3iIiP1BL4gM': 'basico_monthly',
+
+    'price_1QCRLZJd0dkXl3iIIO9qLQXG': 'plus_monthly',
+    'price_1QCRLqJd0dkXl3iIkt5uvfM4': 'premium_monthly',
+
+    'price_1QCRMAJd0dkXl3iINF5Wy17b': 'basico_quarterly',
+    'price_1QCRNIJd0dkXl3iIt27bV3rJ': 'basico_semiannual',
+
+    'price_1QCRMdJd0dkXl3iI7z8yXLm6': 'plus_quarterly',
+    'price_1QCRNbJd0dkXl3iIp50Hpje4': 'plus_semiannual',
+
+    'price_1QCRMzJd0dkXl3iIRzTv1Dh2': 'premium_quarterly',
+    'price_1QCRNuJd0dkXl3iImC88is9t': 'premium_semiannual'
 };
 
 const PLAN_TO_PRICE = {
-    'basico': 'price_1Pv8IfJd0dkXl3iIPFkZLOPJ',
-    'plus': 'price_1Pzr6UJd0dkXl3iIcRukFSiX',
-    'premium': 'price_1Pzr78Jd0dkXl3iIlDGW1Wvf'
+    'basico_monthly': 'price_1PkbaxJd0dkXl3iIiP1BL4gM',
+    'plus_monthly': 'price_1QCRLZJd0dkXl3iIIO9qLQXG',
+    'premium_monthly': 'price_1QCRLqJd0dkXl3iIkt5uvfM4',
+    'basico_quarterly': 'price_1QCRMAJd0dkXl3iINF5Wy17b',
+    'basico_semiannual': 'price_1QCRNIJd0dkXl3iIt27bV3rJ',
+    'plus_quarterly': 'price_1QCRMdJd0dkXl3iI7z8yXLm6',
+    'plus_semiannual': 'price_1QCRNbJd0dkXl3iIp50Hpje4',
+    'premium_quarterly': 'price_1QCRMzJd0dkXl3iIRzTv1Dh2',
+    'premium_semiannual': 'price_1QCRNuJd0dkXl3iImC88is9t'
 };
 
 exports.getPlanFromPriceId = (priceId) => {
@@ -25,9 +41,9 @@ exports.getPriceIdFromPlan = (plan) => {
 };
 
 exports.createCheckoutSession = async (userId, plan, successUrl, cancelUrl) => {
-    console.log(plan)
+    console.log(plan);
     const priceId = await this.getPriceIdFromPlan(plan);
-    console.log(priceId)
+    console.log(priceId);
     if (!priceId) {
         throw new Error('Plano inválido');
     }
@@ -62,11 +78,20 @@ exports.handleSuccessfulPayment = async (session) => {
     const subscription = await stripe.subscriptions.retrieve(session.subscription);
     const planName = this.getPlanFromPriceId(subscription.items.data[0].price.id);
   
+    let validUntil;
+    if (planName.includes('monthly')) {
+        validUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 dias
+    } else if (planName.includes('quarterly')) {
+        validUntil = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000); // 90 dias
+    } else if (planName.includes('semiannual')) {
+        validUntil = new Date(Date.now() + 180 * 24 * 60 * 60 * 1000); // 180 dias
+    }
+
     await User.findByIdAndUpdate(userId, {
       plan: planName,
       stripeCustomerId: session.customer,
       stripeSubscriptionId: session.subscription,
-      validUntil: new Date(subscription.current_period_end * 1000),
+      validUntil: validUntil,
       $push: {
         notifications: {
           title: `Plano ${planName} ativado`,
@@ -77,6 +102,6 @@ exports.handleSuccessfulPayment = async (session) => {
     });
   
     await avisar(user.phone, `Parabéns, ${user.name}! Seu plano ${planName} foi ativado com sucesso. Aproveite todos os recursos!`);
-  };
+};
 
 // Adicione outras funções relacionadas ao Stripe conforme necessário
