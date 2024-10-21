@@ -76,9 +76,15 @@
                 <select id="planFilter" class="select select-bordered">
                     <option value="">Todos os Planos</option>
                     <option value="gratuito">Gratuito</option>
-                    <option value="basico">Básico</option>
-                    <option value="plus">Plus</option>
-                    <option value="premium">Premium</option>
+                    <option value="basico_monthly">Básico Mensal</option>
+                    <option value="basico_quarterly">Básico Trimestral</option>
+                    <option value="basico_semiannual">Básico Semestral</option>
+                    <option value="plus_monthly">Plus Mensal</option>
+                    <option value="plus_quarterly">Plus Trimestral</option>
+                    <option value="plus_semiannual">Plus Semestral</option>
+                    <option value="premium_monthly">Premium Mensal</option>
+                    <option value="premium_quarterly">Premium Trimestral</option>
+                    <option value="premium_semiannual">Premium Semestral</option>
                 </select>
             </div>
             <button onclick="exportUsers()" class="btn btn-primary">
@@ -154,9 +160,15 @@
                 </label>
                 <select id="editPlan" name="plan" class="select select-bordered w-full">
                     <option value="gratuito">Gratuito</option>
-                    <option value="basico">Básico</option>
-                    <option value="plus">Plus</option>
-                    <option value="premium">Premium</option>
+                    <option value="basico_monthly">Básico Mensal</option>
+                    <option value="basico_quarterly">Básico Trimestral</option>
+                    <option value="basico_semiannual">Básico Semestral</option>
+                    <option value="plus_monthly">Plus Mensal</option>
+                    <option value="plus_quarterly">Plus Trimestral</option>
+                    <option value="plus_semiannual">Plus Semestral</option>
+                    <option value="premium_monthly">Premium Mensal</option>
+                    <option value="premium_quarterly">Premium Trimestral</option>
+                    <option value="premium_semiannual">Premium Semestral</option>
                 </select>
             </div>
 
@@ -206,18 +218,25 @@
     }
 
     function createUsersPlanChart(data) {
-            const ctx = document.getElementById('usersPlanChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(data),
-                    datasets: [{
-                        data: Object.values(data),
-                        backgroundColor: [
-                            '#4C51BF', '#48BB78', '#4299E1', '#ED8936'
-                        ]
-                    }]
-                },
+    const planTypes = {
+        'Gratuito': data.gratuito || 0,
+        'Básico': (data.basico_monthly || 0) + (data.basico_quarterly || 0) + (data.basico_semiannual || 0),
+        'Plus': (data.plus_monthly || 0) + (data.plus_quarterly || 0) + (data.plus_semiannual || 0),
+        'Premium': (data.premium_monthly || 0) + (data.premium_quarterly || 0) + (data.premium_semiannual || 0)
+    };
+
+    const ctx = document.getElementById('usersPlanChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(planTypes),
+            datasets: [{
+                data: Object.values(planTypes),
+                backgroundColor: [
+                    '#4C51BF', '#48BB78', '#4299E1', '#ED8936'
+                ]
+            }]
+        },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -244,35 +263,41 @@
 
 
         function loadUsers() {
-            fetch('/admin/users')
-                .then(response => response.json())
-                .then(users => {
-                    const tbody = document.getElementById('userTableBody');
-                    tbody.innerHTML = '';
-                    users.forEach(user => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td class="px-4 py-2">${user.name}</td>
-                            <td class="px-4 py-2">${user.email}</td>
-                            <td class="px-4 py-2">${user.phone}</td>
-                            <td class="px-4 py-2">${user.plan}</td>
-                            <td class="px-4 py-2">${user.manualPlanActive ? 'Ativo' : 'Inativo'}</td>
-                            <td class="px-4 py-2">${formatDate(user.validUntil)}</td>
-                            <td class="px-4 py-2">
-                                <button onclick="openEditModal('${user._id}')" class="btn btn-sm btn-primary mr-2">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button onclick="deleteUser('${user._id}')" class="btn btn-sm btn-error">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                })
-                .catch(error => console.error('Erro ao carregar usuários:', error));
-        }
+    fetch('/admin/users')
+        .then(response => response.json())
+        .then(users => {
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = '';
+            users.forEach(user => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-4 py-2">${user.name}</td>
+                    <td class="px-4 py-2">${user.email}</td>
+                    <td class="px-4 py-2">${user.phone}</td>
+                    <td class="px-4 py-2">${formatPlanName(user.plan)}</td>
+                    <td class="px-4 py-2">${user.manualPlanActive ? 'Ativo' : 'Inativo'}</td>
+                    <td class="px-4 py-2">${formatDate(user.validUntil)}</td>
+                    <td class="px-4 py-2">
+                        <button onclick="openEditModal('${user._id}')" class="btn btn-sm btn-primary mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteUser('${user._id}')" class="btn btn-sm btn-error">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(error => console.error('Erro ao carregar usuários:', error));
+}
 
+function formatPlanName(plan) {
+    const planParts = plan.split('_');
+    if (planParts.length === 1) return plan.charAt(0).toUpperCase() + plan.slice(1);
+    const [type, duration] = planParts;
+    return `${type.charAt(0).toUpperCase() + type.slice(1)} ${duration.charAt(0).toUpperCase() + duration.slice(1)}`;
+}
         function formatDate(dateString) {
             if (!dateString) return 'N/A';
             const date = new Date(dateString);
@@ -383,7 +408,7 @@ document.getElementById('editForm').addEventListener('submit', function(e) {
 // Função para filtrar usuários
 function filterUsers() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const planFilter = document.getElementById('planFilter').value;
+    const planFilter = document.getElementById('planFilter').value.toLowerCase();
     const rows = document.querySelectorAll('#userTableBody tr');
 
     rows.forEach(row => {
@@ -392,7 +417,7 @@ function filterUsers() {
         const plan = row.cells[3].textContent.toLowerCase();
 
         const matchesSearch = name.includes(searchTerm) || email.includes(searchTerm);
-        const matchesPlan = planFilter === '' || plan === planFilter;
+        const matchesPlan = planFilter === '' || plan.includes(planFilter);
 
         if (matchesSearch && matchesPlan) {
             row.style.display = '';
@@ -401,6 +426,7 @@ function filterUsers() {
         }
     });
 }
+
 
 document.getElementById('searchInput').addEventListener('input', filterUsers);
 document.getElementById('planFilter').addEventListener('change', filterUsers);
