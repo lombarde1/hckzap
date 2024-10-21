@@ -367,6 +367,9 @@ app.post('/test-api-request', async (req, res) => {
   }
 });
 
+app.post('/docs', async (req, res) => {
+  res.sendFile(path.join(__dirname, 'docs.html'));
+});
 
 const PORT = process.env.PORT || 3332;
 http.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));

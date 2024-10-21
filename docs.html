@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HocketZap - Documentação</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .dark {
+            @apply bg-gray-900 text-gray-100;
+        }
+        .dark .bg-white {
+            @apply bg-gray-800;
+        }
+        .dark .text-gray-600 {
+            @apply text-gray-300;
+        }
+        .dark .text-gray-800 {
+            @apply text-gray-100;
+        }
+        .dark .border-gray-200 {
+            @apply border-gray-700;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .flex-container {
+                flex-direction: column;
+            }
+            aside {
+                width: 100%;
+                max-height: 300px;
+                overflow-y: auto;
+            }
+            main {
+                width: 100%;
+            }
+            .header-content {
+                flex-direction: column;
+                align-items: center;
+            }
+            .search-and-buttons {
+                margin-top: 1rem;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="header-content flex flex-wrap items-center justify-between">
+                <div class="flex items-center mb-2 sm:mb-0">
+                    <img src="public/img/Remove-bg.ai_1729483993892.png" alt="HocketZap Logo" class="h-12 w-auto mr-2">
+                    <span class="text-xl font-semibold text-emerald-600">HocketZap</span>
+                </div>
+                <div class="search-and-buttons flex items-center space-x-4 flex-wrap">
+                    <div class="relative w-full sm:w-auto mb-2 sm:mb-0">
+                        <input type="text" id="search" placeholder="Pesquisar..." class="w-full pl-8 pr-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <i data-feather="search" class="absolute left-2 top-2.5 h-5 w-5 text-gray-400"></i>
+                    </div>
+                    <button id="themeToggle" class="p-2 rounded-md hover:bg-gray-100">
+                        <i data-feather="sun" class="h-5 w-5"></i>
+                    </button>
+                    <button id="supportBtn" class="bg-emerald-500 text-white px-4 py-2 rounded-md hover:bg-emerald-600">
+                        Suporte
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-container min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-full md:w-64 bg-white border-r border-gray-200 p-6 overflow-y-auto">
+            <nav>
+                <ul id="sidebarNav" class="space-y-2">
+                    <!-- Navegação será preenchida dinamicamente -->
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 md:p-10 overflow-y-auto">
+            <div id="contentArea">
+                <!-- Conteúdo será preenchido dinamicamente -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Dados do tutorial
+        const tutorialData = {
+    "sections": [
+        {
+            "id": "introducao",
+            "title": "Bem-vindo ao HocketZap",
+            "icon": "smile",
+            "content": `
+                <h1 class="text-3xl font-bold mb-6">Bem-vindo ao HocketZap! 🚀</h1>
+                <p class="mb-4">Prepare-se para revolucionar todo seu atendimento e estrutura no WhatsApp! A HocketZap é sua plataforma all-in-one para automação, criação de funis de vendas, automações, CRM e muito mais. Irei te ensinar a como utiliza-la e implementar na sua operação!</p>
+              
+                <h2 class="text-2xl font-semibold mb-4">O que você pode fazer com o HocketZap:</h2>
+                <ul class="list-none space-y-2 mb-6">
+                    <li class="flex items-center">
+                        <span class="text-emerald-500 mr-2">✅</span> Conectar múltiplas instâncias do WhatsApp
+                    </li>
+                    <li class="flex items-center">
+                        <span class="text-emerald-500 mr-2">✅</span> Criar funis de vendas automatizados
+                    </li>
+                    <li class="flex items-center">
+                        <span class="text-emerald-500 mr-2">✅</span> Enviar mensagens em massa
+                    </li>
+                    <li class="flex items-center">
+                        <span class="text-emerald-500 mr-2">✅</span> Configurar autorespostas inteligentes
+                    </li>
+                    <li class="flex items-center">
+                        <span class="text-emerald-500 mr-2">✅</span> Integrar com MercadoPago e ElevenLabs
+                    </li>
+                </ul>
+                <p class="flex justify-center mb-6 text-gray-600 italic">Pronto para começar? Vamos mergulhar nos detalhes de cada recurso incrível que a HocketZap oferece!</p>
+                <div class="flex justify-center mb-6">
+                    <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdjU2MmZ5aWxiamFicnk1aWF2ejJtM2Q2djdwZTg2ZzF5ZDJ1NWxodCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/uxRYjyvzx7CkMGCYhh/giphy.webp" alt="Multitasking octopus" class="rounded-lg shadow-lg">
+                </div>
+            `
+        },
+        {
+            "id": "conectar-instancia",
+            "title": "Conectar Instância do WhatsApp",
+            "icon": "link",
+            "content": `
+                <h2 class="text-2xl font-semibold mb-4">Conectando sua Instância do WhatsApp 📱</h2>
+                <p class="mb-4">Conectar uma instância do WhatsApp é o primeiro passo para desbloquear todo o potencial do HocketZap. Vamos fazer isso juntos!</p>
+                <h3 class="text-xl font-semibold mb-2">Passo a passo:</h3>
+                <ol class="list-decimal list-inside mb-6 space-y-2">
+                    <li>No painel principal, clique em "Adicionar Nova Instância" 🆕</li>
+                    <li>Escolha um nome único para sua instância (ex: "WhatsAppMarcos01"), um nome tudo junto! não coloque espaços e nem caracteres especiais🏷️</li>
+                    <li>Clique em "Gerar QR Code" e aguarde 🔄</li>
+                    <li>Abra o WhatsApp no seu celular e vá para Configurações > WhatsApp Web 📲</li>
+                    <li>Escaneie o QR Code exibido na tela do HocketZap 📸</li>
+                    <li>Pronto! Sua instância está conectada e pronta para uso 🎉</li>
+                </ol>
+                <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6">
+                    <p class="font-bold">Dica de Segurança 🔐:</p>
+                    <p>Sempre desconecte sua instância quando não estiver usando para manter sua conta segura.</p>
+                </div>
+                <p class="text-gray-600 italic">Parabéns! Você acaba de dar o primeiro passo para a automação do seu WhatsApp. Agora, vamos explorar como criar funis incríveis!</p>
+            `
+        },
+        {
+    "id": "criar-funil",
+    "title": "Criador de Funil",
+    "icon": "git-branch",
+    "content": `
+        <h2 class="text-2xl font-semibold mb-4">Criando Funis Inteligentes 🧙‍♂️</h2>
+        <p class="mb-4">O Criador de Funil é o coração do HocketZap! Aqui você vai criar jornadas incríveis para seus clientes, automatizando suas vendas e engajamento.</p>
+
+        
+        <div class="aspect-w-16 aspect-h-9 mb-6">
+            <iframe src="https://www.youtube.com/embed/ntnsX6PUcvM" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="rounded-lg shadow-lg"></iframe>
+        </div>
+        <p class="text-sm text-gray-500">Assista ao vídeo acima para um tutorial detalhado sobre como criar funis poderosos no HocketZap!</p>
+        
+        <h3 class="text-xl font-semibold mb-2">Guia Passo a Passo para Criar um Funil de Alta Conversão:</h3>
+        <ol class="list-decimal list-inside mb-6 space-y-2">
+            <li>No menu principal, clique em "Funis" 🗺️</li>
+            <li>Selecione "Novo Funil" e dê um nome criativo (ex: "Funil Conquista de Clientes") ✨</li>
+            <li>No editor visual, você verá uma tela em branco. É hora de ser criativo!</li>
+            <li>No painel lateral, você encontrará todos os elementos disponíveis. Arraste-os para a tela 🖱️</li>
+            <li>Clique em cada elemento para configurá-lo. Aqui você define mensagens, perguntas, condições, etc. 🛠️</li>
+            <li>Conecte os elementos clicando e arrastando de um ponto a outro, criando o fluxo da conversa 🔗</li>
+            <li>Quando estiver satisfeito, clique em "Salvar" 💾</li>
+        </ol>
+
+        <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6">
+            <p class="font-bold">⚠️ Dica Importante sobre Mídia:</p>
+            <p>Antes de adicionar elementos de áudio, imagem ou vídeo ao seu funil, você precisa hospedá-los primeiro. Vá para a seção "Hospedar Mídia", faça o upload do seu arquivo e copie o link gerado. Use este link ao configurar elementos de mídia no seu funil.</p>
+        </div>
+
+        <h4 class="text-lg font-semibold mb-2">Elementos Disponíveis e Como Usá-los:</h4>
+        <ul class="list-disc list-inside mb-6 space-y-2">
+            <li><strong>Mensagem de Texto:</strong> Use para enviar textos simples. Ideal para saudações, informações e instruções.</li>
+            <li><strong>Input do Usuário:</strong> Faça perguntas e colete respostas. Ótimo para personalizar a jornada.</li>
+            <li><strong>Mídia:</strong> Adicione impacto com imagens, áudios ou vídeos. Lembre-se de hospedá-los antes!</li>
+            <li><strong>Condições:</strong> Crie caminhos diferentes baseados nas respostas do usuário. Ex: Se resposta = "Sim", vá para A; se "Não", vá para B.</li>
+            <li><strong>Agente de IA:</strong> Use inteligência artificial para gerar respostas dinâmicas e personalizadas.</li>
+            <li><strong>Requisição à API:</strong> Integre com sistemas externos para ações como registrar leads ou verificar informações.</li>
+        </ul>
+
+        <h4 class="text-lg font-semibold mb-2">Dicas Avançadas para Funis de Sucesso:</h4>
+        <ul class="list-disc list-inside mb-6 space-y-2">
+            <li>Comece com uma mensagem de boas-vindas calorosa e envolvente.</li>
+            <li>Use perguntas de múltipla escolha no início para facilitar o engajamento.</li>
+            <li>Insira elementos multimídia estrategicamente para manter o interesse.</li>
+            <li>Crie caminhos personalizados baseados nas respostas do usuário.</li>
+            <li>Termine sempre com uma clara chamada para ação (CTA).</li>
+            <li>Teste diferentes versões do seu funil para otimizar as conversões.</li>
+        </ul>
+
+        <div class="bg-gradient-to-r from-purple-400 to-pink-500 text-white p-4 rounded-lg mb-6">
+            <h4 class="font-semibold mb-2">🧙‍♀️ Exemplo de Estrutura de Funil:</h4>
+            <ol class="list-decimal list-inside">
+                <li>Mensagem de Boas-vindas</li>
+                <li>Pergunta sobre interesse (Input do Usuário)</li>
+                <li>Condição baseada na resposta</li>
+                <li>Envio de informação relevante (Texto ou Mídia)</li>
+                <li>Pergunta de qualificação</li>
+                <li>Oferta personalizada</li>
+                <li>Chamada para Ação (CTA)</li>
+            </ol>
+        </div>
+
+        <p class="text-gray-600 italic mb-4">Lembre-se: Um funil eficaz guia suavemente o cliente da conscientização à decisão. Seja criativo, mas mantenha-se focado no objetivo final!</p>
+
+    `
+},
+{
+    "id": "listas-contato",
+    "title": "Listas de Contato",
+    "icon": "users",
+    "content": `
+        <h2 class="text-2xl font-semibold mb-4">Listas de Contato: Organize seus Leads 📋</h2>
+        <p class="mb-4">As Listas de Contato são uma ferramenta poderosa para organizar seus clientes e otimizar suas campanhas. Vamos aprender como usá-las!</p>
+
+        <h3 class="text-xl font-semibold mb-2">Como Criar e Gerenciar Listas de Contato:</h3>
+        <ol class="list-decimal list-inside mb-6 space-y-2">
+            <li>No menu principal, acesse "Listas de Contato" 📁</li>
+            <li>Clique em "Nova Lista" e dê um nome significativo (ex: "Leads Campanha Verão") ✨</li>
+            <li>Sua nova lista aparecerá com as colunas: Nome do Cliente, Número do Cliente e Qualificação</li>
+            <li>Para adicionar contatos, use o WhatsApp Web integrado da plataforma (veja abaixo) 👇</li>
+        </ol>
+
+        <h3 class="text-xl font-semibold mb-2">Adicionando Contatos à Lista:</h3>
+        <ol class="list-decimal list-inside mb-6 space-y-2">
+            <li>No WhatsApp Web da plataforma, abra um chat com o contato desejado 💬</li>
+            <li>Clique nos três pontinhos (...) ao lado do nome do contato</li>
+            <li>Selecione "Adicionar contato à lista" 📥</li>
+            <li>No modal que abrir, escolha a lista e a qualificação do lead (High Ticket ou Low Ticket) 🏷️</li>
+            <li>Clique em "Adicionar" para confirmar ✅</li>
+        </ol>
+
+        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6">
+            <p class="font-bold">💡 Dica Profissional:</p>
+            <p>Após adicionar um contato a uma lista, o nome da lista aparecerá ao lado do nome do contato no WhatsApp Web. Isso facilita a organização e identificação rápida dos seus leads!</p>
+        </div>
+
+        <h3 class="text-xl font-semibold mb-2">Benefícios das Listas de Contato:</h3>
+        <ul class="list-disc list-inside mb-6 space-y-2">
+            <li>Organização eficiente de leads e clientes</li>
+            <li>Segmentação fácil entre High Ticket e Low Ticket</li>
+            <li>Campanhas de marketing mais direcionadas</li>
+            <li>Integração perfeita com a função de Envio em Massa</li>
+        </ul>
+
+        <p class="text-gray-600 italic mb-4">Lembre-se: Uma boa organização de contatos é o primeiro passo para campanhas de marketing bem-sucedidas. Use as Listas de Contato para potencializar suas estratégias!</p>
+    `
+},
+{
+    "id": "envio-massa",
+    "title": "Envio em Massa",
+    "icon": "send",
+    "content": `
+        <h2 class="text-2xl font-semibold mb-4">Envio em Massa: Alcance as Estrelas! 🌟</h2>
+        <p class="mb-4">Com o poder do envio em massa, você pode levar sua mensagem para centenas ou até milhares de contatos de uma só vez. É como ter um megafone mágico!</p>
+
+        <h3 class="text-xl font-semibold mb-2">Como usar o Megafone Mágico (aka Envio em Massa):</h3>
+        <ol class="list-decimal list-inside mb-6 space-y-2">
+            <li>Acesse a seção "Envio em Massa" no painel 📊</li>
+            <li>Escolha o funil que você quer enviar (aquele que você criou com tanto carinho) 💌</li>
+            <li>Selecione o método de envio:
+                <ul class="list-disc list-inside ml-6">
+                    <li>Usar uma Lista de Contatos da plataforma 📋</li>
+                    <li>Colar números de contatos manualmente 📝</li>
+                </ul>
+            </li>
+            <li>Se escolher uma Lista de Contatos:
+                <ul class="list-disc list-inside ml-6">
+                    <li>Você deve ter uma lista de contatos criada, com números nela, ensinei isso no tutorial anterior!</li>
+                    <li>Selecione a lista desejada</li>
+                    <li>Escolha filtrar por "High Ticket", "Low Ticket" ou todos 🏷️</li>
+                </ul>
+            </li>
+            <li>Configure as opções de envio (intervalo entre mensagens e selecione o funil que deseja fazer o envio) ⚙️</li>
+            <li>Faça uma dancinha da sorte 💃🕺</li>
+            <li>Clique em "Iniciar Campanha" e veja a mágica acontecer! 🎭</li>
+        </ol>
+
+        <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6">
+            <p class="font-bold">⚠️ Atenção, Jovem Padawan:</p>
+            <p>Com grandes poderes, vêm grandes responsabilidades. Use o envio em massa com sabedoria e respeite as políticas do WhatsApp para evitar bloqueios. Ninguém quer ver seu megafone confiscado, certo?</p>
+        </div>
+
+        <div class="bg-green-100 p-4 rounded-lg mb-6">
+            <h4 class="font-semibold mb-2">📊 Dica de Ouro para Análise:</h4>
+            <p>Após o envio, acompanhe as métricas de entrega e o engajamento dos leads com seu funil. Isso vai te ajudar a refinar suas campanhas futuras e se tornar um verdadeiro mestre do marketing no WhatsApp!</p>
+        </div>
+
+        <h3 class="text-xl font-semibold mb-2">Maximizando o Impacto do Envio em Massa:</h3>
+        <ul class="list-disc list-inside mb-6 space-y-2">
+            <li>Use as Listas de Contato para segmentar seu público-alvo</li>
+            <li>Crie funis específicos para leads High Ticket e Low Ticket</li>
+            <li>Teste diferentes horários de envio para otimizar taxas de abertura</li>
+            <li>Monitore as respostas e ajuste sua estratégia conforme necessário</li>
+        </ul>
+
+        <p class="text-gray-600 italic">Lembre-se: Qualidade sempre supera quantidade. Certifique-se de que seu funil é relevante e valioso para seus contatos!</p>
+    `
+},
+{
+    "id": "autoresposta",
+    "title": "Configurar Autoresposta",
+    "icon": "message-square",
+    "content": `
+        <h2 class="text-2xl font-semibold mb-4">Autoresposta: Atendimento Automático 24/7 🤖</h2>
+        <p class="mb-4">Imagine ter um assistente digital que responde mensagens enquanto você dorme. Com a autoresposta do HocketZap, isso se torna realidade!</p>
+
+        <h3 class="text-xl font-semibold mb-2">Como Configurar sua Autoresposta:</h3>
+        <ol class="list-decimal list-inside mb-6 space-y-2">
+            <li>Acesse "Autoresposta" no menu principal 🔧</li>
+            <li>Clique em "Escolher uma instância" e selecione a instância desejada para ativar a autoresposta</li>
+            <li>Clique em "Adicionar nova campanha" ➕</li>
+            <li>Dê um nome para sua campanha (ex: "Campanha de Promoção")</li>
+            <li>Defina a condição de ativação:
+                <ul class="list-disc list-inside ml-6 mt-2">
+                    <li>Escolha entre "Contém", "Começa com", "É igual a", etc.</li>
+                    <li>Recomendamos usar "É igual a" ou "Contém" para maior precisão</li>
+                </ul>
+            </li>
+            <li>Configure o valor do gatilho (ex: "quero promoção") 🎯</li>
+            <li>Selecione o funil que será ativado quando o gatilho for disparado 🚀</li>
+            <li>Clique em "Salvar configurações"</li>
+            <li>Teste sua autoresposta para garantir que está funcionando corretamente!</li>
+        </ol>
+
+        <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6">
+            <p class="font-bold">⚠️ Atenção:</p>
+            <p>Ao selecionar a condição "Todas as mensagens", seu funil será enviado em loop para o usuário. Use essa opção com cautela, pois ela responderá literalmente a todas as mensagens do lead com o funil selecionado.</p>
+        </div>
+
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6">
+            <p class="font-bold">💡 Dica de Ouro:</p>
+            <p>Crie várias campanhas de autoresposta com funis diferentes para anúncios diversos. Isso é excelente para validar e otimizar seus funis de conversão!</p>
+        </div>
+
+        <h3 class="text-xl font-semibold mb-2">Exemplo Prático:</h3>
+        <p class="mb-4">Se você configurar o gatilho como "quero promoção" com a condição "Contém", qualquer mensagem que inclua essa frase ativará a autoresposta. Por exemplo, se um lead enviar "Olá, quero promoção de hoje", o funil será acionado.</p>
+
+        <div class="flex items-center justify-center mb-6">
+            <img src="https://media.giphy.com/media/ZZkCo8zKWtt2ZgozfX/giphy.gif" alt="Robot waving" class="rounded-lg shadow-lg">
+        </div>
+
+        <p class="text-gray-600 italic">Autorespostas bem configuradas podem impulsionar suas conversões significativamente. Use esse recurso com sabedoria e veja suas vendas decolarem! 🚀💰</p>
+    `
+},
+        {
+            "id": "whatsapp-web",
+            "title": "WhatsApp Web Integrado",
+            "icon": "smartphone",
+            "content": `
+                <h2 class="text-2xl font-semibold mb-4">WhatsApp Web Integrado: todos seus números em um lugar só 🎛️</h2>
+                <p class="mb-4">Quem precisa de vários tabs abertos quando você tem o WhatsApp Web integrado do HocketZap? É como ter um centro de comando para todas as suas conversas!</p>
+                <h3 class="text-xl font-semibold mb-2">Como Usar seu Centro de Comando:</h3>
+                <ul class="list-disc list-inside mb-6 space-y-2">
+                    <li>Acesse a seção "WhatsApp Web" no HocketZap 🖥️</li>
+                    <li>Selecione a instancia que deseja entrar 👀</li>
+                    <li>Clique em uma conversa para abri-la e responder em tempo real ⚡</li>
+                    <li>Em cima de onde você digita mensagem para enviar, ira aparecer os botões com seus funis criados para você enviar para aquele chat 🚀</li>
+                    <li>Nos 3 pontinhos em cima ao lado do nome do chat aberto, ira aparecer 3 pontinhos, nele você vera a opção "Adicionar contato a lista" para adicionar aquele contato a uma lista personalizada de remarketing 🕵️‍♂️</li>
+                </ul>
+                <div class="bg-pink-100 border-l-4 border-pink-500 text-pink-700 p-4 mb-6">
+                    <p class="font-bold">👑 Dica de Mestre:</p>
+                   <p>Multiplas pessoas podem acessar o whatsapp web ao mesmo tempo, permitindo varios atendentes!</p>
+                </div>
+                <div class="flex justify-center mb-6">
+                    <img src="https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif" alt="Multitasking octopus" class="rounded-lg shadow-lg">
+                </div>
+                <p class="text-gray-600 italic">Com o WhatsApp Web integrado, você se torna o maestro de uma orquestra de conversas. Conduza com maestria! 🎼👨‍🎤</p>
+            `
+        },
+        {
+            "id": "integracao-mercadopago",
+            "title": "Integração MercadoPago",
+            "icon": "credit-card",
+            "content": `
+                <h2 class="text-2xl font-semibold mb-4">Integração MercadoPago: Transforme Conversas em Conversões 💰</h2>
+                <p class="mb-4">Dinheiro na conta é música para os ouvidos, não é? Com a integração MercadoPago, você transforma seu WhatsApp em uma máquina de vendas!</p>
+                <h3 class="text-xl font-semibold mb-2">Configurando a Magia do Pagamento:</h3>
+                <h4 class="text-lg font-semibold mt-4 mb-2">1. Integração via Cookie (Web):</h4>
+                <ol class="list-decimal list-inside mb-4 space-y-2">
+                    <li>Acesse sua conta MercadoPago no navegador 🌐</li>
+                    <li>Abra as ferramentas de desenvolvedor (F12) 🛠️</li>
+                    <li>Vá para a aba "Application" > "Cookies" 🍪</li>
+                    <li>Copie os valores dos cookies necessários 📋</li>
+                    <li>Cole os valores na seção de configuração do HocketZap 📌</li>
+                </ol>
+                <h4 class="text-lg font-semibold mt-4 mb-2">2. Integração via App (API):</h4>
+                <ol class="list-decimal list-inside mb-4 space-y-2">
+                    <li>Vá para o painel de desenvolvedores do MercadoPago 👨‍💻</li>
+                    <li>Crie uma nova aplicação (ou use uma existente) 🆕</li>
+                    <li>Obtenha as credenciais da API (Access Token) 🔑</li>
+                    <li>Insira o Access Token na configuração do HocketZap 🔒</li>
+                </ol>
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6">
+                    <p class="font-bold">💡 Dica de Ouro:</p>
+                    <p>Use a integração do MercadoPago em seus funis para criar uma experiência de compra sem atrito. Imagine: o cliente se interessa, faz o pagamento via pix e... 💥 Venda realizada! (no puro automatico!!)</p>
+                </div>
+                <div class="flex justify-center mb-6">
+                    <img src="https://media.giphy.com/media/LdOyjZ7io5Msw/giphy.gif" alt="Money raining" class="rounded-lg shadow-lg">
+                </div>
+                <p class="text-gray-600 italic">Com grande poder de venda, vem grande responsabilidade. Use a integração com sabedoria e veja sua conta bancária sorrir! 😊💼</p>
+            `
+        },
+        {
+    "id": "integracao-elevenlabs",
+    "title": "Integração ElevenLabs",
+    "icon": "mic",
+    "content": `
+        <h2 class="text-2xl font-semibold mb-4">Integração ElevenLabs: Dê Voz às Suas Ideias 🎙️</h2>
+        <p class="mb-4">Transforme texto em áudio e encante seus clientes com mensagens personalizadas! A integração ElevenLabs permite criar experiências de áudio únicas para seus funis.</p>
+
+        <h3 class="text-xl font-semibold mb-2">Passo a Passo para Configuração:</h3>
+        <ol class="list-decimal list-inside mb-6 space-y-2">
+            <li>Configure sua Conta ElevenLabs:
+                <ul class="list-disc list-inside ml-6 mt-2">
+                    <li>Acesse o site da ElevenLabs e crie uma conta</li>
+                    <li>Escolha e assine um plano adequado às suas necessidades</li>
+                </ul>
+            </li>
+            <li>Obtenha sua API Key:
+                <ul class="list-disc list-inside ml-6 mt-2">
+                    <li>No seu perfil ElevenLabs, clique em "API Keys" 🔑</li>
+                    <li>Gere uma nova API Key e copie-a 🔐</li>
+                </ul>
+            </li>
+            <li>Integre no HocketZap:
+                <ul class="list-disc list-inside ml-6 mt-2">
+                    <li>Acesse "Integrações" > "ElevenLabs" no HocketZap ⚙️</li>
+                    <li>Cole sua API Key no campo correspondente 📌</li>
+                </ul>
+            </li>
+            <li>Configure uma Voz Personalizada:
+                <ul class="list-disc list-inside ml-6 mt-2">
+                    <li>No ElevenLabs, vá para "Voices" 🗣️</li>
+                    <li>Clique em "Add a new voice" > "Instant voice cloning"</li>
+                    <li>Nomeie sua voz e faça o upload de um áudio para clonar 🧬</li>
+                    <li>Após a clonagem, encontre sua voz na lista e clique em "View"</li>
+                    <li>Copie o ID da voz clicando em "ID" 🆔</li>
+                    <li>Cole o ID da voz no campo apropriado no HocketZap 📋</li>
+                </ul>
+            </li>
+        </ol>
+
+        <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6">
+            <p class="font-bold">⚠️ Atenção:</p>
+            <p>Certifique-se de que o áudio usado para clonagem seja claro e de boa qualidade para obter os melhores resultados.</p>
+        </div>
+
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6">
+            <p class="font-bold">💡 Dica de Uso:</p>
+            <p>Experimente diferentes vozes para diversas personas em seus funis. Uma voz jovem pode ser ideal para produtos modernos, enquanto uma voz mais madura pode ser mais adequada para serviços profissionais.</p>
+        </div>
+
+        <h3 class="text-xl font-semibold mb-2">Usando Áudio nos Funis:</h3>
+        <ol class="list-decimal list-inside mb-6 space-y-2">
+            <li>Em android/ios você pode ir na função "Gerar voz" para gerar audios e enviar para seus clientes</li>
+            <li>Em computadores você pode gerar aúdios direto pelo whatsapp web da plataforma, basta abrir um chat, clicar no icone de microfone la em baixo para abrir as opções de geração!</li>
+        </ol>
+
+        <div class="flex justify-center mb-6">
+            <img src="https://media.giphy.com/media/3o7bukPWLMVsRz38J2/giphy.gif" alt="Voice waves" class="rounded-lg shadow-lg">
+        </div>
+
+        <p class="text-gray-600 italic">Com a voz certa, suas mensagens ganham vida. Use o poder do áudio para criar conexões mais profundas e memoráveis com seus clientes! 🎶💖</p>
+    `
+},
+        {
+            "id": "hospedar-midia",
+            "title": "Hospedar Mídia",
+            "icon": "upload-cloud",
+            "content": `
+                <h2 class="text-2xl font-semibold mb-4">Hospedagem de Mídia: Seu Álbum Digital no HocketZap 📸</h2>
+                <p class="mb-4">Chega de perder tempo procurando aquela imagem perfeita! Com a hospedagem de mídia do HocketZap, seus arquivos estão sempre à mão.</p>
+                <h3 class="text-xl font-semibold mb-2">Como Usar seu Álbum Digital:</h3>
+                <ol class="list-decimal list-inside mb-6 space-y-2">
+                    <li>Acesse a seção "Hospedagem de Mídia" no HocketZap 📁</li>
+                    <li>Clique em "Upload de Arquivo" e selecione sua mídia 📤</li>
+                    <li>Escolha o tipo de arquivo: imagem, áudio ou vídeo 🖼️🎵🎞️</li>
+                    <li>Dê um nome fácil de lembrar ao seu arquivo 🏷️</li>
+                    <li>Clique em "Enviar" e voilà! Seu arquivo está nas nuvens ☁️</li>
+                    <li>Copie o link gerado para usar em seus funis 🔗</li>
+                </ol>
+                <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6">
+                    <p class="font-bold">🧙‍♂️ Truque de Mestre:</p>
+                    <p>Organize suas mídias em pastas por campanha ou tipo. Assim, você sempre encontrará o arquivo certo no momento certo!</p>
+                </div>
+                <div class="flex justify-center mb-6">
+                    <img src="https://media.giphy.com/media/3oKIPa2TdahY8LAAxy/giphy.gif" alt="Cloud upload" class="rounded-lg shadow-lg">
+                </div>
+                <p class="text-gray-600 italic">Lembre-se: uma imagem vale mais que mil palavras! Use mídia com sabedoria em seus funis para engajar seus clientes. 🎭✨</p>
+            `
+        },
+        {
+            "id": "dicas-avancadas",
+            "title": "Dicas Avançadas",
+            "icon": "zap",
+            "content": `
+                <h2 class="text-2xl font-semibold mb-4">Dicas Avançadas: Torne-se um Mestre do HocketZap 🧙‍♂️</h2>
+                <p class="mb-4">Pronto para levar suas habilidades ao próximo nível? Estas dicas avançadas vão transformar você de aprendiz a mestre do HocketZap!</p>
+                <h3 class="text-xl font-semibold mb-2">Truques de Mestre:</h3>
+                <ul class="list-none space-y-4 mb-6">
+                    <li class="flex items-start">
+                        <span class="text-emerald-500 mr-2 text-xl">🔮</span>
+                        <div>
+                            <p class="font-semibold">Use Variáveis Dinâmicas</p>
+                            <p>Personalize suas mensagens com o nome do cliente, últimos produtos vistos, etc. É como mágica! Exemplo: "Olá {{nome}}, vi que você gostou do {{produto}}."</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-emerald-500 mr-2 text-xl">🌐</span>
+                        <div>
+                            <p class="font-semibold">Integre APIs Externas</p>
+                            <p>Conecte o HocketZap com outras ferramentas. Previsão do tempo, cotações de moeda, você escolhe! (só basta entender um pouco sobre apis...)</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-emerald-500 mr-2 text-xl">🏷️</span>
+                        <div>
+                            <p class="font-semibold">Domine o Uso de Tags</p>
+                            <p>Categorize seus contatos e personalize campanhas. "Interessados em Carros", "Fãs de Tecnologia" - as possibilidades são infinitas!</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-emerald-500 mr-2 text-xl">📊</span>
+                        <div>
+                            <p class="font-semibold">Análise de Dados é Poder</p>
+                            <p>Use as métricas do HocketZap para otimizar seus funis. Taxa de abertura baixa? Hora de repensar seus títulos!</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-emerald-500 mr-2 text-xl">🤖</span>
+                        <div>
+                            <p class="font-semibold">Automatize, Automatize, Automatize</p>
+                            <p>Configure ações automáticas baseadas em gatilhos. Se um cliente menciona "promoção", ative um funil especifico de promoção para seu produto!</p>
+                        </div>
+                    </li>
+                </ul>
+                <div class="bg-gradient-to-r from-yellow-400 to-red-500 text-white p-4 rounded-lg mb-6">
+                    <p class="font-bold text-xl mb-2">🚀 Desafio do Mestre:</p>
+                    <p>Tente criar um funil que combina todas essas dicas avançadas. Quem conseguir, ganha o título de Grão-Mestre do HocketZap!</p>
+                </div>
+                <div class="flex justify-center mb-6">
+                    <img src="https://media.giphy.com/media/3o7btNa0RUYa5E7iiQ/giphy.gif" alt="Wizard casting spell" class="rounded-lg shadow-lg">
+                </div>
+                <p class="text-gray-600 italic">Lembre-se: com grandes poderes, vêm grandes conversões. Use estas dicas com sabedoria e veja seu negócio decolar! 🚀💼</p>
+            `
+        }
+    ]
+};
+
+
+        // Função para renderizar a navegação lateral
+        function renderSidebar() {
+            const sidebarNav = document.getElementById('sidebarNav');
+            tutorialData.sections.forEach(section => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <a href="#${section.id}" class="flex items-center text-gray-600 hover:text-emerald-600">
+                        <i data-feather="${section.icon}" class="h-4 w-4 mr-2"></i>
+                        ${section.title}
+                    </a>
+                `;
+                sidebarNav.appendChild(li);
+            });
+            feather.replace();
+        }
+
+        // Função para renderizar o conteúdo
+        function renderContent(sectionId) {
+            const contentArea = document.getElementById('contentArea');
+            const section = tutorialData.sections.find(s => s.id === sectionId);
+            if (section) {
+                contentArea.innerHTML = section.content;
+            } else {
+                contentArea.innerHTML = '<p>Seção não encontrada.</p>';
+            }
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSidebar();
+            renderContent('introducao');
+
+            // Navegação
+            document.querySelectorAll('#sidebarNav a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const sectionId = e.currentTarget.getAttribute('href').substring(1);
+                    renderContent(sectionId);
+                });
+            });
+
+            // Alternância de tema
+            const themeToggle = document.getElementById('themeToggle');
+            themeToggle.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                const icon = themeToggle.querySelector('i');
+                icon.setAttribute('data-feather', document.documentElement.classList.contains('dark') ? 'moon' : 'sun');
+                feather.replace();
+            });
+
+            // Funcionalidade de pesquisa
+            const searchInput = document.getElementById('search');
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                document.querySelectorAll('#sidebarNav li').forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    item.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+
+            // Botão de suporte
+            document.getElementById('supportBtn').addEventListener('click', () => {
+                alert('Entre em contato com o suporte: suporte@hocketzap.com');
+            });
+        });
+    </script>
+</body>
+</html>
