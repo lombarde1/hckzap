@@ -8,10 +8,25 @@ const genAI = new GoogleGenerativeAI(apiKey);
 const redisClient = require('../config/redisConfig');
 const json5 = require('json5'); // Certifique-se de instalar esta dependência: npm install json5
 const PLAN_LIMITS = {
-    gratuito: 1,
-    basico: 2,
-    plus: 25,
-    premium: Infinity
+  gratuito: 0,
+
+  basico_monthly: 15,
+  basico_quarterly: 15,
+  basico_semiannual: 15,
+
+  plus_monthly: 30,
+  plus_quarterly: 30,
+  plus_semiannual: 39,
+
+  plus_monthly: 30,
+  plus_quarterly: 30,
+  plus_semiannual: 39,
+
+  premium_monthly: Infinity,
+  premium_quarterly: Infinity,
+  premium_semiannual: Infinity,
+
+
 };
 const FUNNEL_EXPIRY = 60 * 60 * 24 * 30; // 30 dias em segundos
 

@@ -301,10 +301,11 @@ exports.getFunnelDetails = async (req, res) => {
         const userFunnelsKey = `user:${userId}:funnels`;
         const isFunnelOwner = await redisClient.sismember(userFunnelsKey, funnelId);
 
-        if (!isFunnelOwner) {
-            return res.status(403).json({ error: 'Você não tem permissão para acessar este funil' });
+    
+        if (isFunnelOwner && req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Você não tem permissão para apagar este funil' });
         }
-
+        
         // Buscar os detalhes do funil no Redis
         const funnelKey = `funnel:${funnelId}`;
         const funnelData = await redisClient.get(funnelKey);

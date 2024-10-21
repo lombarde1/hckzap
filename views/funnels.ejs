@@ -128,9 +128,24 @@
 const currentPlan = '<%= user.plan %>';
 const PLAN_LIMITS = {
     gratuito: 0,
-    basico: 15,
-    plus: 30,
-    premium: Infinity
+
+    basico_monthly: 15,
+    basico_quarterly: 15,
+    basico_semiannual: 15,
+
+    plus_monthly: 30,
+    plus_quarterly: 30,
+    plus_semiannual: 39,
+
+    plus_monthly: 30,
+    plus_quarterly: 30,
+    plus_semiannual: 39,
+
+    premium_monthly: Infinity,
+    premium_quarterly: Infinity,
+    premium_semiannual: Infinity,
+
+
 };
 const funnelLimit = PLAN_LIMITS[currentPlan];
 
@@ -241,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadFunnels();
     
     document.getElementById('createFunnelBtn').addEventListener('click', () => {
-        if (currentPlan !== 'premium' && funnels.length >= funnelLimit) {
+        if (!currentPlan.includes('premium') && funnels.length >= funnelLimit) {
             showNotification('Limite atingido', `Você atingiu o limite de funis para o plano ${currentPlan}. Faça um upgrade para criar mais funis.`, 'warning');
         } else {
             openModal('create');
@@ -487,7 +502,8 @@ function renderFilteredFunnels(filteredFunnels) {
     const funnelList = document.getElementById('funnelList');
     funnelList.innerHTML = '';
     filteredFunnels.forEach((funnel, index) => {
-        const isBlocked = currentPlan !== 'premium' && index >= funnelLimit;
+        const isBlocked = !currentPlan.includes('premium') && index >= funnelLimit;
+
         const funnelElement = document.createElement('div');
         funnelElement.className = `card ${isBlocked ? 'bg-gray-200' : 'bg-white'} shadow-lg hover:shadow-xl transition-shadow duration-300`;
         funnelElement.innerHTML = `

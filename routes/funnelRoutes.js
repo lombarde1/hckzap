@@ -101,14 +101,25 @@ router.delete('/api/delete-all', ensureAuthenticated, funnelController.deleteAll
 
 router.get('/user-funnels', ensureAuthenticated, async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).select('funnels');
-        res.json(user.funnels);
+    
+        const userId = req.user.id;
+        const userKey = `user:${userId}`;
+        const funnelsKey1 = `user:${userId}:funnels`;
+
+        // Obter todos os IDs de funis do usuário
+        const funnelKeys = await redisClient.smembers(funnelsKey1);
+
+        const funnels = await Promise.all(funnelKeys.map(async (key) => {
+            const funnelData = await redisClient.get(key);
+            return JSON.parse(funnelData);
+        }));
+
+        res.json(funnels);
     } catch (error) {
         console.error('Erro ao buscar funis do usuário:', error);
         res.status(500).json({ error: 'Erro ao buscar funis do usuário' });
     }
 });
-
 
 router.get('/api/list', ensureAuthenticated, funnelController.listFunnels);
 router.post('/api/create', ensureAuthenticated, funnelController.createFunnel);
