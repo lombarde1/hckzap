@@ -34,8 +34,8 @@ function checkFeatureAccess(userPlan, feature) {
 
 const multiPlanCheck = require('../middleware/multiPlanCheck');
 
-// Rota para o dashboard de integrações
-router.get('/dashboard', ensureAuthenticated, multiPlanCheck(['plus', 'premium']), (req, res) => {
+// Rota para o dashboard de integrações // multiPlanCheck(['plus', 'premium'])
+router.get('/dashboard', ensureAuthenticated, (req, res) => {
     res.render('integracoes', { 
         user: req.user,
         pageTitle: 'Dashboard de Integrações',
