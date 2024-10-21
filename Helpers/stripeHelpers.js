@@ -5,31 +5,31 @@ const User = require('../models/User');
 const { avisar } = require("./avisos");
 
 const PRICE_TO_PLAN = {
-    'price_1PkbaxJd0dkXl3iIiP1BL4gM': 'basico_monthly',
+    'price_1Pv8IfJd0dkXl3iIPFkZLOPJ': 'basico_monthly',
 
-    'price_1QCRLZJd0dkXl3iIIO9qLQXG': 'plus_monthly',
-    'price_1QCRLqJd0dkXl3iIkt5uvfM4': 'premium_monthly',
+    'price_1Pzr6UJd0dkXl3iIcRukFSiX': 'plus_monthly',
+    'price_1Pzr78Jd0dkXl3iIlDGW1Wvf': 'premium_monthly',
 
-    'price_1QCRMAJd0dkXl3iINF5Wy17b': 'basico_quarterly',
-    'price_1QCRNIJd0dkXl3iIt27bV3rJ': 'basico_semiannual',
+    'price_1QCSL1Jd0dkXl3iIzo7idTLr': 'basico_quarterly',
+    'price_1QCSMcJd0dkXl3iIT2fNgEje': 'basico_semiannual',
 
-    'price_1QCRMdJd0dkXl3iI7z8yXLm6': 'plus_quarterly',
-    'price_1QCRNbJd0dkXl3iIp50Hpje4': 'plus_semiannual',
+    'price_1QCSLXJd0dkXl3iIgTIRp6EP': 'plus_quarterly',
+    'price_1QCSN6Jd0dkXl3iIOu3IAF3o': 'plus_semiannual',
 
-    'price_1QCRMzJd0dkXl3iIRzTv1Dh2': 'premium_quarterly',
-    'price_1QCRNuJd0dkXl3iImC88is9t': 'premium_semiannual'
+    'price_1QCSLxJd0dkXl3iIK95bNBJC': 'premium_quarterly',
+    'price_1QCSNaJd0dkXl3iIEmCj7fcB': 'premium_semiannual'
 };
 
 const PLAN_TO_PRICE = {
-    'basico_monthly': 'price_1PkbaxJd0dkXl3iIiP1BL4gM',
-    'plus_monthly': 'price_1QCRLZJd0dkXl3iIIO9qLQXG',
-    'premium_monthly': 'price_1QCRLqJd0dkXl3iIkt5uvfM4',
-    'basico_quarterly': 'price_1QCRMAJd0dkXl3iINF5Wy17b',
-    'basico_semiannual': 'price_1QCRNIJd0dkXl3iIt27bV3rJ',
-    'plus_quarterly': 'price_1QCRMdJd0dkXl3iI7z8yXLm6',
-    'plus_semiannual': 'price_1QCRNbJd0dkXl3iIp50Hpje4',
-    'premium_quarterly': 'price_1QCRMzJd0dkXl3iIRzTv1Dh2',
-    'premium_semiannual': 'price_1QCRNuJd0dkXl3iImC88is9t'
+    'basico_monthly': 'price_1Pv8IfJd0dkXl3iIPFkZLOPJ',
+    'plus_monthly': 'price_1Pzr6UJd0dkXl3iIcRukFSiX',
+    'premium_monthly': 'price_1Pzr78Jd0dkXl3iIlDGW1Wvf',
+    'basico_quarterly': 'price_1QCSL1Jd0dkXl3iIzo7idTLr',
+    'basico_semiannual': 'price_1QCSMcJd0dkXl3iIT2fNgEje',
+    'plus_quarterly': 'price_1QCSLXJd0dkXl3iIgTIRp6EP',
+    'plus_semiannual': 'price_1QCSN6Jd0dkXl3iIOu3IAF3o',
+    'premium_quarterly': 'price_1QCSLxJd0dkXl3iIK95bNBJC',
+    'premium_semiannual': 'price_1QCSNaJd0dkXl3iIEmCj7fcB'
 };
 
 exports.getPlanFromPriceId = (priceId) => {
@@ -77,6 +77,7 @@ exports.handleSuccessfulPayment = async (session) => {
   
     const subscription = await stripe.subscriptions.retrieve(session.subscription);
     const planName = this.getPlanFromPriceId(subscription.items.data[0].price.id);
+    const planBase = planName.split('_')[0];
   
     let validUntil;
     if (planName.includes('monthly')) {
@@ -92,6 +93,8 @@ exports.handleSuccessfulPayment = async (session) => {
       stripeCustomerId: session.customer,
       stripeSubscriptionId: session.subscription,
       validUntil: validUntil,
+      // Use o planBase para definir limites
+      funnelLimit: PLAN_LIMITS[planBase].funnels,
       $push: {
         notifications: {
           title: `Plano ${planName} ativado`,
