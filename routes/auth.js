@@ -57,7 +57,7 @@ router.get('/', ensureAuthenticated, async (req, res) => {
   try {
     if (!req.user) {
       console.log('User is undefined in dashboard route');
-      return res.redirect('https://app.hocketzap.com');
+      return res.redirect('https://hocketzap.com');
     }
     console.log('Rendering dashboard for user:', req.user.username);
     res.render('dashboard', { user: req.user });
@@ -654,7 +654,7 @@ router.post('/send-verification-code', async (req, res) => {
       const numfinal = formattedNumber.startsWith('55') 
           ? await formatarNumeroBrasileiro(formattedNumber)
           : formattedNumber;
-
+console.log(numfinal)
       const user = await User.findOne({ phone: numfinal });
       if (!user) {
           return res.status(404).json({ success: false, message: 'Usuário não encontrado' });
@@ -665,7 +665,7 @@ router.post('/send-verification-code', async (req, res) => {
       user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
       await user.save();
 
-      await avisar(numfinal, `Seu código de verificação para redefinir a senha é: ${verificationCode}`);
+      await avisar(numfinal, `Seu código de verificação para redefinir a senha é: ${verificationCode}`, "darkadm");
 
       res.json({ success: true, message: 'Código de verificação enviado' });
   } catch (error) {
@@ -785,7 +785,7 @@ router.post('/register', [
     if (!validationKey) {
 
       try {
-        await sendTextMessage(phone, `Eii ${name}, para criar sua conta na budzap você precisa ter um código de ativação!\n\nℹ️ *Esse código de ativação é necessário para ativar sua conta.*\n\n❌  Parece que você não digitou o código, ou o código que você digitou é invalido"\n\nNão tem um código de ativação? 👇\n\nAssine um plano da budzap por aqui: https://app.hocketzap.comzapp \n\n✅ _Ao assinar um plano pelo site acima, você recebera o seu codigo de ativação para ativar sua conta de acordo com o plano que você adquiriu_`)
+        await sendTextMessage(phone, `Eii ${name}, para criar sua conta na budzap você precisa ter um código de ativação!\n\nℹ️ *Esse código de ativação é necessário para ativar sua conta.*\n\n❌  Parece que você não digitou o código, ou o código que você digitou é invalido"\n\nNão tem um código de ativação? 👇\n\nAssine um plano da budzap por aqui: https://hocketzap.comzapp \n\n✅ _Ao assinar um plano pelo site acima, você recebera o seu codigo de ativação para ativar sua conta de acordo com o plano que você adquiriu_`)
       } catch(e) {
      
         if (e.response && e.response.data) {

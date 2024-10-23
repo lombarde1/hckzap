@@ -53,7 +53,7 @@ module.exports = {
 
       return next();
     }
-    res.redirect('https://app.hocketzap.com');
+    res.redirect('https://hocketzap.com');
   },
   ensureAdmin: (req, res, next) => {
     if (req.isAuthenticated() && req.user.role === 'admin' && req.session.isAdmin) {

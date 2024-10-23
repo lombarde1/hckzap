@@ -13,7 +13,7 @@ router.get('/', ensureAuthenticated, async (req, res) => {
   try {
     if (!req.user) {
       console.log('User is undefined in dashboard route');
-      return res.redirect('https://app.hocketzap.com');
+      return res.redirect('https://hocketzap.com');
     }
     console.log('Rendering dashboard for user:', req.user.username);
 

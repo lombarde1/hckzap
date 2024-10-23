@@ -271,7 +271,7 @@
                     <h3 class="text-3xl leading-8 font-bold text-purple-800 mb-4">Pagamento via PIX</h3>
                     <div class="mt-4 px-7 py-3 bg-purple-100 rounded-lg">
                         <p class="text-lg text-purple-800 font-semibold">
-                            Chave PIX: <span class="font-bold text-purple-900 pix-key-animation">17981557251</span>
+                            Chave PIX: <span class="font-bold text-purple-900 pix-key-animation">pagamento@hocketzap.com</span>
                         </p>
                     </div>
                     <div class="mt-6">
@@ -488,7 +488,7 @@
 
     const pixKey = document.querySelector('.pix-key-animation');
     pixKey.addEventListener('click', function() {
-        navigator.clipboard.writeText('17981557251').then(function() {
+        navigator.clipboard.writeText('pagamento@hocketzap.com').then(function() {
             alert('Chave PIX copiada para a área de transferência!');
         }, function(err) {
             console.error('Erro ao copiar: ', err);
