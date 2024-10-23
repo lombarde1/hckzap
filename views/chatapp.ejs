@@ -2043,6 +2043,7 @@ socket.on('chat update', (data) => {
   updateLastSeen(data.chatId, data.timestamp);
 });
 
+
 function updatePresence(chatId, presence, timestamp) {
             const chatElement = document.querySelector(`.chat-item[data-chat-id="${chatId}"]`);
             const chatTypeElement = document.getElementById('chatType');

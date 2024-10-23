@@ -81,6 +81,9 @@ io.on('connection', (socket) => {
   });
 });
 
+const videoEditRoutes = require('./routes/videoEdit');
+app.use('/video-edit', videoEditRoutes);
+
 // Escutar eventos do eventBus e emitir para o socket
 eventBus.on('newMessage', (instanceKey, data) => {
   console.log("EVENTBUS DE MENSAGEM NOVA")
@@ -281,9 +284,9 @@ app.use('/clear', chatCleanupRoutes);
 const funnelRoutes = require('./routes/funnelRoutes');
 app.use('/funnels', funnelRoutes);
 
-const telegramRoutes = require('./routes/consulta');
+//const telegramRoutes = require('./routes/consulta');
 
-app.use('/consulta', telegramRoutes);
+//app.use('/consulta', telegramRoutes);
 
 const whatsappRoutes = require('./routes/funcoeszap');
 app.use('/funcao', whatsappRoutes);

@@ -61,7 +61,7 @@ body {
             width: 250px;
             border-radius: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
+   
             background-color: white;
           
             user-select: none;
@@ -182,7 +182,20 @@ body {
   gap: 0.75rem;
 }
 
+
+.node.dragging {
+    opacity: 0.8;
+    cursor: grabbing !important;
+}
+
+
+.menu-item.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
 .menu-item {
+
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -191,7 +204,7 @@ body {
   border-radius: 0.5rem;
   background-color: #f8f9fa;
   border: 1px solid #e9ecef;
-  cursor: pointer;
+   cursor: grab;
   transition: all 0.2s ease;
 }
 
@@ -306,21 +319,25 @@ body {
         }
 
         .media-preview {
-        max-width: 100%;
-        max-height: 100px;
-        object-fit: contain;
-    }
+    max-width: 100%;
+    max-height: 150px;
+    margin-top: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: #f3f4f6;
+}
 
-    .media-preview img,
-    .media-preview video {
-        max-width: 100%;
-        max-height: 100px;
-        object-fit: contain;
-    }
+.media-preview img,
+.media-preview video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
 
-    .media-preview audio {
-        width: 100%;
-    }
+.media-preview audio {
+    width: 100%;
+    margin-top: 8px;
+}
 
         .zoom-controls {
             position: fixed;
@@ -615,6 +632,17 @@ function addNewNode(type) {
     nodeDiv.style.left = data && data.position ? data.position.left : '100px';
     nodeDiv.style.top = data && data.position ? data.position.top : '100px';
 
+
+    nodeDiv.addEventListener('mouseenter', () => {
+        if (jsPlumbInstance.dragging) {
+            nodeDiv.classList.add('grouping-target');
+        }
+    });
+
+    nodeDiv.addEventListener('mouseleave', () => {
+        nodeDiv.classList.remove('grouping-target');
+    });
+
     const defaultContent = getDefaultContent(type);
     const newNode2 = {
         id: nodeId,
@@ -787,7 +815,11 @@ function addNewNode(type) {
         mediaPreview.className = 'media-preview mt-2';
         mediaPreview.id = `preview_${nodeId}`;
         nodeDiv.querySelector('.node-content').appendChild(mediaPreview);
-        updateMediaPreview(nodeId, data ? data.content : '');
+        
+        // Atualizar preview imediatamente se houver dados
+        if (data && data.content) {
+            updateMediaPreviewRealTime(nodeId, data.content);
+        }
     }
 
 
@@ -1044,6 +1076,80 @@ function generateApiDataFields(data, prefix = '') {
     return html;
 }
 
+function truncateUrl(url, maxLength = 30) {
+    if (!url) return '';
+    if (url.length <= maxLength) return url;
+    
+    const start = url.substring(0, maxLength/2);
+    const end = url.substring(url.length - maxLength/2);
+    return `${start}...${end}`;
+}
+
+function updateMediaPreviewRealTime(nodeId, url) {
+    const nodeContent = document.getElementById(`content_${nodeId}`);
+    if (!nodeContent) return;
+
+    // Procura pelo preview existente ou cria um novo
+    let previewElement = document.getElementById(`preview_${nodeId}`);
+    if (!previewElement) {
+        previewElement = document.createElement('div');
+        previewElement.id = `preview_${nodeId}`;
+        previewElement.className = 'media-preview mt-2';
+        nodeContent.appendChild(previewElement);
+    }
+
+    if (!url) {
+        previewElement.innerHTML = '';
+        return;
+    }
+
+    const node = nodes.find(n => n.id === nodeId);
+    if (!node) return;
+
+    // Limpar preview anterior
+    previewElement.innerHTML = '';
+
+    // Criar novo elemento de preview baseado no tipo
+    try {
+        switch (node.type) {
+            case 'image':
+                const img = new Image();
+                img.src = url;
+                img.classList.add('media-preview');
+                img.onerror = () => {
+                    previewElement.innerHTML = '<p class="text-red-500">Erro ao carregar imagem</p>';
+                };
+                img.onload = () => {
+                    previewElement.innerHTML = '';
+                    previewElement.appendChild(img);
+                };
+                break;
+            case 'video':
+                const video = document.createElement('video');
+                video.src = url;
+                video.controls = true;
+                video.classList.add('media-preview');
+                video.onerror = () => {
+                    previewElement.innerHTML = '<p class="text-red-500">Erro ao carregar vídeo</p>';
+                };
+                previewElement.appendChild(video);
+                break;
+            case 'audio':
+                const audio = document.createElement('audio');
+                audio.src = url;
+                audio.controls = true;
+                audio.classList.add('media-preview');
+                audio.onerror = () => {
+                    previewElement.innerHTML = '<p class="text-red-500">Erro ao carregar áudio</p>';
+                };
+                previewElement.appendChild(audio);
+                break;
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar preview:', error);
+        previewElement.innerHTML = '<p class="text-red-500">Erro ao carregar mídia</p>';
+    }
+}
 
 function insertVariableToApiFields() {
     const select = document.getElementById('variableSelect');
@@ -1121,6 +1227,56 @@ function insertVariable(targetId) {
         const placeholder = `{{${select.value}}}`;
         insertAtCursor(textarea, placeholder);
     }
+}
+
+// Adicione ao script existente
+
+function initializeDragAndDrop() {
+    const menuItems = document.querySelectorAll('.menu-item');
+    
+    menuItems.forEach(item => {
+        item.setAttribute('draggable', 'true');
+        
+        item.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('nodeType', item.getAttribute('data-type'));
+            e.dataTransfer.effectAllowed = 'move';
+            
+            // Adiciona classe visual durante o arrasto
+            item.classList.add('dragging');
+        });
+
+        item.addEventListener('dragend', (e) => {
+            item.classList.remove('dragging');
+        });
+    });
+
+    const canvas = document.getElementById('canvas');
+    
+    canvas.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    });
+
+    canvas.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const nodeType = e.dataTransfer.getData('nodeType');
+        
+        // Calcula a posição do drop considerando o scroll e zoom
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.offsetWidth / rect.width;
+        const scaleY = canvas.offsetHeight / rect.height;
+        
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
+
+        // Cria o novo nó na posição do drop
+        addNode(nodeType, {
+            position: {
+                left: `${x}px`,
+                top: `${y}px`
+            }
+        });
+    });
 }
 
     function editNode(nodeId) {
@@ -1567,6 +1723,28 @@ case 'video':
     }
     }
 
+    if (['image', 'audio', 'video'].includes(node.type)) {
+    setTimeout(() => {
+        const contentInput = document.getElementById('nodeContent');
+        if (contentInput) {
+            // Remove eventos antigos antes de adicionar o novo
+            contentInput.removeEventListener('input', updatePreview);
+            
+            // Cria uma função de callback nomeada para poder removê-la depois
+            function updatePreview(e) {
+                updateMediaPreviewRealTime(nodeId, e.target.value);
+            }
+            
+            contentInput.addEventListener('input', updatePreview);
+            
+            // Atualizar preview inicial se já houver URL
+            if (node.content) {
+                updateMediaPreviewRealTime(nodeId, node.content);
+            }
+        }
+    }, 0);
+}
+
 // Adicione este código após a criação do conteúdo do modal
 if (node.type === 'condition') {
     setTimeout(() => {
@@ -1948,6 +2126,17 @@ function updateNodeDisplay(node) {
                     displayContent = 'Nenhuma mensagem definida';
                 }
                 break;
+                case 'image':
+        case 'video':
+        case 'audio':
+            const truncatedUrl = truncateUrl(node.content);
+            displayContent = `
+                <div class="space-y-2">
+                    <p class="text-sm text-gray-600 break-all">URL: ${truncatedUrl}</p>
+                    ${node.caption ? `<p class="text-sm">Legenda: ${node.caption}</p>` : ''}
+                </div>
+            `;
+            break;
 
         }
 
@@ -1959,6 +2148,11 @@ function updateNodeDisplay(node) {
     }
 
         contentElement.innerHTML = `<p>${displayContent}</p>`;
+
+    // Recriar o preview se for um nó de mídia
+    if (['image', 'audio', 'video'].includes(node.type) && node.content) {
+        updateMediaPreviewRealTime(node.id, node.content);
+    }
     }
 }
 
@@ -2356,7 +2550,7 @@ function startDragging(e) {
        
         { type: 'input', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />', label: 'Input' },
         { type: 'condition', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />', label: 'Condição' },
-        { type: 'aiCondition', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />', label: 'Condição com IA' },
+      //  { type: 'aiCondition', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />', label: 'Condição com IA' },
         { type: 'wait', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />', label: 'Espera' },
     ],
     actions: [
@@ -2404,7 +2598,7 @@ function startDragging(e) {
 
 // Chamar esta função quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', populateMenu);
-
+document.addEventListener('DOMContentLoaded', initializeDragAndDrop);
     // Expor funções necessárias globalmente
     window.showTab = showTab;
 })();
