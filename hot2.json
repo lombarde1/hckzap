@@ -1,0 +1,962 @@
+{
+  "id": "c8abfa3f-598a-4924-a866-0c0599a0296e",
+  "name": "hot-2",
+  "nodes": [
+    {
+      "id": "start_node",
+      "type": "start",
+      "position": {
+        "left": "50px",
+        "top": "50px"
+      },
+      "content": "",
+      "delay": 0,
+      "nodeId": "start_node"
+    },
+    {
+      "id": "audio_1729787556518",
+      "type": "audio",
+      "position": {
+        "left": "290px",
+        "top": "490px"
+      },
+      "content": "https://dev.hocketzap.com/integrations/chat-media/audio/c24ac2d6-9254-4c87-a863-63fb78b3e51e.mp3",
+      "delay": 5,
+      "caption": "",
+      "nodeId": "audio_1729787556518"
+    },
+    {
+      "id": "wait_1729787565198",
+      "type": "wait",
+      "position": {
+        "left": "430px",
+        "top": "730px"
+      },
+      "content": "1",
+      "delay": 0,
+      "nodeId": "wait_1729787565198"
+    },
+    {
+      "id": "input_1729787570358",
+      "type": "input",
+      "position": {
+        "left": "570px",
+        "top": "230px"
+      },
+      "content": "🥰",
+      "delay": 1,
+      "inputKey": "emojii",
+      "nodeId": "input_1729787570358"
+    },
+    {
+      "id": "wait_1729787582961",
+      "type": "wait",
+      "position": {
+        "left": "890px",
+        "top": "30px"
+      },
+      "content": "7",
+      "delay": 0,
+      "nodeId": "wait_1729787582961"
+    },
+    {
+      "id": "message_1729787591104",
+      "type": "message",
+      "position": {
+        "left": "920px",
+        "top": "420px"
+      },
+      "content": "hmm",
+      "delay": 2,
+      "nodeId": "message_1729787591104"
+    },
+    {
+      "id": "input_1729787770364",
+      "type": "input",
+      "position": {
+        "left": "1330px",
+        "top": "170px"
+      },
+      "content": "to com tedio aq, bora se divertir? kkk 👀",
+      "delay": 6,
+      "inputKey": "dv",
+      "nodeId": "input_1729787770364"
+    },
+    {
+      "id": "wait_1729787803012",
+      "type": "wait",
+      "position": {
+        "left": "1630px",
+        "top": "10px"
+      },
+      "content": "4",
+      "delay": 0,
+      "nodeId": "wait_1729787803012"
+    },
+    {
+      "id": "message_1729787808411",
+      "type": "message",
+      "position": {
+        "left": "1710px",
+        "top": "230px"
+      },
+      "content": "safado kkkkk",
+      "delay": 10,
+      "nodeId": "message_1729787808411"
+    },
+    {
+      "id": "message_1729787827067",
+      "type": "message",
+      "position": {
+        "left": "1740px",
+        "top": "660px"
+      },
+      "content": "calma ai vida q to no banho agr",
+      "delay": 8,
+      "nodeId": "message_1729787827067"
+    },
+    {
+      "id": "wait_1729787829235",
+      "type": "wait",
+      "position": {
+        "left": "1710px",
+        "top": "460px"
+      },
+      "content": "3",
+      "delay": 0,
+      "nodeId": "wait_1729787829235"
+    },
+    {
+      "id": "wait_1729788049627",
+      "type": "wait",
+      "position": {
+        "left": "2220px",
+        "top": "780px"
+      },
+      "content": "200",
+      "delay": 0,
+      "nodeId": "wait_1729788049627"
+    },
+    {
+      "id": "input_1729788087739",
+      "type": "input",
+      "position": {
+        "left": "2460px",
+        "top": "300px"
+      },
+      "content": "oiii",
+      "delay": 3,
+      "inputKey": "rem",
+      "nodeId": "input_1729788087739"
+    },
+    {
+      "id": "wait_1729788097714",
+      "type": "wait",
+      "position": {
+        "left": "2470px",
+        "top": "550px"
+      },
+      "content": "2",
+      "delay": 0,
+      "nodeId": "wait_1729788097714"
+    },
+    {
+      "id": "message_1729788106442",
+      "type": "message",
+      "position": {
+        "left": "2570px",
+        "top": "760px"
+      },
+      "content": "sai do banho",
+      "delay": 2,
+      "nodeId": "message_1729788106442"
+    },
+    {
+      "id": "message_1729788120386",
+      "type": "message",
+      "position": {
+        "left": "2490px",
+        "top": "1010px"
+      },
+      "content": "to peladinha aqui na sala kkkkk que tedio",
+      "delay": 5,
+      "nodeId": "message_1729788120386"
+    },
+    {
+      "id": "wait_1729788231653",
+      "type": "wait",
+      "position": {
+        "left": "2500px",
+        "top": "1250px"
+      },
+      "content": "10",
+      "delay": 0,
+      "nodeId": "wait_1729788231653"
+    },
+    {
+      "id": "image_1729788241652",
+      "type": "image",
+      "position": {
+        "left": "2510px",
+        "top": "1440px"
+      },
+      "content": "https://dev.hocketzap.com/integrations/chat-media/image/42ea1768-9acd-4bb8-985d-e6a3cccc29f6.jpg",
+      "delay": 0,
+      "caption": "😳😳",
+      "nodeId": "image_1729788241652"
+    },
+    {
+      "id": "input_1729788275733",
+      "type": "input",
+      "position": {
+        "left": "2490px",
+        "top": "1840px"
+      },
+      "content": "mds eu sou mt safada kkkkkkkk ",
+      "delay": 4,
+      "inputKey": "🤦‍♀️",
+      "nodeId": "input_1729788275733"
+    },
+    {
+      "id": "wait_1729788334582",
+      "type": "wait",
+      "position": {
+        "left": "2498px",
+        "top": "2150px"
+      },
+      "content": "5",
+      "delay": 0,
+      "nodeId": "wait_1729788334582"
+    },
+    {
+      "id": "audio_1729788340190",
+      "type": "audio",
+      "position": {
+        "left": "2520px",
+        "top": "2350px"
+      },
+      "content": "https://dev.hocketzap.com/integrations/chat-media/audio/f1318a37-ffaf-4179-b199-e06d6aa5bfe8.mp3",
+      "delay": 4,
+      "caption": "",
+      "nodeId": "audio_1729788340190"
+    },
+    {
+      "id": "input_1729843435824",
+      "type": "input",
+      "position": {
+        "left": "2950px",
+        "top": "2520px"
+      },
+      "content": "delicia bebe",
+      "delay": 3,
+      "inputKey": "dlc",
+      "nodeId": "input_1729843435824"
+    },
+    {
+      "id": "message_1729843449024",
+      "type": "message",
+      "position": {
+        "left": "3070px",
+        "top": "2740px"
+      },
+      "content": "vou te mandar mais uma amostrinha dos meus conteudos vida",
+      "delay": 3,
+      "nodeId": "message_1729843449024"
+    },
+    {
+      "id": "message_1729843486043",
+      "type": "message",
+      "position": {
+        "left": "3090px",
+        "top": "3020px"
+      },
+      "content": "https://app.hocketzap.com/previa/",
+      "delay": 2,
+      "nodeId": "message_1729843486043"
+    },
+    {
+      "id": "input_1729843527593",
+      "type": "input",
+      "position": {
+        "left": "3175px",
+        "top": "3269px"
+      },
+      "content": "Depois me diz oque achou rsrs",
+      "delay": 2,
+      "inputKey": "achou",
+      "nodeId": "input_1729843527593"
+    },
+    {
+      "id": "wait_1729843549043",
+      "type": "wait",
+      "position": {
+        "left": "3431px",
+        "top": "3591px"
+      },
+      "content": "5",
+      "delay": 0,
+      "nodeId": "wait_1729843549043"
+    },
+    {
+      "id": "audio_1729843554663",
+      "type": "audio",
+      "position": {
+        "left": "3530px",
+        "top": "3780px"
+      },
+      "content": "https://dev.hocketzap.com/integrations/chat-media/audio/50dac214-ed4b-4d90-8c24-0c4fd9c92bf4.mp3",
+      "delay": 5,
+      "caption": "",
+      "nodeId": "audio_1729843554663"
+    },
+    {
+      "id": "audio_1729843556191",
+      "type": "audio",
+      "position": {
+        "left": "3590px",
+        "top": "4040px"
+      },
+      "content": "https://dev.hocketzap.com/integrations/chat-media/audio/d91eefee-b4a4-4822-a7f0-47aff6c2d606.mp3",
+      "delay": 5,
+      "caption": "",
+      "nodeId": "audio_1729843556191"
+    },
+    {
+      "id": "audio_1729843659233",
+      "type": "audio",
+      "position": {
+        "left": "3610px",
+        "top": "4370px"
+      },
+      "content": "https://dev.hocketzap.com/integrations/chat-media/audio/70d8e692-4831-4527-a8ab-737ff8b7a30e.mp3",
+      "delay": 3,
+      "caption": "",
+      "nodeId": "audio_1729843659233"
+    },
+    {
+      "id": "input_1729843675146",
+      "type": "input",
+      "position": {
+        "left": "3990px",
+        "top": "4230px"
+      },
+      "content": "Você quer vida?",
+      "delay": 0,
+      "inputKey": "quer",
+      "nodeId": "input_1729843675146"
+    },
+    {
+      "id": "message_1729843686825",
+      "type": "message",
+      "position": {
+        "left": "4120px",
+        "top": "4700px"
+      },
+      "content": "ok bb",
+      "delay": 3,
+      "nodeId": "message_1729843686825"
+    },
+    {
+      "id": "wait_1729843694056",
+      "type": "wait",
+      "position": {
+        "left": "4110px",
+        "top": "4470px"
+      },
+      "content": "5",
+      "delay": 0,
+      "nodeId": "wait_1729843694056"
+    },
+    {
+      "id": "message_1729843706056",
+      "type": "message",
+      "position": {
+        "left": "4470px",
+        "top": "4350px"
+      },
+      "content": "só hoje eu to fazendo uma promoçãozinha de 50 videos meus, peladinha, transando e gemendo gostoso por R$19,90 ",
+      "delay": 0,
+      "nodeId": "message_1729843706056"
+    },
+    {
+      "id": "message_1729843747575",
+      "type": "message",
+      "position": {
+        "left": "4760px",
+        "top": "4420px"
+      },
+      "content": "Nova mensagem",
+      "delay": 0,
+      "nodeId": "message_1729843747575"
+    },
+    {
+      "id": "message_1729843752082",
+      "type": "message",
+      "position": {
+        "left": "4400px",
+        "top": "4040px"
+      },
+      "content": "e como presentinho se você comprar eu faço uma chamadinha de video gratis de brinde rsrs",
+      "delay": 5,
+      "nodeId": "message_1729843752082"
+    },
+    {
+      "id": "input_1729843786687",
+      "type": "input",
+      "position": {
+        "left": "4360px",
+        "top": "3780px"
+      },
+      "content": "Posso mandar meu pix pra vc comprar vida?",
+      "delay": 2,
+      "inputKey": "pix",
+      "nodeId": "input_1729843786687"
+    },
+    {
+      "id": "wait_1729843808376",
+      "type": "wait",
+      "position": {
+        "left": "4250px",
+        "top": "3560px"
+      },
+      "content": "5",
+      "delay": 0,
+      "nodeId": "wait_1729843808376"
+    },
+    {
+      "id": "message_1729843815360",
+      "type": "message",
+      "position": {
+        "left": "4240px",
+        "top": "3350px"
+      },
+      "content": "é chave telefone ta bom bb",
+      "delay": 2,
+      "nodeId": "message_1729843815360"
+    },
+    {
+      "id": "message_1729843830816",
+      "type": "message",
+      "position": {
+        "left": "4210px",
+        "top": "3080px"
+      },
+      "content": "17981557251",
+      "delay": 1,
+      "nodeId": "message_1729843830816"
+    },
+    {
+      "id": "message_1729843888935",
+      "type": "message",
+      "position": {
+        "left": "4190px",
+        "top": "2760px"
+      },
+      "content": "so mandar o comprovante que ja te mando vida, to doida pra gozar na chamadinha com vc",
+      "delay": 2,
+      "nodeId": "message_1729843888935"
+    },
+    {
+      "id": "fakeCall_1731361610736",
+      "type": "fakeCall",
+      "position": {
+        "left": "520px",
+        "top": "20px"
+      },
+      "content": "",
+      "delay": 0,
+      "duration": 4,
+      "isVideo": false,
+      "nodeId": "fakeCall_1731361610736"
+    },
+    {
+      "id": "wait_1731361627008",
+      "type": "wait",
+      "position": {
+        "left": "140px",
+        "top": "214.02px"
+      },
+      "content": "35",
+      "delay": 0,
+      "nodeId": "wait_1731361627008"
+    },
+    {
+      "id": "message_1731361637232",
+      "type": "message",
+      "position": {
+        "left": "0px",
+        "top": "390px"
+      },
+      "content": "liguei sem querer kkk",
+      "delay": 2,
+      "nodeId": "message_1731361637232"
+    },
+    {
+      "id": "wait_1731361879687",
+      "type": "wait",
+      "position": {
+        "left": "1920px",
+        "top": "930px"
+      },
+      "content": "15",
+      "delay": 0,
+      "nodeId": "wait_1731361879687"
+    },
+    {
+      "id": "videoMessage_1731361887984",
+      "type": "videoMessage",
+      "position": {
+        "left": "1940px",
+        "top": "1200px"
+      },
+      "content": "https://dev.hocketzap.com/integrations/chat-media/video/11da2046-add7-4058-8696-933a432e857b.mp4",
+      "delay": 0,
+      "nodeId": "videoMessage_1731361887984"
+    },
+    {
+      "id": "message_1731361896079",
+      "type": "message",
+      "position": {
+        "left": "2093px",
+        "top": "1373px"
+      },
+      "content": "kkkk vou terminar aqui e ja te mando mensagem amor",
+      "delay": 5,
+      "nodeId": "message_1731361896079"
+    },
+    {
+      "id": "wait_1732552836475",
+      "type": "wait",
+      "position": {
+        "left": "4566px",
+        "top": "2740px"
+      },
+      "content": "30",
+      "delay": 0,
+      "inputKey": "",
+      "saveResponse": false,
+      "variable": "",
+      "conditionType": "equals",
+      "conditionValue": "",
+      "caption": "",
+      "nodeId": "wait_1732552836475"
+    },
+    {
+      "id": "image_1732552847460",
+      "type": "image",
+      "position": {
+        "left": "4798px",
+        "top": "2889px"
+      },
+      "content": "https://dev.hocketzap.com/integrations/chat-media/image/71bc526f-ff69-43c2-9706-e323c35070f1.jpg",
+      "delay": 0,
+      "inputKey": "",
+      "saveResponse": false,
+      "variable": "",
+      "conditionType": "equals",
+      "conditionValue": "",
+      "caption": "to aq te esperando ",
+      "nodeId": "image_1732552847460"
+    }
+  ],
+  "connections": [
+    {
+      "sourceId": "audio_1729787556518",
+      "targetId": "wait_1729787565198",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729787565198",
+      "targetId": "input_1729787570358",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "input_1729787570358",
+      "targetId": "wait_1729787582961",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729787582961",
+      "targetId": "message_1729787591104",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729787591104",
+      "targetId": "input_1729787770364",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "input_1729787770364",
+      "targetId": "wait_1729787803012",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729787803012",
+      "targetId": "message_1729787808411",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729787808411",
+      "targetId": "wait_1729787829235",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729787829235",
+      "targetId": "message_1729787827067",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729788049627",
+      "targetId": "input_1729788087739",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "input_1729788087739",
+      "targetId": "wait_1729788097714",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729788097714",
+      "targetId": "message_1729788106442",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729788106442",
+      "targetId": "message_1729788120386",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729788120386",
+      "targetId": "wait_1729788231653",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729788231653",
+      "targetId": "image_1729788241652",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "image_1729788241652",
+      "targetId": "input_1729788275733",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "input_1729788275733",
+      "targetId": "wait_1729788334582",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729788334582",
+      "targetId": "audio_1729788340190",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "audio_1729788340190",
+      "targetId": "input_1729843435824",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "input_1729843435824",
+      "targetId": "message_1729843449024",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729843449024",
+      "targetId": "message_1729843486043",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729843486043",
+      "targetId": "input_1729843527593",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "input_1729843527593",
+      "targetId": "wait_1729843549043",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729843549043",
+      "targetId": "audio_1729843554663",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "audio_1729843554663",
+      "targetId": "audio_1729843556191",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "audio_1729843556191",
+      "targetId": "audio_1729843659233",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "audio_1729843659233",
+      "targetId": "input_1729843675146",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "input_1729843675146",
+      "targetId": "wait_1729843694056",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729843694056",
+      "targetId": "message_1729843686825",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729843686825",
+      "targetId": "message_1729843706056",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729843706056",
+      "targetId": "message_1729843752082",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729843752082",
+      "targetId": "input_1729843786687",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "input_1729843786687",
+      "targetId": "wait_1729843808376",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1729843808376",
+      "targetId": "message_1729843815360",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729843815360",
+      "targetId": "message_1729843830816",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729843830816",
+      "targetId": "message_1729843888935",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729787827067",
+      "targetId": "wait_1731361879687",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1731361879687",
+      "targetId": "videoMessage_1731361887984",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "videoMessage_1731361887984",
+      "targetId": "message_1731361896079",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1731361896079",
+      "targetId": "wait_1729788049627",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "start_node",
+      "targetId": "wait_1731361627008",
+      "sourceHandle": "true",
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "message_1729843888935",
+      "targetId": "wait_1732552836475",
+      "sourceHandle": null,
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1732552836475",
+      "targetId": "image_1732552847460",
+      "sourceHandle": null,
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "sourceId": "wait_1731361627008",
+      "targetId": "audio_1729787556518",
+      "sourceHandle": null,
+      "anchors": [
+        "Right",
+        "Left"
+      ]
+    }
+  ],
+  "exportedAt": "2024-11-26T22:35:06.673Z",
+  "exportVersion": "1.0"
+}

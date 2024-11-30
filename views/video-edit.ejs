@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Vídeo com IA</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold mb-4 text-indigo-900">Editor de Vídeo com IA</h1>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Transforme vídeos de qualquer idioma para português com música contextualizada usando Inteligência Artificial!
+            </p>
+        </div>
+
+        <!-- Main Card -->
+        <div class="card bg-white shadow-2xl backdrop-blur-sm bg-opacity-90">
+            <div class="card-body p-8">
+                <!-- Upload Form -->
+                <form id="uploadForm" class="space-y-6">
+                    <div class="upload-area p-8 border-2 border-dashed border-indigo-300 rounded-lg text-center hover:border-indigo-500 transition-all">
+                        <label class="cursor-pointer block">
+                            <span class="text-lg mb-4 block text-gray-700">
+                                <i class="fas fa-cloud-upload-alt text-3xl mb-2 block text-indigo-500"></i>
+                                Arraste seu vídeo ou clique para selecionar
+                            </span>
+                            <input type="file" 
+                                   name="video" 
+                                   accept="video/*" 
+                                   class="hidden"
+                                   required />
+                        </label>
+                        <p id="selectedFileName" class="text-sm text-gray-500 mt-2"></p>
+                    </div>
+                    
+                    <button type="submit" 
+                            class="btn btn-primary w-full bg-indigo-600 hover:bg-indigo-700">
+                        <i class="fas fa-magic mr-2"></i>
+                        Iniciar Processamento
+                    </button>
+                </form>
+
+                <!-- Progress Area -->
+                <div id="progressArea" class="hidden mt-8">
+                    <div class="flex items-center justify-between mb-2">
+                        <span id="progressMessage" class="text-indigo-700"></span>
+                        <span id="progressPercentage" class="text-sm font-semibold">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div id="progressBar" class="bg-indigo-600 h-2.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Result Area -->
+                <div id="resultArea" class="hidden mt-8 space-y-6">
+                    <!-- Status Message -->
+                    <div class="alert alert-success bg-green-100 border-l-4 border-green-500 p-4">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        <span id="resultMessage"></span>
+                    </div>
+
+                    <!-- Context Info -->
+                    <div id="contextInfo" class="alert bg-blue-100 border-l-4 border-blue-500 p-4 hidden">
+                        <h3 class="font-bold text-blue-800">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Contexto da Música:
+                        </h3>
+                        <p id="musicContext" class="text-blue-700 mt-2"></p>
+                    </div>
+
+                    <!-- Videos Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Original Video -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="fas fa-file-video mr-2 text-indigo-500"></i>
+                                Vídeo Original
+                            </h3>
+                            <div class="aspect-video rounded-lg overflow-hidden bg-black">
+                                <video id="originalVideo" 
+                                       controls 
+                                       class="w-full h-full object-contain">
+                                    Seu navegador não suporta a tag de vídeo.
+                                </video>
+                            </div>
+                        </div>
+                        
+                        <!-- Processed Video -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="fas fa-wand-magic-sparkles mr-2 text-indigo-500"></i>
+                                Vídeo Processado
+                            </h3>
+                            <div class="aspect-video rounded-lg overflow-hidden bg-black">
+                                <video id="processedVideo" 
+                                       controls 
+                                       class="w-full h-full object-contain">
+                                    Seu navegador não suporta a tag de vídeo.
+                                </video>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Download Button -->
+                    <button onclick="downloadVideo()" 
+                            class="btn btn-secondary w-full bg-green-600 hover:bg-green-700 text-white">
+                        <i class="fas fa-download mr-2"></i>
+                        Baixar Vídeo Processado
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const progressArea = document.getElementById('progressArea');
+        const progressMessage = document.getElementById('progressMessage');
+        const resultArea = document.getElementById('resultArea');
+        const resultMessage = document.getElementById('resultMessage');
+        const contextInfo = document.getElementById('contextInfo');
+        const musicContext = document.getElementById('musicContext');
+        const originalVideo = document.getElementById('originalVideo');
+        const processedVideo = document.getElementById('processedVideo');
+        let processedVideoUrl = '';
+        document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || 'Nenhum arquivo selecionado';
+            document.getElementById('selectedFileName').textContent = fileName;
+        });
+
+         // Atualizar a barra de progresso
+         function updateProgress(message, percent = null) {
+            const progressBar = document.getElementById('progressBar');
+            const progressPercentage = document.getElementById('progressPercentage');
+            
+            if (percent !== null) {
+                progressBar.style.width = `${percent}%`;
+                progressPercentage.textContent = `${percent}%`;
+            }
+            
+            if (message) {
+                document.getElementById('progressMessage').textContent = message;
+            }
+        }
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            progressArea.classList.remove('hidden');
+            resultArea.classList.add('hidden');
+            contextInfo.classList.add('hidden');
+    
+            try {
+                const response = await fetch('/video-edit/process', {
+                    method: 'POST',
+                    body: formData
+                });
+    
+                // Configura o leitor de stream
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+    
+                while (true) {
+                    const {value, done} = await reader.read();
+                    if (done) break;
+                    
+                    const text = decoder.decode(value);
+                    const messages = text.split('\n\n')
+                        .filter(msg => msg.startsWith('data: '))
+                        .map(msg => JSON.parse(msg.replace('data: ', '')));
+    
+                    for (const data of messages) {
+                        if (data.message) {
+                            progressMessage.textContent = data.message;
+                        }
+
+                        if (data.message) {
+            const percentMatch = data.message.match(/Processando: (\d+)%/);
+            if (percentMatch) {
+                updateProgress(data.message, parseInt(percentMatch[1]));
+            } else {
+                updateProgress(data.message);
+            }
+        }
+        
+    
+                        if (data.done) {
+                            progressArea.classList.add('hidden');
+                            resultArea.classList.remove('hidden');
+    
+                            if (data.success) {
+                                resultMessage.textContent = data.message;
+                                originalVideo.src = data.originalVideo.replace(`public`, "");
+                                processedVideo.src = data.processedVideo.replace(`public`, "");
+                                processedVideoUrl = data.processedVideo.replace(`public`, "");
+    
+                                if (data.context) {
+                                    contextInfo.classList.remove('hidden');
+                                    musicContext.textContent = data.context;
+                                }
+                            } else {
+                                alert('Erro: ' + data.error);
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                progressArea.classList.add('hidden');
+                alert('Erro ao processar vídeo: ' + error.message);
+            }
+        };
+    
+        function downloadVideo() {
+            if (processedVideoUrl) {
+                const link = document.createElement('a');
+                link.href = processedVideoUrl;
+                link.download = 'video-processado.mp4';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+    </script>
+</body>
+</html>

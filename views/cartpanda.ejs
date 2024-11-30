@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integração Cartpanda - HocketZap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.6.0/dist/full.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/2.8.2/alpine.js" defer></script>
+    <!-- Axios -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
+</head>
+<style>
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+    }
+
+    .modal-dialog {
+        background: white;
+        border-radius: 0.5rem;
+        width: 100%;
+        max-width: 42rem;
+        margin: 1.5rem;
+        position: relative;
+        padding: 1.5rem;
+        z-index: 51;
+    }
+
+    .modal.show {
+        display: flex !important;
+    }
+</style>
+<body class="bg-gray-50">
+    <div class="min-h-screen p-6">
+        <!-- Header Section -->
+        <div class="max-w-6xl mx-auto">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900">Integração Cartpanda</h1>
+                <p class="mt-2 text-gray-600">Configure a integração automática entre Cartpanda e HocketZap</p>
+            </div>
+
+            <!-- Status Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900">Status da Integração</h2>
+                        <p class="text-gray-600 mt-1">Verifique o status atual da sua integração</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span id="cartpandaStatus" class="px-3 py-1 text-sm font-semibold text-red-800 bg-red-100 rounded-full flex items-center">
+                            <i class="fas fa-times-circle mr-1"></i> Não configurado
+                        </span>
+                        <button id="configureCartpanda" 
+                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                            <i class="fas fa-plug mr-2"></i>
+                            Configurar Integração
+                        </button>
+                        <button id="editCartpandaEvents" 
+                                style="display: none"
+                                class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                            <i class="fas fa-cog mr-2"></i>
+                            Configurar Eventos
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Webhook Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-blue-100 rounded-lg p-3">
+                            <i class="fas fa-link text-blue-600 text-xl"></i>
+                        </div>
+                        <h3 class="ml-4 text-lg font-semibold text-gray-900">Webhook URL</h3>
+                    </div>
+                    <p class="text-gray-600 text-sm">URL única para receber eventos do Cartpanda</p>
+                </div>
+
+                <!-- Instances Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-green-100 rounded-lg p-3">
+                            <i class="fab fa-whatsapp text-green-600 text-xl"></i>
+                        </div>
+                        <h3 class="ml-4 text-lg font-semibold text-gray-900">Instância WhatsApp</h3>
+                    </div>
+                    <p class="text-gray-600 text-sm">Instância que processará as mensagens automáticas</p>
+                </div>
+
+                <!-- Events Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-purple-100 rounded-lg p-3">
+                            <i class="fas fa-bolt text-purple-600 text-xl"></i>
+                        </div>
+                        <h3 class="ml-4 text-lg font-semibold text-gray-900">Eventos Automáticos</h3>
+                    </div>
+                    <p class="text-gray-600 text-sm">Configure gatilhos automáticos para cada evento</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events Configuration Modal -->
+    <div id="cartpandaEventsModal" class="modal fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
+        <div class="relative top-20 mx-auto p-5 w-full max-w-4xl">
+            <div class="bg-white rounded-xl shadow-xl">
+                <div class="p-6 border-b border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xl font-semibold text-gray-900">
+                            Configurar Eventos Automáticos
+                        </h3>
+                        <button class="closeCartpandaModal text-gray-400 hover:text-gray-500">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <div id="cartpandaEventsContainer" class="space-y-6">
+                        <!-- Event cards will be inserted here dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            z-index: 1000;
+        }
+        
+        /* Switch styling */
+        input:checked ~ .dot {
+            transform: translateX(100%);
+            background-color: #8B5CF6;
+        }
+    </style>
+
+    <!-- Pasta o código JavaScript fornecido aqui -->
+    <script>
+        let cartpandaConfig = null;
+        
+        async function updateCartpandaStatus() {
+            try {
+                const response = await axios.get('/cartpanda/status');
+                const data = response.data;
+                cartpandaConfig = data;
+        
+                const statusElement = document.getElementById('cartpandaStatus');
+                const configureButton = document.getElementById('configureCartpanda');
+                const editButton = document.getElementById('editCartpandaEvents');
+        
+                if (data.configured) {
+                    statusElement.innerHTML = data.active ? 
+                        '<i class="fas fa-check-circle mr-1"></i> Ativo' :
+                        '<i class="fas fa-exclamation-circle mr-1"></i> Configurado';
+                    statusElement.className = data.active ?
+                        'px-3 py-1 text-sm font-semibold text-green-800 bg-green-100 rounded-full flex items-center' :
+                        'px-3 py-1 text-sm font-semibold text-yellow-800 bg-yellow-100 rounded-full flex items-center';
+                    
+                    configureButton.textContent = 'Reconfigurar Webhook';
+                    editButton.style.display = 'inline-flex';
+                } else {
+                    statusElement.innerHTML = '<i class="fas fa-times-circle mr-1"></i> Não configurado';
+                    statusElement.className = 'px-3 py-1 text-sm font-semibold text-red-800 bg-red-100 rounded-full flex items-center';
+                    
+                    configureButton.textContent = 'Configurar Integração';
+                    editButton.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Erro ao verificar status do Cartpanda:', error);
+                showNotification('Erro ao verificar status', 'error');
+            }
+        }
+        
+        // Modal de webhook URL
+        function generateWebhookToken(length = 32) {
+            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let token = '';
+            for (let i = 0; i < length; i++) {
+                token += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return token;
+        }
+        
+        // Função para gerar URL do webhook
+        function generateWebhookUrl(token) {
+            const baseUrl = window.location.origin; // Pega a URL base do site atual
+            return `${baseUrl}/cartpanda/webhook/${token}`;
+        }
+        
+        // Função principal para mostrar o modal
+        function showConfigurationModal() {
+    const webhookToken = generateWebhookToken();
+    const webhookUrl = generateWebhookUrl(webhookToken);
+
+    const modalHtml = `
+        <div id="cartpandaConfigModal" class="modal">
+            <div class="modal-dialog animate__animated animate__fadeIn">
+                <div class="relative w-full">
+                    <!-- Header -->
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-medium text-gray-900">
+                            Configurar Cartpanda
+                        </h3>
+                        <button id="closeConfigModal" class="text-gray-400 hover:text-gray-500">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="space-y-6">
+                        <!-- Seletor de Instância -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Selecione a Instância do WhatsApp
+                            </label>
+                            <select id="instanceSelect" 
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
+                                <option value="">Carregando instâncias...</option>
+                            </select>
+                            <p class="mt-1 text-sm text-gray-500">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Esta instância será usada para enviar as mensagens automáticas
+                            </p>
+                        </div>
+
+                        <!-- URL do Webhook -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex justify-between items-center mb-2">
+                                <p class="text-sm text-gray-600">URL do Webhook:</p>
+                                <span class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">
+                                    <i class="fas fa-clock mr-1"></i> Aguardando configuração
+                                </span>
+                            </div>
+                            <div class="flex items-center bg-white rounded border">
+                                <input id="webhookUrlInput" 
+                                       type="text" 
+                                       value="${webhookUrl}" 
+                                       readonly 
+                                       class="flex-1 p-3 text-sm text-gray-800 bg-transparent outline-none font-mono" />
+                                <button id="copyUrlButton" 
+                                        class="px-4 py-2 bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors duration-200">
+                                    <i class="fas fa-copy mr-2"></i> Copiar
+                                </button>
+                            </div>
+                            <p class="mt-2 text-xs text-gray-500">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Copie esta URL e configure no seu painel Cartpanda
+                            </p>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="flex justify-between items-center pt-4">
+                            <button id="testWebhookButton" 
+                                    class="px-4 py-2 text-purple-600 border border-purple-200 rounded-md text-sm font-medium hover:bg-purple-50"
+                                    disabled>
+                                <i class="fas fa-vial mr-2"></i> Testar Webhook
+                            </button>
+                            <div class="space-x-3">
+                                <button id="cancelConfigButton"
+                                        class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                    Cancelar
+                                </button>
+                                <button id="saveConfigButton"
+                                        class="px-4 py-2 bg-purple-600 text-white rounded-md text-sm font-medium hover:bg-purple-700">
+                                    Salvar Configuração
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Remove modal existente se houver
+    const existingModal = document.getElementById('cartpandaConfigModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    // Adiciona novo modal
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    // Mostra o modal
+    const modal = document.getElementById('cartpandaConfigModal');
+    modal.classList.add('show');
+
+    // Carrega as instâncias
+    loadInstances();
+
+    // Anexa os event listeners
+    attachModalEventListeners(webhookToken);
+}
+
+function attachModalEventListeners(webhookToken) {
+    const modal = document.getElementById('cartpandaConfigModal');
+    const closeButton = document.getElementById('closeConfigModal');
+    const cancelButton = document.getElementById('cancelConfigButton');
+    const saveButton = document.getElementById('saveConfigButton');
+    const copyButton = document.getElementById('copyUrlButton');
+    const testButton = document.getElementById('testWebhookButton');
+
+    const closeModal = () => {
+        modal.classList.remove('show');
+        setTimeout(() => modal.remove(), 200);
+    };
+
+    // Fecha modal ao clicar fora
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    closeButton.addEventListener('click', closeModal);
+    cancelButton.addEventListener('click', closeModal);
+
+            copyButton.addEventListener('click', () => {
+                const urlInput = document.getElementById('webhookUrlInput');
+                urlInput.select();
+                document.execCommand('copy');
+                showNotification('URL copiada com sucesso!', 'success');
+            });
+        
+            saveButton.addEventListener('click', async () => {
+                const instanceSelect = document.getElementById('instanceSelect');
+                const instanceKey = instanceSelect.value;
+        
+                if (!instanceKey) {
+                    showNotification('Por favor, selecione uma instância', 'error');
+                    return;
+                }
+        
+                try {
+                    console.log('Salvando configuração...');
+                    const response = await axios.post('/cartpanda/configure', {
+                        instanceKey,
+                        webhookToken,
+                        webhookUrl: generateWebhookUrl(webhookToken)
+                    });
+                    
+                    if (response.data.success) {
+                        showNotification('Configuração salva com sucesso!', 'success');
+                        testButton.disabled = false;
+                        await updateCartpandaStatus();
+                        // Atualizar o badge de status
+                        const statusBadge = modal.querySelector('.bg-yellow-100');
+                        statusBadge.className = 'text-xs px-2 py-1 rounded-full bg-green-100 text-green-800';
+                        statusBadge.innerHTML = '<i class="fas fa-check mr-1"></i> Configurado';
+                    }
+                } catch (error) {
+                    console.error('Erro ao salvar:', error);
+                    showNotification('Erro ao salvar configuração', 'error');
+                }
+            });
+        
+            testButton.addEventListener('click', async () => {
+                try {
+                    const response = await axios.post('/cartpanda/test-webhook');
+                    if (response.data.success) {
+                        showNotification('Webhook testado com sucesso!', 'success');
+                    }
+                } catch (error) {
+                    console.error('Erro ao testar webhook:', error);
+                    showNotification('Erro ao testar webhook', 'error');
+                }
+            });
+        }
+        
+        function closeWebhookModal() {
+            const modal = document.getElementById('webhookUrlModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        async function loadInstances() {
+            try {
+                const response = await axios.get('/whatsapp/list');
+                const instances = response.data;
+                const select = document.getElementById('instanceSelect');
+                
+                select.innerHTML = `
+                    <option value="">Selecione uma instância...</option>
+                    ${instances.map(instance => `
+                        <option value="${instance.name}" ${instance.isConnected ? '' : 'disabled'}>
+                            ${instance.name} ${instance.isConnected ? '(Conectado)' : '(Desconectado)'}
+                        </option>
+                    `).join('')}
+                `;
+            } catch (error) {
+                console.error('Erro ao carregar instâncias:', error);
+                showNotification('Erro ao carregar instâncias do WhatsApp', 'error');
+            }
+        }
+        
+        
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('URL copiada com sucesso!', 'success');
+            }).catch(() => {
+                showNotification('Erro ao copiar URL', 'error');
+            });
+        }
+        
+        async function saveCartpandaConfig() {
+            const instanceSelect = document.getElementById('instanceSelect');
+            if (!instanceSelect) {
+                showNotification('Erro ao salvar configuração', 'error');
+                return;
+            }
+        
+            const instanceKey = instanceSelect.value;
+            
+            if (!instanceKey) {
+                showNotification('Por favor, selecione uma instância do WhatsApp', 'error');
+                return;
+            }
+        
+            try {
+                const response = await axios.post('/cartpanda/configure', {
+                    instanceKey: instanceKey
+                });
+        
+                if (response.data.success) {
+                    showNotification('Configuração salva com sucesso!', 'success');
+                    closeWebhookModal();
+                    await updateCartpandaStatus();
+                }
+            } catch (error) {
+                console.error('Erro ao salvar configuração:', error);
+                showNotification('Erro ao salvar configuração', 'error');
+            }
+        }
+        
+        // Atualizar o event listener do botão de configuração
+        document.getElementById('configureCartpanda').addEventListener('click', () => {
+            showConfigurationModal();
+        });
+        
+        function createEventFields(event, funnels) {
+            const eventTypes = {
+                'abandoned_cart': {
+                    title: 'Carrinho Abandonado',
+                    description: 'Dispare um funil quando um cliente abandona itens no carrinho'
+                },
+                'pix_generated': {
+                    title: 'PIX Gerado',
+                    description: 'Dispare um funil quando um novo PIX é gerado'
+                },
+                'payment_confirmed': {
+                    title: 'Pagamento Confirmado',
+                    description: 'Dispare um funil após a confirmação do pagamento'
+                },
+                'order_created': {
+                    title: 'Pedido Criado',
+                    description: 'Dispare um funil quando um novo pedido é criado'
+                }
+            };
+        
+            const eventInfo = eventTypes[event.eventType];
+            
+            // Criar as opções de funis
+            const funnelOptions = funnels
+                .filter(funnel => funnel.name) // Garante que só funis com nome sejam incluídos
+                .map(funnel => 
+                    `<option value="${funnel.name}" ${event.funnelId === funnel.name ? 'selected' : ''}>
+                        ${funnel.name}
+                    </option>`
+                ).join('');
+        
+            return `
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-4" data-event-type="${event.eventType}">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-900 mb-1">
+                                ${eventInfo.title}
+                            </h4>
+                            <p class="text-sm text-gray-600">
+                                ${eventInfo.description}
+                            </p>
+                        </div>
+                        <label class="flex items-center cursor-pointer ml-4">
+                            <div class="relative">
+                                <input type="checkbox" class="sr-only event-active" ${event.isActive ? 'checked' : ''}>
+                                <div class="w-14 h-7 bg-gray-200 rounded-full shadow-inner"></div>
+                                <div class="dot absolute w-7 h-7 bg-white rounded-full shadow -left-1 -top-1 transition-all duration-200"></div>
+                            </div>
+                            <span class="ml-3 text-sm font-medium text-gray-700">Ativo</span>
+                        </label>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="block text-sm font-medium text-gray-700">
+                                    Selecione o Funil
+                                </label>
+                                <span class="text-xs text-gray-500">
+                                    ${funnels.length} funis disponíveis
+                                </span>
+                            </div>
+                            <select 
+                                class="funnel-select w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500 text-sm bg-white"
+                            >
+                                <option value="">Selecione um funil...</option>
+                                ${funnelOptions}
+                            </select>
+                            <p class="mt-1 text-xs text-gray-500">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                O funil selecionado será disparado automaticamente quando este evento ocorrer
+                            </p>
+                        </div>
+                        
+                        <div class="flex items-center space-x-6">
+                            <div class="flex-1">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Atraso no disparo
+                                </label>
+                                <div class="relative rounded-md shadow-sm max-w-xs">
+                                    <input 
+                                        type="number" 
+                                        class="event-delay w-full pl-4 pr-16 py-2.5 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                                        value="${event.delay || 0}"
+                                        min="0"
+                                        placeholder="0"
+                                    >
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-4">
+                                        <span class="text-gray-500 sm:text-sm">segundos</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex-shrink-0 pt-6">
+                                <button onclick="saveEvent('${event.eventType}')"
+                                        class="inline-flex items-center px-5 py-2.5 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                                    <i class="fas fa-save mr-2"></i>
+                                    Salvar Configuração
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        async function loadFunnels() {
+            try {
+                const response = await axios.get('/funnels/api/list');
+                return response.data;
+            } catch (error) {
+                console.error('Erro ao carregar funis:', error);
+                showNotification('Erro ao carregar funis', 'error');
+                return [];
+            }
+        }
+        
+        // Função para abrir o modal de eventos
+      async function openEventsModal() {
+    const modal = document.getElementById('cartpandaEventsModal');
+    const container = document.getElementById('cartpandaEventsContainer');
+    
+    if (cartpandaConfig && cartpandaConfig.events) {
+        const funnels = await loadFunnels();
+        container.innerHTML = cartpandaConfig.events
+            .map(event => createEventFields(event, funnels))
+            .join('');
+        
+        modal.classList.add('show');
+
+        // Atualizar os switches
+        document.querySelectorAll('.event-active').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                updateSwitchStyle(this);
+            });
+            updateSwitchStyle(checkbox);
+        });
+    }
+}
+
+        // Adicionar event listener ao botão de editar eventos
+        document.getElementById('editCartpandaEvents').addEventListener('click', openEventsModal);
+        
+        // Atualizar estilo do switch
+        function updateSwitchStyle(checkbox) {
+            const dot = checkbox.parentElement.querySelector('.dot');
+            if (checkbox.checked) {
+                dot.style.transform = 'translateX(1.5rem)';
+                dot.style.backgroundColor = '#8B5CF6';
+            } else {
+                dot.style.transform = 'translateX(0)';
+                dot.style.backgroundColor = '#fff';
+            }
+        }
+        
+        // Atualizar a função saveEvent
+        async function saveEvent(eventType) {
+            const eventDiv = document.querySelector(`[data-event-type="${eventType}"]`);
+            const isActive = eventDiv.querySelector('.event-active').checked;
+            const funnelId = eventDiv.querySelector('.funnel-select').value;
+            const delay = parseInt(eventDiv.querySelector('.event-delay').value) || 0;
+        
+            if (isActive && !funnelId) {
+                showNotification('Por favor, selecione um funil antes de ativar o evento', 'error');
+                return;
+            }
+        
+            try {
+                const response = await axios.post('/cartpanda/event', {
+                    eventType,
+                    funnelId,
+                    isActive,
+                    delay
+                });
+        
+                if (response.data.success) {
+                    cartpandaConfig = response.data.config;
+                    showNotification('Evento atualizado com sucesso!', 'success');
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar evento:', error);
+                showNotification('Erro ao atualizar evento', 'error');
+            }
+        }
+        function showNotification(message, type = 'success') {
+            const notificationDiv = document.createElement('div');
+            notificationDiv.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg ${
+                type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            } text-white text-sm font-medium z-50`;
+            notificationDiv.textContent = message;
+            
+            document.body.appendChild(notificationDiv);
+            
+            setTimeout(() => {
+                notificationDiv.remove();
+            }, 3000);
+        }
+        
+        // Fecha os modais quando clica fora
+        window.addEventListener('click', (event) => {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    if (modal.id === 'webhookUrlModal') {
+                        modal.remove();
+                    } else {
+                        modal.style.display = 'none';
+                    }
+                }
+            });
+        });
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCartpandaStatus();
+            
+            // Adicionar event listener para fechar modal
+            document.querySelector('.closeCartpandaModal')?.addEventListener('click', () => {
+                document.getElementById('cartpandaEventsModal').style.display = 'none';
+            });
+        });
+        </script>
+        </body>
+</body>
+</html>

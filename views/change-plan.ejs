@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HocketZap Premium - Revolucione Seu Marketing no WhatsApp</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.6.0/dist/full.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-animate-in {
+            animation: fadeIn 0.3s ease-out forwards, scaleIn 0.3s ease-out forwards;
+        }
+
+        .modal-animate-out {
+            animation: fadeIn 0.3s ease-in reverse forwards, scaleIn 0.3s ease-in reverse forwards;
+        }
+
+        .pix-key-animation {
+            transition: all 0.3s ease;
+        }
+
+        .pix-key-animation:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .plan-card {
+            transition: all 0.3s ease;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        .plan-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .bg-purple-gradient {
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+        }
+        .feature-icon {
+            background: linear-gradient(135deg, #9f7aea, #7f9cf5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .countdown {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #7c3aed;
+        }
+        .testimonial-card {
+            background-color: #f3f4f6;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .badge-trust {
+            background-color: #e5e7eb;
+            color: #4b5563;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        .discount-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background-color: #10B981;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .plan-toggle {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        .plan-toggle button {
+            padding: 0.5rem 1rem;
+            border: 2px solid #7C3AED;
+            background-color: white;
+            color: #7C3AED;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .plan-toggle button.active {
+            background-color: #7C3AED;
+            color: white;
+        }
+        .plan-toggle button:first-child {
+            border-radius: 0.5rem 0 0 0.5rem;
+        }
+        .plan-toggle button:last-child {
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+        .hero-section {
+            background-image: url('https://images.unsplash.com/photo-1557761469-f29c6e201784?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+        @media (max-width: 640px) {
+            .plan-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <main class="container mx-auto flex-grow p-8">
+        <h2 class="text-5xl font-bold text-center mb-6 text-purple-800">Planos HocketZap</h2>
+        
+        <div class="plan-toggle">
+            <button class="active" onclick="togglePlanDuration('monthly')">Mensal</button>
+            <button onclick="togglePlanDuration('quarterly')">Trimestral</button>
+            <button onclick="togglePlanDuration('semiannual')">Semestral</button>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8 plan-grid">
+            <% const planDetails = {
+                basico: {
+                    icon: 'seedling',
+                    description: 'Ideal para quem está começando e quer experimentar o poder da automação.',
+                    features: [
+                        '1 conexão WhatsApp',
+                        '15 funis de mensagens',
+                        'Spam de mensagem para até 1500 leads por dia',
+                        'Autoresposta para até 750 leads por dia',
+                        'Gerenciamento básico de grupos',
+                    ],
+                    prices: {
+                        monthly: 65,
+                        quarterly: 175,
+                        semiannual: 330
+                    },
+                    discounts: {
+                        quarterly: 10,
+                        semiannual: 15
+                    }
+                },
+                plus: {
+                    icon: 'rocket',
+                    description: 'Perfeito para negócios em crescimento que precisam de mais recursos e flexibilidade.',
+                    features: [
+                        'Todos os recursos do plano Básico',
+                        '3 conexões WhatsApp',
+                        '50 funis de mensagens',
+                        'Spam de mensagem para até 15k leads por dia',
+                        'Autoresposta para até 2000 leads por dia',
+                        'Gerenciamento avançado de grupos',
+                        'Todas as integrações disponiveis (elevenlabs, mercadopago...)',
+                        'Antiban ativo',
+                        'API básica'
+                    ],
+                    prices: {
+                        monthly: 110,
+                        quarterly: 297,
+                        semiannual: 561
+                    },
+                    discounts: {
+                        quarterly: 10,
+                        semiannual: 15
+                    }
+                },
+                premium: {
+                    icon: 'crown',
+                    description: 'Para empresas que precisam de poder máximo e recursos ilimitados.',
+                    features: [
+                        'Todos os recursos do plano Plus',
+                        '10 Conexões WhatsApp',
+                        'Funis de mensagens ilimitados',
+                        'Spam de mensagens ilimitado',
+                        'Autoresposta ilimitada',
+                        'Suporte prioritário 24/7',
+                        'Acesso antecipado a novos recursos',
+                        'API avançada',
+                        'Treinamento personalizado',
+                        'Dashboard analytics avançado'
+                    ],
+                    prices: {
+                        monthly: 180,
+                        quarterly: 486,
+                        semiannual: 918
+                    },
+                    discounts: {
+                        quarterly: 10,
+                        semiannual: 15
+                    }
+                }
+            } %>
+            
+            <% Object.entries(planDetails).forEach(function([planKey, plan]) { %>
+                <div class="plan-card card bg-base-100 shadow-xl <%= planKey === atualplan ? 'border-4 border-purple-500' : '' %>" data-plan="<%= planKey %>">
+                    <div class="card-body relative">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-<%= plan.icon %> text-4xl feature-icon"></i>
+                        </div>
+                        <h2 class="card-title text-2xl text-purple-700 justify-center"><%= planKey.charAt(0).toUpperCase() + planKey.slice(1) %></h2>
+                        <% if (planKey === atualplan) { %>
+                            <div class="badge badge-primary mx-auto">Seu Plano Atual</div>
+                        <% } %>
+                        <p class="text-4xl font-bold my-4 text-purple-800 text-center plan-price">
+                            R$ <span class="price-amount"><%= plan.prices.monthly %></span>
+                            <span class="text-sm font-normal">/mês</span>
+                        </p>
+                        <div class="discount-badge hidden">
+                            <i class="fas fa-tag"></i>
+                            <span class="discount-amount"></span>% OFF
+                        </div>
+                        <% if (planKey === 'plus') { %>
+                            <p class="text-green-600 font-semibold text-center">Melhor Custo-Benefício!</p>
+                        <% } %>
+                        <p class="text-gray-600 text-center mb-4"><%= plan.description %></p>
+                        <ul class="space-y-2 mb-4">
+                            <% plan.features.forEach(feature => { %>
+                                <li><i class="fas fa-check text-green-500 mr-2"></i><%= feature %></li>
+                            <% }) %>
+                        </ul>
+                        <div class="card-actions justify-center mt-4">
+                            <button class="btn btn-primary btn-lg w-full <%= planKey === atualplan ? 'btn-disabled' : '' %>" 
+                                    onclick="selectPlan('<%= planKey %>')">
+                                <i class="fas <%= planKey === atualplan ? 'fa-check' : 'fa-rocket' %> mr-2"></i>
+                                <%= planKey === atualplan ? 'Seu Plano Atual' : 'ASSINAR PLANO' %>
+                            </button>
+                            <button class="btn btn-secondary btn-lg w-full mt-2" onclick="openPixModal('<%= planKey %>')">
+                                <i class="fas fa-qrcode mr-2"></i> Pagar via PIX
+                            </button>
+                        </div>
+                        <% if (planKey !== 'gratuito') { %>
+                            <p class="text-center text-sm mt-2">Seu plano é ativado automaticamente!</p>
+                        <% } %>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+
+        <div id="pix-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50 transition-opacity duration-300 opacity-0">
+            <div class="relative top-10 mx-auto p-8 border w-11/12 max-w-2xl shadow-2xl rounded-xl bg-white transform transition-all duration-300 scale-95">
+                <div class="text-center">
+                    <div class="flex justify-center mb-6">
+                        <svg class="w-20 h-20 text-purple-600 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-3xl leading-8 font-bold text-purple-800 mb-4">Pagamento via PIX</h3>
+                    <div class="mt-4 px-7 py-3 bg-purple-100 rounded-lg">
+                        <p class="text-lg text-purple-800 font-semibold">
+                            Chave PIX: <span class="font-bold text-purple-900 pix-key-animation">pagamento@hocketzap.com</span>
+                        </p>
+                    </div>
+                    <div class="mt-6">
+                        <p class="text-lg text-gray-600">
+                            Após o pagamento, envie o comprovante para o administrador clicando no botão abaixo.
+                        </p>
+                    </div>
+                    <div class="mt-8 space-y-4">
+                        <button id="send-proof" class="px-6 py-3 bg-green-500 text-white text-lg font-medium rounded-full w-full shadow-lg hover:bg-green-600 focus:outline-none focus:ring-4 focus:ring-green-300 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105">
+                            <i class="fas fa-paper-plane mr-2"></i> Enviar Comprovante
+                        </button>
+                        <button id="close-modal" class="px-6 py-3 bg-gray-200 text-gray-800 text-lg font-medium rounded-full w-full shadow-lg hover:bg-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-400 transition duration-300 ease-in-out">
+                            Fechar
+                        </button>
+                    </div>
+                </div>
+                <div class="absolute top-4 right-4">
+                    <button id="close-modal-x" class="text-gray-400 hover:text-gray-600 transition duration-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <br>
+        <br>
+        <section id="features" class="mb-20">
+            <h3 class="text-3xl font-bold text-purple-800 mb-8 text-center">Por que escolher o HocketZap?</h3>
+            <div class="features-grid">
+                <div class="text-center p-6 bg-white rounded-lg shadow-md">
+                    <i class="fas fa-chart-line text-4xl text-purple-600 mb-4"></i>
+                    <h4 class="text-xl font-semibold mb-2">Aumento de Vendas</h4>
+                    <p>Nossos clientes relatam um aumento médio de 200% nas vendas após 3 meses de uso.</p>
+                </div>
+                <div class="text-center p-6 bg-white rounded-lg shadow-md">
+                    <i class="fas fa-clock text-4xl text-purple-600 mb-4"></i>
+                    <h4 class="text-xl font-semibold mb-2">Economia de Tempo</h4>
+                    <p>Automatize suas conversas e economize até 20 horas por semana em tarefas repetitivas.</p>
+                </div>
+                <div class="text-center p-6 bg-white rounded-lg shadow-md">
+                    <i class="fas fa-users text-4xl text-purple-600 mb-4"></i>
+                    <h4 class="text-xl font-semibold mb-2">Aumento de Leads</h4>
+                    <p>Capture e nutra leads automaticamente, aumentando sua base de clientes em até 5x.</p>
+                </div>
+                <div class="text-center p-6 bg-white rounded-lg shadow-md">
+                    <i class="fas fa-robot text-4xl text-purple-600 mb-4"></i>
+                    <h4 class="text-xl font-semibold mb-2">Automação Inteligente</h4>
+                    <p>Use IA para personalizar mensagens e otimizar suas campanhas de marketing.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="mt-16 text-center">
+            <h3 class="text-2xl font-bold text-purple-800 mb-4">Ficou com dúvida em algo?</h3>
+            <p class="text-gray-600 mb-6">Chame o suporte.</p>
+            <a href="https://wa.me/5517991134416?text=Opa+tenho+duvidas+sobre+a+hocket" class="btn btn-primary btn-lg">FALAR COM SUPORTE</a>
+        </div>
+
+        <div class="mt-16 flex justify-center space-x-4">
+            <span class="badge-trust">
+                <i class="fas fa-lock mr-2"></i>
+                Pagamento Seguro
+            </span>
+           
+            <span class="badge-trust">
+                <i class="fas fa-headset mr-2"></i>
+                Suporte 24/7
+            </span>
+        </div>
+
+        <div class="mt-16" id="faq">
+            <h3 class="text-3xl font-bold text-purple-800 mb-8 text-center">Perguntas Frequentes</h3>
+            <div class="space-y-4">
+                <div class="collapse border rounded-box border-base-300 collapse-plus">
+                    <input type="checkbox" /> 
+                    <div class="collapse-title text-xl font-medium">
+                        Como o HocketZap pode aumentar minhas vendas?
+                    </div>
+                    <div class="collapse-content"> 
+                        <p>O HocketZap automatiza suas conversas no WhatsApp, permitindo que você atenda mais clientes simultaneamente, qualifique leads automaticamente e nunca perca uma oportunidade de venda.</p>
+                    </div>
+                </div>
+                <div class="collapse border rounded-box border-base-300 collapse-plus">
+                    <input type="checkbox" /> 
+                    <div class="collapse-title text-xl font-medium">
+                        É difícil começar a usar o HocketZap?
+                    </div>
+                    <div class="collapse-content"> 
+                        <p>Não! Nossa interface é intuitiva e oferecemos tutoriais detalhados. Além disso, nossa equipe de suporte está sempre pronta para ajudar você a configurar e otimizar sua estratégia.</p>
+                    </div>
+                </div>
+
+                <div class="collapse border rounded-box border-base-300 collapse-plus">
+                    <input type="checkbox" /> 
+                    <div class="collapse-title text-xl font-medium">
+                        Como funciona o antiban?
+                    </div>
+                    <div class="collapse-content"> 
+                        <p>Nosso sistema simula uma conexão android e comportamentos humanos com a API do whatsapp e nosso sistema fica alterando o IP simultaneamente para não cruzar dados.</p>
+                    </div>
+                </div>
+
+                <div class="collapse border rounded-box border-base-300 collapse-plus">
+                    <input type="checkbox" /> 
+                    <div class="collapse-title text-xl font-medium">
+                        Como funciona a clonagem de voz?
+                    </div>
+                    <div class="collapse-content"> 
+                        <p>Nossa plataforma possui integração com a elevenlabs.</p>
+                    </div>
+                </div>
+
+                <div class="collapse border rounded-box border-base-300 collapse-plus">
+                    <input type="checkbox" /> 
+                    <div class="collapse-title text-xl font-medium">
+                        Tenho que pagar algum tipo de hospedagem?
+                    </div>
+                    <div class="collapse-content"> 
+                        <p>Não, nós cuidamos de todo o processo chato de hospedagem, domínio e código. Você não precisa gastar nada com isso!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="payment-form" class="hidden mt-8">
+        <form id="stripe-form" class="max-w-md mx-auto">
+            <div id="card-element" class="mb-4"></div>
+            <div id="card-errors" role="alert" class="text-red-600 mb-4"></div>
+            <button type="submit" class="btn btn-primary btn-lg w-full">
+                Confirmar Assinatura
+            </button>
+        </form>
+    </div>
+
+    <form id="change-plan-form" method="POST" action="/change-plan" class="hidden">
+        <input type="hidden" name="userId" value="<%= userId %>">
+        <input type="hidden" id="plan-select" name="newPlan" value="">
+    </form>
+
+    <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-purple-500"></div>
+    </div>
+
+    <script>
+    const stripe = Stripe('pk_live_51QQeKULnnNeQfOms0IY3XXiZuuB2VJaRdJIqUeTgPvXUoBQ3v81r7TPb6u6Wv5uTpJCGep3nZCy6lsVxQRzcYJrd003se6jO3C');
+    const planDetails = <%- JSON.stringify(planDetails) %>;
+    let currentDuration = 'monthly';
+
+    function togglePlanDuration(duration) {
+        currentDuration = duration;
+        document.querySelectorAll('.plan-toggle button').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`.plan-toggle button[onclick="togglePlanDuration('${duration}')"]`).classList.add('active');
+        updatePrices();
+    }
+
+    function updatePrices() {
+        Object.entries(planDetails).forEach(([planKey, plan]) => {
+            const card = document.querySelector(`.plan-card[data-plan="${planKey}"]`);
+            const priceElement = card.querySelector('.price-amount');
+            const discountBadge = card.querySelector('.discount-badge');
+            const price = plan.prices[currentDuration];
+            const discount = plan.discounts[currentDuration];
+
+            priceElement.textContent = price;
+            
+            if (discount) {
+                discountBadge.classList.remove('hidden');
+                discountBadge.querySelector('.discount-amount').textContent = discount;
+            } else {
+                discountBadge.classList.add('hidden');
+            }
+
+            const durationText = currentDuration === 'monthly' ? '/mês' : 
+                                 currentDuration === 'quarterly' ? '/trimestre' : '/semestre';
+            card.querySelector('.plan-price .text-sm').textContent = durationText;
+        });
+    }
+
+    function openPixModal(planKey) {
+        const modal = document.getElementById('pix-modal');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.add('modal-animate-in');
+            modal.classList.remove('opacity-0');
+        }, 10);
+    }
+
+    function closePixModal() {
+        const modal = document.getElementById('pix-modal');
+        modal.classList.add('modal-animate-out');
+        setTimeout(() => {
+            modal.classList.add('hidden', 'opacity-0');
+            modal.classList.remove('modal-animate-in', 'modal-animate-out');
+        }, 300);
+    }
+
+    document.getElementById('close-modal').addEventListener('click', closePixModal);
+    document.getElementById('close-modal-x').addEventListener('click', closePixModal);
+
+    document.getElementById('send-proof').addEventListener('click', function() {
+        const message = encodeURIComponent("Olá! Acabei de fazer um pagamento via PIX para o plano. Aqui está o comprovante:");
+        window.open(`https://wa.me/5517991134416?text=${message}`, '_blank');
+    });
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('pix-modal');
+        if (event.target == modal) {
+            closePixModal();
+        }
+    }
+
+    const pixKey = document.querySelector('.pix-key-animation');
+    pixKey.addEventListener('click', function() {
+        navigator.clipboard.writeText('pagamento@hocketzap.com').then(function() {
+            alert('Chave PIX copiada para a área de transferência!');
+        }, function(err) {
+            console.error('Erro ao copiar: ', err);
+        });
+    });
+
+    const elements = stripe.elements();
+    const cardElement = elements.create('card');
+    cardElement.mount('#card-element');
+
+    function selectPlan(planKey) {
+        const loadingOverlay = document.getElementById('loading-overlay');
+        loadingOverlay.classList.remove('hidden');
+        loadingOverlay.classList.add('flex');
+
+        const selectedPlan = `${planKey}_${currentDuration}`;
+
+        fetch('/create-checkout-session', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                planKey: selectedPlan,
+            }),
+        })
+        .then(response => response.json())
+        .then(session => {
+            return stripe.redirectToCheckout({ sessionId: session.id });
+        })
+        .then(result => {
+            if (result.error) {
+                alert(result.error.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        })
+        .finally(() => {
+            loadingOverlay.classList.add('hidden');
+            loadingOverlay.classList.remove('flex');
+        });
+    }
+
+    updatePrices();
+</script>
+</body>
+</html>

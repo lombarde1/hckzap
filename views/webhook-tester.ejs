@@ -1,0 +1,218 @@
+<!-- views/webhook-tester.ejs -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webhook Tester - HocketZap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.4.8/sweetalert2.all.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen p-6">
+        <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-2xl font-bold mb-6 text-gray-800">
+                Testador de Webhook do WhatsApp
+            </h1>
+
+            <div class="mb-8">
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+                    <p class="text-blue-700">
+                        Use esta ferramenta para simular webhooks do WhatsApp localmente.
+                        Você pode testar com múltiplos números simultaneamente.
+                    </p>
+                </div>
+
+                <form id="webhookForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Instância
+                        </label>
+                        <select name="instanceKey" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            <% instances.forEach(function(instance) { %>
+                                <option value="<%= instance.name %>"><%= instance.name %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Números para Teste
+                        </label>
+                        <select id="phoneNumbers" multiple class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 h-32">
+                            <option value="5517981557251@s.whatsapp.net">55 17 98155-7251</option>
+                            <option value="5515997356078@s.whatsapp.net">+55 75 99805-2896</option>
+                            <option value="557788018793@s.whatsapp.net">+55 48 98849-8766</option>
+                            <option value="556281936905@s.whatsapp.net">+55 11 93358-9501</option>
+                        </select>
+                        <p class="text-sm text-gray-500 mt-1">
+                            Pressione Ctrl/Cmd para selecionar múltiplos números
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Tipo de Mensagem
+                        </label>
+                        <select name="messageType" id="messageType" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            <option value="conversation">Texto</option>
+                            <option value="imageMessage">Imagem</option>
+                            <option value="videoMessage">Vídeo</option>
+                            <option value="audioMessage">Áudio</option>
+                            <option value="documentMessage">Documento</option>
+                            <option value="stickerMessage">Sticker</option>
+                        </select>
+                    </div>
+
+                    <div id="mediaUrlField" class="hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            URL da Mídia
+                        </label>
+                        <input type="url" name="mediaUrl" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="https://exemplo.com/media.jpg">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Mensagem
+                        </label>
+                        <textarea name="message" rows="3" 
+                                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="Digite sua mensagem aqui"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Intervalo entre mensagens (ms)
+                        </label>
+                        <input type="number" id="interval" value="500" min="100" 
+                               class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <div class="flex justify-end space-x-3">
+                        <button type="submit" 
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Enviar Webhooks
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="border-t pt-6">
+                <h2 class="text-lg font-semibold mb-4 text-gray-800">Histórico de Webhooks</h2>
+                <div id="webhookHistory" class="space-y-4">
+                    <!-- O histórico será inserido aqui via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('webhookForm');
+            const messageType = document.getElementById('messageType');
+            const mediaUrlField = document.getElementById('mediaUrlField');
+            const history = document.getElementById('webhookHistory');
+            const phoneNumbers = document.getElementById('phoneNumbers');
+
+            messageType.addEventListener('change', function() {
+                mediaUrlField.classList.toggle('hidden', this.value === 'conversation');
+            });
+
+            async function sendWebhook(phoneNumber, data) {
+                const webhookData = {
+                    ...data,
+                    remoteJid: phoneNumber
+                };
+
+                try {
+                    const response = await fetch('/webhook-tester/simulate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(webhookData)
+                    });
+
+                    const result = await response.json();
+                    return result;
+                } catch (error) {
+                    console.error(`Erro ao enviar webhook para ${phoneNumber}:`, error);
+                    throw error;
+                }
+            }
+
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData);
+                const selectedNumbers = Array.from(phoneNumbers.selectedOptions).map(opt => opt.value);
+                const interval = parseInt(document.getElementById('interval').value);
+
+                if (selectedNumbers.length === 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Selecione pelo menos um número',
+                        text: 'Você precisa selecionar ao menos um número para testar'
+                    });
+                    return;
+                }
+
+                const totalWebhooks = selectedNumbers.length;
+                let successCount = 0;
+                let errorCount = 0;
+
+                Swal.fire({
+                    title: 'Enviando Webhooks...',
+                    html: `Progresso: 0/${totalWebhooks}`,
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                for (let i = 0; i < selectedNumbers.length; i++) {
+                    try {
+                        const result = await sendWebhook(selectedNumbers[i], data);
+                        if (result.success) successCount++;
+                        else errorCount++;
+
+                        // Adicionar ao histórico
+                        const historyItem = document.createElement('div');
+                        historyItem.className = 'p-4 bg-gray-50 rounded-lg';
+                        historyItem.innerHTML = `
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-medium">${selectedNumbers[i]}</p>
+                                    <p class="text-gray-600 text-sm mt-1">${data.message}</p>
+                                </div>
+                                <span class="text-xs text-gray-500">${new Date().toLocaleTimeString()}</span>
+                            </div>
+                        `;
+                        history.insertBefore(historyItem, history.firstChild);
+
+                        Swal.update({
+                            html: `Progresso: ${i + 1}/${totalWebhooks}`
+                        });
+
+                        // Aguardar o intervalo antes do próximo envio
+                        if (i < selectedNumbers.length - 1) {
+                            await new Promise(resolve => setTimeout(resolve, interval));
+                        }
+                    } catch (error) {
+                        errorCount++;
+                        console.error(`Erro ao enviar webhook para ${selectedNumbers[i]}:`, error);
+                    }
+                }
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Webhooks Enviados',
+                    text: `Sucesso: ${successCount} | Erros: ${errorCount}`
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecionando...</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+            flex-direction: column;
+        }
+        .counter {
+            font-size: 24px;
+            color: #25D366;
+            margin-bottom: 20px;
+        }
+        .message {
+            text-align: center;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="counter"><span id="timer"><%= delay %></span>s</div>
+    <div class="message">Aguarde, você será redirecionado em instantes...</div>
+    
+    <script>
+        let timeLeft = <%= delay %>;
+        const timerElement = document.getElementById('timer');
+        
+        const countdown = setInterval(() => {
+            timeLeft--;
+            timerElement.textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                window.location.href = '<%= redirectUrl %>';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - HocketZap</title>
+    <!-- Core StyleSheets -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.5.0/dist/full.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Telephone Input CSS -->
+    <link rel="icon" type="image/png" href="/img/logohock.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.13/css/intlTelInput.css">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <style>
+        .iti { width: 100%; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .floating { 
+            animation: float 6s ease-in-out infinite; 
+        }
+        
+        .bg-gradient {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #9333EA 100%);
+        }
+        
+        .glass-effect {
+            backdrop-filter: blur(16px) saturate(180%);
+            background-color: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(209, 213, 219, 0.3);
+        }
+        
+        .input-wrapper {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .input-wrapper:focus-within {
+            transform: scale(1.02);
+        }
+        
+        .floating-label {
+            transform: translateY(-50%) scale(0.85);
+            background: white;
+            padding: 0 6px;
+        }
+    </style>
+</head>
+<body class="bg-gradient min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto max-w-6xl">
+        <div class="glass-effect rounded-3xl shadow-2xl overflow-hidden animate__animated animate__fadeIn">
+            <div class="flex flex-col md:flex-row">
+                <!-- Left side -->
+                <div class="md:w-1/2 bg-indigo-600 p-12 flex flex-col justify-center items-center text-white relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient opacity-90"></div>
+                    <div class="relative z-10">
+                      <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script> 
+
+    <dotlottie-player src="https://lottie.host/5361b773-fa52-42c4-bf47-12d3f472ebde/jyMxMPOMKt.json" background="transparent" speed="1" style="width: 300px; height: 300px;" loop autoplay class="flex items-center w-72 h-72 object-cover rounded-full mb-8 floating"></dotlottie-player>
+
+                        <h2 class="text-4xl font-bold mb-6 text-center">Bem-vindo ao HocketZap</h2>
+                        <p class="text-xl text-center mb-8">Automatize vários whatsapps ao mesmo tempo!</p>
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                                <span>Automação com funis de vendas completos!</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                                <span>Suporte 24/7</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                                <span>Integração com múltiplas plataformas</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                              <i class="fas fa-check-circle text-green-400"></i>
+                              <span>WhatsApp web integrado na plataforma</span>
+                          </div>
+                          <div class="flex items-center space-x-3">
+                            <i class="fas fa-check-circle text-green-400"></i>
+                            <span>Randomização de IP</span>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right side -->
+                <div class="md:w-1/2 p-12">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-8">Crie sua conta</h2>
+                    <form id="registrationForm" class="space-y-6">
+                        <!-- Nome completo -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold"><i class="fas fa-user mr-2"></i>Nome completo</span>
+                            </label>
+                            <input type="text" id="name" name="name" required 
+                                   class="input input-bordered w-full transition-all duration-300 hover:shadow-md focus:ring-2 focus:ring-indigo-500">
+                        </div>
+
+                        <!-- Telefone -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold"><i class="fab fa-whatsapp mr-2"></i>WhatsApp</span>
+                            </label>
+                            <input type="tel" id="phone" name="phone" required 
+                                   class="input input-bordered w-full transition-all duration-300">
+                            <label class="label">
+                                <span class="label-text-alt text-gray-500">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Informe seu WhatsApp principal para ser adicionado automaticamente ao grupo de clientes.
+                                </span>
+                            </label>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold"><i class="fas fa-envelope mr-2"></i>Email</span>
+                            </label>
+                            <input type="email" id="email" name="email" required 
+                                   class="input input-bordered w-full transition-all duration-300">
+                        </div>
+
+                        <!-- Username -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold"><i class="fas fa-at mr-2"></i>Username</span>
+                            </label>
+                            <input type="text" id="username" name="username" required 
+                                   class="input input-bordered w-full transition-all duration-300">
+                        </div>
+
+                        <!-- Senha -->
+                        <div class="form-control relative">
+                            <label class="label">
+                                <span class="label-text font-semibold"><i class="fas fa-lock mr-2"></i>Senha</span>
+                            </label>
+                            <div class="relative">
+                                <input type="password" id="password" name="password" required 
+                                       class="input input-bordered w-full pr-10 transition-all duration-300">
+                                <button type="button" id="togglePassword" 
+                                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                    <i class="far fa-eye"></i>
+                                </button>
+                            </div>
+                            <div id="passwordStrength" class="mt-2 h-1 rounded-full bg-gray-200">
+                                <div class="h-full rounded-full transition-all duration-300" id="passwordStrengthBar"></div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="mt-8">
+                            <button type="submit" id="registerBtn" 
+                                    class="btn btn-primary w-full h-12 text-lg transition-all duration-300 transform hover:scale-105">
+                                <i class="fas fa-user-plus mr-2"></i>Criar Conta
+                            </button>
+                        </div>
+                    </form>
+
+                    <p class="mt-6 text-center text-gray-600">
+                        Já tem uma conta? 
+                        <a href="/login" class="text-indigo-600 hover:text-indigo-800 font-semibold transition-colors duration-300">
+                            Faça login
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.13/js/intlTelInput.min.js"></script>
+    <script>
+        // Inicialização do input de telefone
+        const phoneInput = window.intlTelInput(document.querySelector("#phone"), {
+            preferredCountries: ["br"],
+            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.13/js/utils.js",
+        });
+
+        // Toggle de visibilidade da senha
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+
+        togglePassword.addEventListener('click', function() {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.querySelector('i').classList.toggle('fa-eye');
+            this.querySelector('i').classList.toggle('fa-eye-slash');
+        });
+
+        // Verificador de força da senha
+        password.addEventListener('input', function() {
+            const strength = checkPasswordStrength(this.value);
+            const bar = document.querySelector('#passwordStrengthBar');
+            
+            // Atualiza a barra de força
+            bar.style.width = `${strength.score * 25}%`;
+            bar.style.backgroundColor = strength.color;
+        });
+
+        function checkPasswordStrength(password) {
+            let score = 0;
+            if (password.length > 8) score++;
+            if (password.match(/[A-Z]/)) score++;
+            if (password.match(/[0-9]/)) score++;
+            if (password.match(/[^A-Za-z0-9]/)) score++;
+
+            const colors = ['#ff4646', '#ffa730', '#ffcd3c', '#2ecc71'];
+            return { score, color: colors[score - 1] || '#ff4646' };
+        }
+
+        // Animações com GSAP
+        gsap.from(".glass-effect", {
+            opacity: 0,
+            y: 50,
+            duration: 1,
+            ease: "power3.out"
+        });
+
+        gsap.from("form > div", {
+            opacity: 0,
+            y: 20,
+            stagger: 0.1,
+            duration: 0.8,
+            ease: "power2.out",
+            delay: 0.5
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+    const registerBtn = document.getElementById('registerBtn');
+    const registrationForm = document.getElementById('registrationForm');
+
+    registrationForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      if (!phoneInput.isValidNumber()) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Número inválido',
+                    text: 'Por favor, insira um número de WhatsApp válido.'
+                });
+                return;
+            }
+      // Show loading popup
+      Swal.fire({
+        title: 'Processando...',
+        text: 'Por favor, aguarde enquanto criamos sua conta.',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        willOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      const formData = new FormData(registrationForm);
+        const formDataObj = Object.fromEntries(formData.entries());
+
+        // Get the phone number with country code
+        const phoneNumber = phoneInput.getNumber(); // This gets the full number with country code
+        const countryData = phoneInput.getSelectedCountryData();
+        const ddi = `+${countryData.dialCode}`; // Gets the country code (DDI)
+
+        // Add phone data to the form data object
+        formDataObj.phone = phoneNumber;
+        formDataObj.ddi = ddi;
+
+      try {
+        const response = await fetch('/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formDataObj),
+        });
+
+        const data = await response.json();
+
+        // Close loading popup
+        Swal.close();
+
+        if (response.ok) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Registro concluído!',
+            text: 'Sua conta foi criada com sucesso. Você será redirecionado para o dashboard.',
+          }).then(() => {
+            window.location.href = data.redirect || '/dashboard';
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Erro no registro',
+            text: data.message || 'Ocorreu um erro durante o registro.',
+          });
+        }
+      } catch (error) {
+        console.error('Erro:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro',
+          text: 'Ocorreu um erro ao processar sua solicitação.',
+        });
+      }
+    });
+  });
+    </script>
+</body>
+</html>

@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autoresposta Avançada - HocketZap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {"50":"#eff6ff","100":"#dbeafe","200":"#bfdbfe","300":"#93c5fd","400":"#60a5fa","500":"#3b82f6","600":"#2563eb","700":"#1d4ed8","800":"#1e40af","900":"#1e3a8a","950":"#172554"}
+                    }
+                },
+                fontFamily: {
+                    'body': [
+                        'Inter', 
+                        'ui-sans-serif', 
+                        'system-ui', 
+                        '-apple-system', 
+                        'system-ui', 
+                        'Segoe UI', 
+                        'Roboto', 
+                        'Helvetica Neue', 
+                        'Arial', 
+                        'Noto Sans', 
+                        'sans-serif', 
+                        'Apple Color Emoji', 
+                        'Segoe UI Emoji', 
+                        'Segoe UI Symbol', 
+                        'Noto Color Emoji'
+                    ],
+                    'sans': [
+                        'Inter', 
+                        'ui-sans-serif', 
+                        'system-ui', 
+                        '-apple-system', 
+                        'system-ui', 
+                        'Segoe UI', 
+                        'Roboto', 
+                        'Helvetica Neue', 
+                        'Arial', 
+                        'Noto Sans', 
+                        'sans-serif', 
+                        'Apple Color Emoji', 
+                        'Segoe UI Emoji', 
+                        'Segoe UI Symbol', 
+                        'Noto Color Emoji'
+                    ]
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .custom-select-wrapper {
+            position: relative;
+            user-select: none;
+        }
+        .custom-select-selected {
+            padding: 8px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            cursor: pointer;
+        }
+        .custom-select-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-top: none;
+            border-radius: 0 0 0.375rem 0.375rem;
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        .custom-select-options.show {
+            display: block;
+        }
+        .custom-select-options li {
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+        .custom-select-options li:hover {
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white font-body custom-scrollbar">
+    <div class="flex flex-col h-screen overflow-hidden">
+        <!-- Navbar -->
+        <header class="bg-white dark:bg-gray-800 shadow-sm">
+           <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Autoresposta Avançada</h1>
+                <div class="flex items-center">
+                    <button id="theme-toggle" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
+                        <i class="fas fa-sun hidden dark:block"></i>
+                        <i class="fas fa-moon block dark:hidden"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+            <!-- Page Content -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-gray-900">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <!-- Uso de Autoresposta -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 transition-all duration-300 hover:shadow-lg">
+                        <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Uso de Autoresposta</h2>
+                        <div id="autoResponseUsage" class="space-y-4">
+                            <div id="limitedPlanContent">
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
+                                    <div id="usageBar" class="bg-primary-600 h-4 rounded-full transition-all duration-500 ease-in-out" style="width: 0%"></div>
+                                </div>
+                                <p class="text-lg font-medium mt-2 dark:text-gray-300">
+                                    <span id="usedResponses" class="text-primary-600 dark:text-primary-400">0</span> de <span id="totalResponses" class="text-primary-600 dark:text-primary-400">0</span> respostas automáticas usadas
+                                </p>
+                                <p id="limitMessage" class="text-sm text-gray-600 dark:text-gray-400 mt-1"></p>
+                                <button class="mt-4 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-300">
+                                    <i class="fas fa-arrow-up mr-2"></i>Aumentar Limite
+                                </button>
+                            </div>
+                            <div id="premiumPlanContent" class="hidden">
+                                <p class="text-lg font-semibold text-green-600 dark:text-green-400">
+                                    <i class="fas fa-infinity mr-2"></i>Respostas automáticas ilimitadas!
+                                </p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Aproveite seu plano Premium</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configurações de Campanha -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 transition-all duration-300 hover:shadow-lg">
+                        <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Configurações de Campanha</h2>
+                        <form id="autoResponseForm" class="space-y-6">
+                            <!-- Seletor de instância -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" for="instanceSelect">
+                                    Selecione a Instância
+                                </label>
+                                <select id="instanceSelect" name="instanceKey" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md dark:bg-gray-700 dark:text-white">
+                                    <option disabled selected>Escolha uma instância</option>
+                                    <% user.whatsappInstances.forEach(instance => { %>
+                                        <option value="<%= instance.name %>"><%= instance.name %></option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                    
+                            <!-- Botões de ação -->
+                            <div class="flex justify-between items-center">
+                                <button type="button" id="addCampaignBtn" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-300">
+                                    <i class="fas fa-plus mr-2"></i>Adicionar Nova Campanha
+                                </button>
+                                <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-300">
+                                    <i class="fas fa-save mr-2"></i>Salvar Configurações
+                                </button>
+                            </div>
+                    
+                            <!-- Lista de campanhas -->
+                            <div id="campaignsList" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                                <!-- Campanhas serão adicionadas aqui dinamicamente -->
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Relatórios -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-all duration-300 hover:shadow-lg">
+                            <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Respostas Recentes</h2>
+                            <div id="reportContent" class="space-y-4">
+                                <!-- Conteúdo do relatório será preenchido dinamicamente -->
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-all duration-300 hover:shadow-lg">
+                            <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Evolução das Respostas</h2>
+                            <canvas id="responseChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-all duration-300 hover:shadow-lg">
+                        <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Campanhas Mais Ativadas</h2>
+                        <canvas id="campaignActivationChart"></canvas>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Template para campanha -->
+    <template id="campaignTemplate">
+        <div class="campaign-card bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm p-6 transition-all duration-300 hover:shadow-md">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" for="campaignName">
+                        Nome da Campanha
+                    </label>
+                    <input type="text" name="campaignName" id="campaignName" class="mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-600 dark:text-white" required placeholder="Nome da campanha">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" for="condition">
+                        Condição
+                    </label>
+                    <select name="condition" id="condition" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md dark:bg-gray-600 dark:text-white">
+                        <option value="all">Todas as mensagens</option>
+                        <option value="startsWith">Começa com</option>
+                        <option value="contains">Contém</option>
+                        <option value="equals">É igual a</option>
+                        <option value="regex">Expressão Regular</option>
+                    </select>
+                </div>
+                <div class="condition-value hidden">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" for="conditionValue">
+                        Valor da Condição
+                    </label>
+                    <input type="text" name="conditionValue" id="conditionValue" class="mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-600 dark:text-white" placeholder="Valor da condição">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" for="funnelId">
+                        Selecione o Funil
+                    </label>
+                    <select name="funnelId" id="funnelId" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md dark:bg-gray-600 dark:text-white" required>
+                        <option value="">Selecione um funil</option>
+                        <% funnels.forEach(funnel => { %>
+                            <option value="<%= funnel.id %>"><%= funnel.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" name="isActive" id="isActive" class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded dark:border-gray-600 dark:bg-gray-700" checked>
+                    <label for="isActive" class="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+                        Ativar Campanha
+                    </label>
+                </div>
+                <button type="button" class="remove-campaign-btn w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-300">
+                    <i class="fas fa-trash mr-2"></i>Remover Campanha
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        const instanceSelect = document.getElementById('instanceSelect');
+        const campaignsList = document.getElementById('campaignsList');
+        const addCampaignBtn = document.getElementById('addCampaignBtn');
+        const campaignTemplate = document.getElementById('campaignTemplate');
+
+        let campaigns = [];
+
+        function startPeriodicUpdates() {
+            setInterval(() => {
+                if (instanceSelect && instanceSelect.value) {
+                    loadAutoResponseReport(instanceSelect.value);
+                    updateAutoResponseUsage();
+                }
+            }, 60000); // Atualiza a cada minuto
+        }
+
+        if (instanceSelect) {
+            instanceSelect.addEventListener('change', loadCampaigns);
+        }
+
+        if (addCampaignBtn) {
+            addCampaignBtn.addEventListener('click', addCampaign);
+        }
+
+        function loadCampaigns() {
+            const instanceKey = instanceSelect ? instanceSelect.value : null;
+            if (!instanceKey) return;
+
+            fetch(`/auto-response/campaigns/${instanceKey}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        campaignsList.innerHTML = '';
+                        campaigns = [];
+                        data.campaigns.forEach(campaign => addCampaign(campaign));
+                    } else {
+                        console.error('Erro ao carregar campanhas:', data.error);
+                    }
+                })
+                .catch(error => console.error('Erro ao carregar campanhas:', error));
+        }
+
+        function addCampaign(campaignData = null) {
+            const newCampaign = campaignTemplate.content.cloneNode(true);
+            const campaignItem = newCampaign.querySelector('.campaign-card');
+            
+            if (campaignData) {
+                campaignItem.querySelector('[name="campaignName"]').value = campaignData.name || '';
+                campaignItem.querySelector('[name="condition"]').value = campaignData.condition || 'all';
+                campaignItem.querySelector('[name="conditionValue"]').value = campaignData.value || '';
+                campaignItem.querySelector('[name="funnelId"]').value = campaignData.funnelId || '';
+                campaignItem.querySelector('[name="isActive"]').checked = campaignData.isActive !== undefined ? campaignData.isActive : true;
+            }
+            
+            campaignItem.querySelector('select[name="condition"]').addEventListener('change', toggleConditionValue);
+            campaignItem.querySelector('.remove-campaign-btn').addEventListener('click', () => removeCampaign(campaignItem));
+
+            campaignsList.appendChild(campaignItem);
+            campaigns.push(campaignItem);
+            
+            toggleConditionValue({ target: campaignItem.querySelector('select[name="condition"]') });
+        }
+
+        function removeCampaign(campaignItem) {
+            campaignsList.removeChild(campaignItem);
+            campaigns = campaigns.filter(item => item !== campaignItem);
+        }
+
+        function toggleConditionValue(event) {
+            const conditionSelect = event.target;
+            const conditionValueInput = conditionSelect.closest('.campaign-card').querySelector('.condition-value');
+            conditionValueInput.classList.toggle('hidden', conditionSelect.value === 'all');
+        }
+
+        document.getElementById('autoResponseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const instanceKey = formData.get('instanceKey');
+
+            const campaignsData = campaigns.map(campaign => ({
+                name: campaign.querySelector('[name="campaignName"]').value,
+                condition: campaign.querySelector('[name="condition"]').value,
+                value: campaign.querySelector('[name="conditionValue"]').value,
+                funnelId: campaign.querySelector('[name="funnelId"]').value,
+                isActive: campaign.querySelector('[name="isActive"]').checked
+            }));
+
+            try {
+                const response = await fetch('/auto-response/update-campaigns', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ instanceKey, campaigns: campaignsData }),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Sucesso!',
+                        text: 'Campanhas de autoresposta atualizadas.',
+                        confirmButtonColor: '#4CAF50',
+                    });
+                    loadCampaigns(); // Recarrega as campanhas após salvar
+                } else {
+                    throw new Error(result.error || 'Erro ao atualizar campanhas');
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: error.message,
+                    confirmButtonColor: '#f44336',
+                });
+            }
+        });
+
+        function loadAutoResponseReport(instanceKey) {
+            if (!instanceKey) {
+                console.error('Chave da instância não fornecida');
+                return;
+            }
+
+            fetch(`/auto-response/report/${instanceKey}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        updateReportUI(data);
+                        updateResponseChart(data);
+                        updateCampaignActivationChart(data);
+                    } else {
+                        console.error('Erro ao carregar relatório:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar relatório:', error);
+                });
+        }
+
+        function updateReportUI(data) {
+            const reportContent = document.getElementById('reportContent');
+            if (reportContent) {
+                reportContent.innerHTML = `
+                    <div class="stats shadow">
+                        <div class="stat">
+                            <div class="stat-figure text-primary-500">
+                                <i class="fas fa-robot text-3xl"></i>
+                            </div>
+                            <div class="stat-title text-gray-600 dark:text-gray-400">Total de Respostas</div>
+                            <div class="stat-value text-primary-500">${data.totalResponses}</div>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto mt-4">
+                        <table class="table-auto w-full">
+                            <thead>
+                                <tr class="bg-gray-100 dark:bg-gray-700">
+                                    <th class="px-4 py-2 text-left text-gray-600 dark:text-gray-300">Campanha</th>
+                                    <th class="px-4 py-2 text-left text-gray-600 dark:text-gray-300">Número</th>
+                                    <th class="px-4 py-2 text-left text-gray-600 dark:text-gray-300">Data</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.recentResponses.map(resp => `
+                                    <tr class="border-b dark:border-gray-700">
+                                        <td class="px-4 py-2 text-gray-800 dark:text-gray-300">${resp.campaignName || 'N/A'}</td>
+                                        <td class="px-4 py-2 text-gray-800 dark:text-gray-300">${resp.phoneNumber}</td>
+                                        <td class="px-4 py-2 text-gray-800 dark:text-gray-300">${new Date(resp.timestamp).toLocaleString()}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+        }
+
+        function updateResponseChart(data) {
+            const ctx = document.getElementById('responseChart');
+            if (!ctx) {
+                console.error('Elemento do gráfico de respostas não encontrado');
+                return;
+            }
+
+            if (window.responseChart && typeof window.responseChart.destroy === 'function') {
+                window.responseChart.destroy();
+            }
+
+            window.responseChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.recentResponses.map(r => new Date(r.timestamp).toLocaleDateString()),
+                    datasets: [{
+                        label: 'Respostas Automáticas',
+                        data: data.recentResponses.map((_, index) => index + 1),
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Evolução das Respostas Automáticas'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const response = data.recentResponses[context.dataIndex];
+                                    return `Campanha: ${response.campaignName || 'N/A'}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCampaignActivationChart(data) {
+            const ctx = document.getElementById('campaignActivationChart');
+            if (!ctx) {
+                console.error('Elemento do gráfico de ativações de campanha não encontrado');
+                return;
+            }
+
+            if (window.campaignActivationChart && typeof window.campaignActivationChart.destroy === 'function') {
+                window.campaignActivationChart.destroy();
+            }
+            
+            const sortedCampaigns = Object.entries(data.campaignActivations)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5); // Pegar as 5 campanhas mais ativadas
+
+            window.campaignActivationChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sortedCampaigns.map(campaign => campaign[0]),
+                    datasets: [{
+                        label: 'Ativações',
+                        data: sortedCampaigns.map(campaign => campaign[1]),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false,
+                        },
+                        title: {
+                            display: true,
+                            text: 'Campanhas Mais Ativadas'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+  
+    function updateAutoResponseUsage() {
+    fetch('/auto-response/usage')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const limitedPlanContent = document.getElementById('limitedPlanContent');
+                const premiumPlanContent = document.getElementById('premiumPlanContent');
+
+                if (data.isUnlimited) {
+                    limitedPlanContent.classList.add('hidden');
+                    premiumPlanContent.classList.remove('hidden');
+
+                    premiumPlanContent.innerHTML = `
+                        <div class="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg p-6">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-4xl font-bold text-primary-600 dark:text-primary-400">
+                                    ${data.usage}
+                                </span>
+                                <span class="text-4xl text-primary-600 dark:text-primary-400">
+                                    <i class="fas fa-infinity animate-pulse"></i>
+                                </span>
+                            </div>
+                            <div class="bg-green-100 dark:bg-green-900 px-4 py-2 rounded-lg">
+                                <p class="text-green-800 dark:text-green-200 font-medium flex items-center">
+                                    <i class="fas fa-crown mr-2"></i>
+                                    Plano Premium
+                                </p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-gray-600 dark:text-gray-400">
+                                <i class="fas fa-clock mr-2"></i>
+                                Próximo reset em ${data.nextReset.hoursRemaining}h
+                            </p>
+                        </div>
+                    `;
+                }  else {
+                    // Mostrar visualização para plano com limite
+                    limitedPlanContent.classList.remove('hidden');
+                    premiumPlanContent.classList.add('hidden');
+
+                    // Calcular porcentagem de uso
+                    const percentage = (data.usage / data.limit) * 100;
+                    const usageBar = document.getElementById('usageBar');
+                    
+                    // Atualizar barra de progresso com animação suave
+                    gsap.to(usageBar, {
+                        width: `${percentage}%`,
+                        duration: 0.5,
+                        ease: "power2.out"
+                    });
+
+                    // Definir cor baseada no uso
+                    usageBar.className = `h-4 rounded-full transition-all duration-500 ease-in-out ${
+                        percentage >= 90 ? 'bg-red-500' :
+                        percentage >= 70 ? 'bg-yellow-500' :
+                        'bg-primary-600'
+                    }`;
+
+                    // Atualizar números e mensagens
+                    document.getElementById('usedResponses').textContent = data.usage;
+                    document.getElementById('totalResponses').textContent = data.limit;
+
+                    // Atualizar mensagem de limite com contexto
+                    const limitMessage = document.getElementById('limitMessage');
+                    const remainingText = percentage >= 90 
+                        ? `<span class="text-red-500 font-semibold">Atenção!</span> Restam apenas ${data.remaining} autorespostas.`
+                        : `${data.remaining} autorespostas disponíveis.`;
+
+                    limitMessage.innerHTML = `
+                        ${remainingText}<br>
+                        <span class="text-sm">Próximo reset em ${data.nextReset.hoursRemaining} horas</span>
+                    `;
+                }
+
+                // Adicionar tooltip informativo
+                tippy('#autoResponseUsage', {
+                    content: `
+                        <div class="p-3 space-y-1">
+                            <p class="font-medium">Uso atual: ${data.usage}</p>
+                            <p>Limite: ${data.isUnlimited ? '∞' : data.limit}</p>
+                            <p>Restante: ${data.isUnlimited ? '∞' : data.remaining}</p>
+                            <p>Reset em: ${data.nextReset.hoursRemaining}h</p>
+                        </div>
+                    `,
+                    allowHTML: true,
+                    placement: 'right',
+                    theme: 'custom'
+                });
+
+            } else {
+                console.error('Erro ao buscar uso de autoresposta:', data);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro',
+                    text: 'Não foi possível atualizar o uso de autoresposta',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao buscar uso de autoresposta:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: 'Erro ao conectar com o servidor',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        });
+}
+        
+
+        // Dark mode toggle
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const htmlElement = document.documentElement;
+
+        themeToggleBtn.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark');
+            const isDarkMode = htmlElement.classList.contains('dark');
+            localStorage.setItem('darkMode', isDarkMode);
+        });
+
+        // Check for saved theme preference or prefer-color-scheme
+        const savedTheme = localStorage.getItem('darkMode');
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
+        if (savedTheme !== null) {
+            htmlElement.classList.toggle('dark', savedTheme === 'true');
+        } else if (prefersDarkScheme.matches) {
+            htmlElement.classList.add('dark');
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            startPeriodicUpdates();
+            updateAutoResponseUsage();
+            setInterval(updateAutoResponseUsage, 300000); // Atualiza a cada 5 minutos
+            
+            if (instanceSelect) {
+                instanceSelect.addEventListener('change', () => {
+                    loadCampaigns();
+                    loadAutoResponseReport(instanceSelect.value);
+                    updateAutoResponseUsage();
+                });
+            }
+
+            // Animate elements on page load
+            gsap.from('.campaign-card', {
+                duration: 0.5,
+                y: 20,
+                opacity: 0,
+                stagger: 0.1,
+                ease: 'power2.out'
+            });
+
+            gsap.from('.stats', {
+                duration: 0.5,
+                scale: 0.9,
+                opacity: 0,
+                ease: 'back.out(1.7)'
+            });
+
+            // Add smooth scrolling to all links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+
+        // Add custom animations for adding and removing campaigns
+        function animateAddCampaign(campaignItem) {
+            gsap.from(campaignItem, {
+                duration: 0.5,
+                height: 0,
+                opacity: 0,
+                ease: 'power2.out'
+            });
+        }
+
+        function animateRemoveCampaign(campaignItem, onComplete) {
+            gsap.to(campaignItem, {
+                duration: 0.5,
+                height: 0,
+                opacity: 0,
+                ease: 'power2.in',
+                onComplete: onComplete
+            });
+        }
+
+
+
+        // Update the addCampaign and removeCampaign functions to use animations
+        function addCampaign(campaignData = null) {
+            const newCampaign = campaignTemplate.content.cloneNode(true);
+            const campaignItem = newCampaign.querySelector('.campaign-card');
+            
+                
+            if (campaignData) {
+                campaignItem.querySelector('[name="campaignName"]').value = campaignData.name || '';
+                campaignItem.querySelector('[name="condition"]').value = campaignData.condition || 'all';
+                campaignItem.querySelector('[name="conditionValue"]').value = campaignData.value || '';
+                campaignItem.querySelector('[name="funnelId"]').value = campaignData.funnelId || '';
+                campaignItem.querySelector('[name="isActive"]').checked = campaignData.isActive !== undefined ? campaignData.isActive : true;
+            }
+            
+            campaignItem.querySelector('select[name="condition"]').addEventListener('change', toggleConditionValue);
+            campaignItem.querySelector('.remove-campaign-btn').addEventListener('click', () => removeCampaign(campaignItem));
+
+
+            // ... (rest of the addCampaign function remains the same)
+
+            campaignsList.appendChild(campaignItem);
+            campaigns.push(campaignItem);
+            
+            animateAddCampaign(campaignItem);
+            
+            toggleConditionValue({ target: campaignItem.querySelector('select[name="condition"]') });
+        }
+
+        function removeCampaign(campaignItem) {
+            animateRemoveCampaign(campaignItem, () => {
+                campaignsList.removeChild(campaignItem);
+                campaigns = campaigns.filter(item => item !== campaignItem);
+            });
+        }
+
+        // Add tooltip functionality
+        tippy('[data-tippy-content]', {
+            theme: 'light-border'
+        });
+
+        // Add custom dropdown component
+        function createCustomDropdown(selectElement) {
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('custom-select-wrapper');
+
+            const selected = document.createElement('div');
+            selected.classList.add('custom-select-selected');
+            selected.textContent = selectElement.options[selectElement.selectedIndex].textContent;
+
+            const optionsList = document.createElement('ul');
+            optionsList.classList.add('custom-select-options');
+
+            Array.from(selectElement.options).forEach((option, index) => {
+                const li = document.createElement('li');
+                li.textContent = option.textContent;
+                li.setAttribute('data-value', option.value);
+                li.addEventListener('click', () => {
+                    selectElement.selectedIndex = index;
+                    selected.textContent = option.textContent;
+                    optionsList.classList.remove('show');
+                    selectElement.dispatchEvent(new Event('change'));
+                });
+                optionsList.appendChild(li);
+            });
+
+            selected.addEventListener('click', () => {
+                optionsList.classList.toggle('show');
+            });
+
+            wrapper.appendChild(selected);
+            wrapper.appendChild(optionsList);
+
+            selectElement.parentNode.insertBefore(wrapper, selectElement);
+            selectElement.style.display = 'none';
+        }
+
+        // Apply custom dropdowns to select elements
+        document.querySelectorAll('select').forEach(createCustomDropdown);
+    </script>
+</body>
+</html>

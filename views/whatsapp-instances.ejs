@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Instâncias WhatsApp - HocketZap</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.5.0/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        @keyframes pulseWarning {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+.limit-warning {
+    animation: pulseWarning 2s infinite;
+}
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: .5;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen">
+    <div class="container mx-auto p-6 max-w-7xl"> <!-- Alterado de max-w-6xl para max-w-7xl -->
+        <header class="text-center mb-12">
+            <h1 class="text-5xl font-bold text-gray-800 mb-4">Gerenciador de Instâncias WhatsApp</h1> <!-- Alterado text-4xl para text-5xl e mb-2 para mb-4 -->
+            <p class="text-xl text-gray-600 mb-8">Crie, gerencie e monitore suas instâncias do WhatsApp com facilidade.</p> <!-- Aumentado o tamanho da fonte e adicionado mb-8 -->
+        </header>
+
+        <!-- Aviso sobre instâncias não conectadas -->
+        <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-8 rounded-r-lg shadow-md">
+            <p class="font-semibold">Aviso:</p>
+            <p>Instâncias não conectadas serão deletadas automaticamente depois de certo tempo.</p>
+        </div>
+
+        <div class="mb-8 bg-white rounded-lg shadow-lg p-6 animate-fade-in-up">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-700 flex items-center">
+                    <i class="fas fa-chart-pie mr-2 text-indigo-600"></i>
+                    Uso de Instâncias
+                </h2>
+                <div class="text-sm text-gray-500">
+                    Plano: <span class="font-semibold text-indigo-600" id="currentPlan">Carregando...</span>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <!-- Barra de progresso -->
+                <div id="limitProgressContainer" class="relative pt-1">
+                    <div class="flex items-center justify-between mb-2">
+                        <div>
+                            <span id="currentUsage" class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-indigo-600 bg-indigo-200">
+                                0/0 Instâncias
+                            </span>
+                        </div>
+                        <div>
+                            <span id="remainingLabel" class="text-xs font-semibold inline-block text-gray-600">
+                                Restantes: 0
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex h-2 mb-4 overflow-hidden bg-indigo-100 rounded">
+                        <div id="limitProgressBar" class="flex flex-col justify-center bg-indigo-500 rounded transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+        
+                <!-- Status Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-gradient-to-r from-cyan-50 to-blue-50 p-4 rounded-lg border border-blue-100">
+                        <h3 class="text-sm font-medium text-gray-600">Disponíveis</h3>
+                        <p id="availableInstances" class="text-2xl font-bold text-blue-600">0</p>
+                    </div>
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-100">
+                        <h3 class="text-sm font-medium text-gray-600">Conectadas</h3>
+                        <p id="connectedInstances" class="text-2xl font-bold text-green-600">0</p>
+                    </div>
+                    <div class="bg-gradient-to-r from-purple-50 to-indigo-50 p-4 rounded-lg border border-purple-100">
+                        <h3 class="text-sm font-medium text-gray-600">Total Permitido</h3>
+                        <p id="totalAllowed" class="text-2xl font-bold text-purple-600">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-8"> <!-- Alterado gap-6 para gap-8 -->
+            <!-- Painel de Criação de Instância -->
+            <div class="bg-white rounded-lg shadow-lg p-6 transform hover:shadow-xl transition duration-300 animate-fade-in-up">
+                <h2 class="text-2xl font-semibold mb-6 text-gray-700 flex items-center">
+                    <svg class="h-6 w-6 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Criar Nova Instância
+                </h2>
+                <form id="createInstanceForm" class="space-y-6"> <!-- Alterado de space-y-4 para space-y-6 -->
+                    <div class="form-control">
+                        <label for="instanceName" class="label">
+                            <span class="label-text text-gray-700">Nome da Instância</span>
+                        </label>
+                        <input type="text" id="instanceName" name="name" required 
+                               class="input input-bordered w-full focus:ring-2 focus:ring-indigo-500 transition duration-300">
+                    </div>
+                    <div class="form-control">
+                        <label for="phoneNumber" class="label">
+                            <span class="label-text text-gray-700">Número de Telefone</span>
+                        </label>
+                        <input type="tel" id="phoneNumber" name="phoneNumber" required 
+                               class="input input-bordered w-full focus:ring-2 focus:ring-indigo-500 transition duration-300"
+                               placeholder="Ex: 5511999999999">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full mt-4 bg-indigo-600 hover:bg-indigo-700 transition duration-300">
+                        <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Criar Instância
+                    </button>
+                </form>
+                <div id="loadingIndicator" class="hidden mt-4">
+                    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-700 mx-auto"></div>
+                    <p class="text-center mt-2 text-indigo-700">Criando instância...</p>
+                </div>
+            </div>
+
+            <!-- Estatísticas -->
+            <div class="bg-white rounded-lg shadow-lg p-8 transform hover:shadow-xl transition duration-300 animate-fade-in-up"> <!-- Alterado p-6 para p-8 -->
+                <h2 class="text-2xl font-semibold mb-6 text-gray-700 flex items-center">
+                    <svg class="h-6 w-6 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Estatísticas
+                </h2>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="stat bg-indigo-50 rounded-lg p-4">
+                        <div class="stat-figure text-indigo-600">
+                            <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                            </svg>
+                        </div>
+                        <div class="stat-title text-indigo-600">Total de Instâncias</div>
+                        <div class="stat-value text-indigo-800 text-3xl" id="totalInstances">0</div>
+                    </div>
+                    <div class="stat bg-green-50 rounded-lg p-4">
+                        <div class="stat-figure text-green-600">
+                            <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                        <div class="stat-title text-green-600">Instâncias Conectadas</div>
+                        <div class="stat-value text-green-800 text-3xl" id="connectedInstances">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botão Deletar Todas -->
+            <div class="bg-white rounded-lg shadow-lg p-6 transform hover:shadow-xl transition duration-300 animate-fade-in-up">
+                <h2 class="text-2xl font-semibold mb-6 text-gray-700 flex items-center">
+                    <svg class="h-6 w-6 mr-2 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Deletar Todas as Instâncias
+                </h2>
+                <button onclick="deleteAllInstances()" class="btn btn-error w-full mt-4 bg-red-600 hover:bg-red-700 transition duration-300">
+                    <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Deletar Todas as Instâncias
+                </button>
+            </div>
+        </div>
+
+        <!-- Lista de Instâncias -->
+        <div class="mt-12 bg-white rounded-lg shadow-lg p-6 animate-fade-in-up">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-700 flex items-center">
+                <svg class="h-6 w-6 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+                Suas Instâncias
+            </h2>
+            <div id="instanceList" class="space-y-4">
+                <!-- As instâncias serão carregadas aqui dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTotalInstances = 0;
+        let currentConnectedInstances = 0;
+        let qrCheckIntervals = {};
+
+
+        async function deleteAllInstances() {
+    if (confirm('Tem certeza que deseja deletar todas as instâncias? Esta ação é irreversível.')) {
+        try {
+            const response = await fetch('/whatsapp/deleteAll', { method: 'DELETE' });
+            const data = await response.json();
+            
+            if (response.ok) {
+                showToast('Todas as instâncias foram deletadas com sucesso!', 'success');
+                await loadInstances();
+            } else {
+                showToast(`Erro ao deletar instâncias: ${data.error}`, 'error');
+            }
+        } catch (error) {
+            console.error('Erro ao deletar todas as instâncias:', error);
+            showToast('Erro ao deletar todas as instâncias. Por favor, tente novamente.', 'error');
+        }
+    }
+}
+
+        function generateRandomKey() {
+            return 'inst_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadInstances();
+            updateLimitsDisplay();
+
+          // Adicione esta função para gerar um token aleatório
+function generateRandomToken() {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let token = '';
+    for (let i = 0; i < 36; i++) {
+        if (i === 8 || i === 13 || i === 18 || i === 23) {
+            token += '-';
+        } else {
+            token += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+    }
+    return token;
+}
+
+async function updateLimitsDisplay(limits = null) {
+    if (!limits) {
+        try {
+            const response = await fetch('/whatsapp/limits');
+            limits = await response.json();
+        } catch (error) {
+            console.error('Erro ao buscar limites:', error);
+            return;
+        }
+    }
+
+    const {currentUsage, limit, remaining, isCustomLimit} = limits;
+    const percentage = (currentUsage / limit) * 100;
+
+    // Atualizar textos
+    document.getElementById('currentUsage').textContent = `${currentUsage}/${limit} Instâncias`;
+    document.getElementById('remainingLabel').textContent = `Restantes: ${remaining}`;
+    document.getElementById('availableInstances').textContent = remaining;
+    document.getElementById('totalAllowed').textContent = limit;
+    
+    // Atualizar barra de progresso
+    const progressBar = document.getElementById('limitProgressBar');
+    progressBar.style.width = `${percentage}%`;
+
+    // Atualizar cores baseado no uso
+    if (percentage >= 90) {
+        progressBar.className = 'flex flex-col justify-center bg-red-500 rounded transition-all duration-500';
+        document.getElementById('limitProgressContainer').classList.add('limit-warning');
+    } else if (percentage >= 70) {
+        progressBar.className = 'flex flex-col justify-center bg-yellow-500 rounded transition-all duration-500';
+    } else {
+        progressBar.className = 'flex flex-col justify-center bg-indigo-500 rounded transition-all duration-500';
+    }
+
+    // Adicionar badge se for limite personalizado
+    if (isCustomLimit) {
+        document.getElementById('currentPlan').innerHTML += `
+            <span class="ml-2 px-2 py-1 text-xs font-medium bg-indigo-100 text-indigo-800 rounded-full">
+                Limite Personalizado
+            </span>
+        `;
+    }
+}
+
+// Modificar a função de erro do formulário
+function showLimitError(data) {
+    Swal.fire({
+        icon: 'warning',
+        title: 'Limite de Instâncias Atingido',
+        html: `
+            <div class="space-y-4">
+                <div class="p-4 bg-red-50 rounded-lg">
+                    <p class="text-red-700 font-medium">Você atingiu o limite de instâncias do seu plano!</p>
+                    <div class="mt-2 text-sm">
+                        <p>Uso atual: ${data.currentUsage}/${data.limit}</p>
+                        <p>Restantes: ${data.remaining}</p>
+                    </div>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <p class="font-medium mb-2">O que você pode fazer:</p>
+                    <ul class="list-disc list-inside text-sm space-y-1">
+                        <li>Fazer upgrade do seu plano</li>
+                        <li>Deletar instâncias não utilizadas</li>
+                        <li>Entrar em contato com o suporte</li>
+                    </ul>
+                </div>
+                ${data.isCustomLimit ? `
+                    <div class="text-sm text-gray-500">
+                        Nota: Você está utilizando um limite personalizado.
+                    </div>
+                ` : ''}
+            </div>
+        `,
+        confirmButtonText: 'Entendi',
+        confirmButtonColor: '#4F46E5',
+        showCancelButton: true,
+        cancelButtonText: 'Ver Planos',
+        cancelButtonColor: '#059669'
+    }).then((result) => {
+        if (!result.isConfirmed) {
+            window.location.href = '/change-plan'; // Redirecionar para página de planos
+        }
+    });
+}
+
+// Modifique o event listener do formulário
+document.getElementById('createInstanceForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const instanceName = formData.get('name');
+    const phoneNumber = formData.get('phoneNumber');
+    
+    document.getElementById('loadingIndicator').classList.remove('hidden');
+
+    try {
+        const response = await fetch('/whatsapp/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                name: instanceName,
+                phoneNumber: phoneNumber,
+                token: generateRandomToken()
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            showToast('Instância criada com sucesso!', 'success');
+            
+            // Atualizar estatísticas com os novos limites
+            updateLimitsDisplay(data.limits);
+            
+            loadInstances();
+            e.target.reset();
+        } else {
+            // No event listener do formulário
+if (response.status === 403) {
+    showLimitError(data);
+    return;
+} else {
+                showToast(`Erro: ${data.error || data.message}`, 'error');
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao criar instância:', error);
+        showToast('Erro ao criar instância. Por favor, tente novamente.', 'error');
+    } finally {
+        document.getElementById('loadingIndicator').classList.add('hidden');
+    }
+});
+})
+
+        async function loadInstances() {
+        const response = await fetch('/whatsapp/list');
+        const instances = await response.json();
+        const instanceList = document.getElementById('instanceList');
+        instanceList.innerHTML = '';
+        
+        let connectedCount = 0;
+        instances.forEach(instance => {
+            if (instance.isConnected) connectedCount++;
+            const instanceElement = createInstanceElement(instance);
+            instanceList.appendChild(instanceElement);
+
+            if (!instance.isConnected) {
+                startQRCodeCheck(instance._id);
+            }
+        });
+
+        document.getElementById('totalInstances').textContent = instances.length;
+        document.getElementById('connectedInstances').textContent = connectedCount;
+
+        updateStatistics(instances.length, connectedCount);
+    }
+
+    function createInstanceElement(instance) {
+        const instanceElement = document.createElement('div');
+        instanceElement.className = 'bg-gray-800 p-6 rounded-lg shadow-md transition-all duration-300 hover:shadow-lg mb-4 transform hover:scale-102';
+        instanceElement.innerHTML = `
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <img src="${instance.foto}" alt="Profile" class="w-16 h-16 rounded-full object-cover">
+                    <div>
+                        <h3 class="text-xl font-semibold text-white">${instance.name}</h3>
+                        <p class="text-sm text-gray-300">Número: ${instance.number}</p>
+                        <p class="text-sm ${instance.isConnected ? 'text-green-400' : 'text-red-400'} font-medium">
+                            <i class="fas fa-${instance.isConnected ? 'check-circle' : 'times-circle'} mr-2"></i>
+                            ${instance.isConnected ? 'Conectado' : 'Desconectado'}
+                        </p>
+                    </div>
+                </div>
+                <div class="flex flex-col space-y-2">
+                    <button onclick="getQRCode('${instance._id}')" class="btn btn-info btn-sm" ${instance.isConnected ? 'disabled' : ''}>
+                        <i class="fas fa-qrcode mr-1"></i> QR Code
+                    </button>
+                    <button onclick="disconnectInstance('${instance._id}')" class="btn btn-warning btn-sm" ${!instance.isConnected ? 'disabled' : ''}>
+                        <i class="fas fa-unlink mr-1"></i> Desconectar
+                    </button>
+                    <button onclick="deleteInstance('${instance._id}')" class="btn btn-error btn-sm">
+                        <i class="fas fa-trash mr-1"></i> Deletar
+                    </button>
+                </div>
+            </div>
+            <div class="mt-4 text-gray-300">
+                <p class="text-sm">Mensagens: ${instance.messageCount}</p>
+                <p class="text-sm">Contatos: ${instance.contactCount}</p>
+                <p class="text-sm">Chats: ${instance.chatCount}</p>
+            </div>
+        `;
+        return instanceElement;
+    }
+
+    function createInstanceElement(instance) {
+    const instanceElement = document.createElement('div');
+    instanceElement.className = 'bg-gradient-to-br from-purple-50 to-indigo-100 p-6 rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl mb-6 transform hover:scale-103';
+    instanceElement.innerHTML = `
+        <div class="flex flex-col md:flex-row items-center justify-between">
+            <div class="flex items-center space-x-6 mb-4 md:mb-0">
+                <img src="${instance.foto}" alt="Profile" class="w-20 h-20 rounded-full object-cover border-4 border-purple-300 shadow-md">
+                <div>
+                    <h3 class="text-2xl font-bold text-purple-800 font-sans">${instance.name}</h3>
+                    <p class="text-sm text-indigo-600 font-medium mt-1">
+                        <i class="fab fa-whatsapp text-green-500 mr-2"></i>${instance.whatsappName}
+                    </p>
+                    <p class="text-sm ${instance.isConnected ? 'text-emerald-600' : 'text-rose-600'} font-semibold mt-2">
+                        <i class="fas fa-${instance.isConnected ? 'check-circle' : 'times-circle'} mr-2"></i>
+                        ${instance.isConnected ? 'Conectado' : 'Desconectado'}
+                    </p>
+                </div>
+            </div>
+            <div class="flex flex-col space-y-3">
+                <button onclick="getQRCode('${instance._id}')" class="btn bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 flex items-center justify-center" ${instance.isConnected ? 'disabled' : ''}>
+                    <i class="fas fa-qrcode mr-2"></i> QR Code
+                </button>
+                <button onclick="disconnectInstance('${instance._id}')" class="btn bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 flex items-center justify-center" ${!instance.isConnected ? 'disabled' : ''}>
+                    <i class="fas fa-unlink mr-2"></i> Desconectar
+                </button>
+                <button onclick="deleteInstance('${instance._id}')" class="btn bg-rose-500 hover:bg-rose-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 flex items-center justify-center">
+                    <i class="fas fa-trash-alt mr-2"></i> Deletar
+                </button>
+            </div>
+        </div>
+        <div class="mt-6 bg-white bg-opacity-50 p-4 rounded-lg">
+            <div class="grid grid-cols-3 gap-4">
+                <div class="text-center">
+                    <i class="fas fa-envelope text-indigo-500 text-2xl mb-2"></i>
+                    <p class="text-sm font-medium text-gray-700">Mensagens</p>
+                    <p class="text-lg font-bold text-indigo-700">${instance.messageCount}</p>
+                </div>
+                <div class="text-center">
+                    <i class="fas fa-address-book text-indigo-500 text-2xl mb-2"></i>
+                    <p class="text-sm font-medium text-gray-700">Contatos</p>
+                    <p class="text-lg font-bold text-indigo-700">${instance.contactCount}</p>
+                </div>
+                <div class="text-center">
+                    <i class="fas fa-comments text-indigo-500 text-2xl mb-2"></i>
+                    <p class="text-sm font-medium text-gray-700">Chats</p>
+                    <p class="text-lg font-bold text-indigo-700">${instance.chatCount}</p>
+                </div>
+            </div>
+        </div>
+        <div id="qrCode-${instance._id}" class="mt-6 hidden"></div>
+    `;
+    return instanceElement;
+}
+function stopQRCodeInterval(instanceId) {
+    if (window.qrInterval) {
+        clearInterval(window.qrInterval);
+        delete window.qrInterval;
+    }
+    const popup = document.querySelector('.qr-popup');
+    if (popup) {
+        popup.remove();
+    }
+}
+
+// Modificar a função getQRCode para usar o novo sistema
+async function getQRCode(instanceId) {
+    try {
+        const response = await fetch(`/whatsapp/qr/${instanceId}`);
+        const data = await response.json();
+        if (data.qr) {
+            showQRCodePopup(data.qr, instanceId);
+            startQRCodeCheck(instanceId);
+        } else {
+            showToast('QR Code não disponível', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao obter QR Code:', error);
+        showToast('Erro ao obter QR Code', 'error');
+    }
+}
+      
+    function showQRCodePopup(qrCodeData, instanceId) {
+    // Remove qualquer popup existente primeiro
+    const existingPopup = document.querySelector('.qr-popup');
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+
+    const popup = document.createElement('div');
+    popup.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 qr-popup';
+    popup.innerHTML = `
+        <div class="bg-white p-6 rounded-lg shadow-2xl max-w-sm w-full">
+            <h3 class="text-2xl font-bold mb-4 text-gray-800">QR Code para Conexão</h3>
+            <div id="qrCodeContainer-${instanceId}">
+                <img src="${qrCodeData}" alt="QR Code" class="mx-auto mb-6 w-full max-w-xs">
+            </div>
+            <p class="text-center text-sm text-gray-600 mb-4">Escaneie o código QR para conectar</p>
+            <p class="text-center text-xs text-gray-500 mb-4">O QR Code atualiza automaticamente a cada 3 segundos</p>
+            <div class="flex justify-between">
+                <button onclick="stopQRCodeInterval('${instanceId}')" class="btn btn-error flex-1 mr-2">Cancelar</button>
+                <button onclick="refreshQRCode('${instanceId}')" class="btn btn-info flex-1 ml-2">Atualizar QR</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(popup);
+
+    // Inicia o intervalo de atualização do QR code
+    startQRCodeInterval(instanceId);
+}
+
+
+async function refreshQRCode(instanceId) {
+    try {
+        const response = await fetch(`/whatsapp/qr/${instanceId}`);
+        const data = await response.json();
+        if (data.qr) {
+            const container = document.getElementById(`qrCodeContainer-${instanceId}`);
+            if (container) {
+                container.innerHTML = `<img src="${data.qr}" alt="QR Code" class="mx-auto mb-6 w-full max-w-xs">`;
+            }
+        } else {
+            showToast('QR Code não disponível', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar QR Code:', error);
+        showToast('Erro ao atualizar QR Code', 'error');
+    }
+}
+
+// Função para iniciar o intervalo de atualização do QR code
+function startQRCodeInterval(instanceId) {
+    if (window.qrInterval) {
+        clearInterval(window.qrInterval);
+    }
+    window.qrInterval = setInterval(() => refreshQRCode(instanceId), 3000);
+}
+
+    function startQRCodeCheck(instanceId) {
+        if (qrCheckIntervals[instanceId]) {
+            clearInterval(qrCheckIntervals[instanceId]);
+        }
+        qrCheckIntervals[instanceId] = setInterval(() => checkInstanceStatus(instanceId), 5000);
+    }
+
+    async function checkInstanceStatus(instanceId) {
+    try {
+        const response = await fetch(`/whatsapp/checker/${instanceId}`);
+        const data = await response.json();
+        if (data.status === 'connected') {
+            clearInterval(qrCheckIntervals[instanceId]);
+            delete qrCheckIntervals[instanceId];
+            stopQRCodeInterval(instanceId); // Adicionar esta linha
+            const popup = document.querySelector('.qr-popup');
+            if (popup) {
+                popup.remove();
+            }
+            showToast('WhatsApp conectado com sucesso!', 'success');
+            await loadInstances();
+        }
+    } catch (error) {
+        console.error('Erro ao verificar status da instância:', error);
+    }
+}
+
+        async function disconnectInstance(instanceId) {
+            if (confirm('Tem certeza que deseja desconectar esta instância?')) {
+                try {
+                    const response = await fetch(`/whatsapp/disconnect/${instanceId}`, { method: 'POST' });
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        showToast('Instância desconectada com sucesso!', 'success');
+                        await loadInstances();
+                    } else {
+                        showToast(`Erro ao desconectar instância: ${data.message}`, 'error');
+                    }
+                } catch (error) {
+                    console.error('Erro:', error);
+                    showToast('Erro ao desconectar instância. Por favor, tente novamente.', 'error');
+                }
+            }
+        }
+
+        async function deleteInstance(instanceId) {
+            if (confirm('Tem certeza que deseja deletar esta instância? Esta ação é irreversível.')) {
+                try {
+                    const response = await fetch(`/whatsapp/delete/${instanceId}`, { method: 'DELETE' });
+                    if (response.ok) {
+                        showToast('Instância deletada com sucesso!', 'success');
+                        await loadInstances();
+                    } else {
+                        const data = await response.json();
+                        showToast(`Erro ao deletar instância: ${data.error}`, 'error');
+                    }
+                } catch (error) {
+                    console.error('Erro ao deletar instância:', error);
+                    showToast('Erro ao deletar instância. Por favor, tente novamente.', 'error');
+                }
+            }
+        }
+
+        function updateStatistics(totalInstances, connectedInstances) {
+            const totalElement = document.getElementById('totalInstances');
+            const connectedElement = document.getElementById('connectedInstances');
+
+            animateCounter(totalElement, currentTotalInstances, totalInstances);
+            animateCounter(connectedElement, currentConnectedInstances, connectedInstances);
+
+            currentTotalInstances = totalInstances;
+            currentConnectedInstances = connectedInstances;
+        }
+
+        function animateCounter(element, start, end) {
+            const duration = 500;
+            const range = end - start;
+            const startTime = performance.now();
+
+            function updateCounter(currentTime) {
+                const elapsedTime = currentTime - startTime;
+                if (elapsedTime > duration) {
+                    element.textContent = end;
+                } else {
+                    const progress = elapsedTime / duration;
+                    const currentValue = Math.round(start + progress * range);
+                    element.textContent = currentValue;
+                    requestAnimationFrame(updateCounter);
+                }
+            }
+
+            requestAnimationFrame(updateCounter);
+        }
+        
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-4 right-4 p-4 rounded-lg shadow-lg text-white ${
+                type === 'success' ? 'bg-green-500' :
+                type === 'error' ? 'bg-red-500' :
+                type === 'info' ? 'bg-blue-500' : 'bg-yellow-500'
+            } animate-fade-in-up max-w-xs w-full`;
+            toast.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} mr-2"></i>
+                    <p>${message}</p>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('animate-fade-out');
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+            

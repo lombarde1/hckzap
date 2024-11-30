@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Integrações - HocketZap</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+
+        /* Adicione estes estilos ao seu arquivo CSS ou na seção <style> */
+
+
+/* Estilo para o container de notificações */
+.notification-container {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 50;
+}
+
+.notification {
+    transition: all 0.3s ease-in-out;
+    transform: translateX(100%);
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+/* Estilo para os switches */
+.switch-container {
+    position: relative;
+    width: 3.5rem;
+    height: 2rem;
+}
+
+.switch-container input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 2rem;
+}
+
+.switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 1.5rem;
+    width: 1.5rem;
+    left: 0.25rem;
+    bottom: 0.25rem;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .switch-slider {
+    background-color: #8B5CF6;
+}
+
+input:checked + .switch-slider:before {
+    transform: translateX(1.5rem);
+}
+
+        .integration-card {
+            transition: all 0.2s ease;
+        }
+        .integration-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .bg-gradient {
+            background: linear-gradient(to right, #2563eb, #3b82f6);
+        }
+        .btn-gradient {
+            background: linear-gradient(to right, #2563eb, #3b82f6);
+            transition: all 0.2s ease;
+        }
+        .btn-gradient:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+      
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="bg-gradient text-white shadow-lg">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center">
+                <h1 class="text-3xl font-bold">Dashboard de Integrações</h1>
+                <div class="text-sm">
+                    <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full">
+                        <i class="fas fa-plug mr-2"></i>
+                        <span id="activeIntegrations">Carregando...</span> Integrações Ativas
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="px-4 py-6 sm:px-0">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+               <!-- ElevenLabs Card -->
+               <div class="integration-card bg-white overflow-hidden shadow-lg rounded-lg hover:shadow-2xl transition-shadow duration-300">
+                <div class="px-6 py-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full p-3 shadow-md">
+                                <i class="fas fa-microphone-alt text-white text-2xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-xl font-semibold text-gray-900">ElevenLabs</h3>
+                                <p class="text-sm text-purple-600 font-medium">Geração de Voz AI Avançada</p>
+                                <!--  <% if (!checkFeatureAccess(user.plan, 'voiceGenerator')) { %>
+                                    <p class="text-red-500 text-sm mt-2">Seu plano atual não inclui acesso ao gerador de voz.</p>
+                                <% } %>  -->
+                            </div>
+                        </div>
+                        <span id="elevenlabsStatus" class="px-3 py-1 text-sm font-semibold text-gray-800 bg-gray-200 rounded-full flex items-center">
+                            <i class="fas fa-spinner fa-spin mr-1"></i> Verificando...
+                        </span>
+                    </div>
+        <div class="mt-4 space-y-2">
+            <p class="text-sm text-gray-600 leading-relaxed">
+                Revolucione sua comunicação com vozes AI realistas e personalizáveis:
+            </p>
+            <ul class="text-sm text-gray-700 space-y-1">
+                <li class="flex items-center">
+                    <i class="fas fa-robot text-purple-500 mr-2"></i>
+                    <span>Vozes AI ultra-realistas em múltiplos idiomas</span>
+                </li>
+                <li class="flex items-center">
+                    <i class="fas fa-sliders-h text-indigo-500 mr-2"></i>
+                    <span>Personalize tom, emoção e ênfase</span>
+                </li>
+                <li class="flex items-center">
+                    <i class="fas fa-bolt text-yellow-500 mr-2"></i>
+                    <span>Geração e envio rápido para seus leads</span>
+                </li>
+                <li class="flex items-center">
+                    <i class="fas fa-language text-green-500 mr-2"></i>
+                    <span>Suporte multilíngue para alcance global</span>
+                </li>
+            </ul>
+        </div>
+        <div class="mt-6 flex justify-between items-center">
+            <a href="/integrations/elevenlabs" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300 transform hover:scale-105">
+                <i class="fas fa-cog mr-2"></i> Configurar Integração
+            </a>
+           
+        </div>
+    </div>
+</div>
+
+               <!-- Mercado Pago Card -->
+<div class="integration-card bg-white overflow-hidden shadow-lg rounded-lg hover:shadow-2xl transition-shadow duration-300">
+    <div class="px-6 py-6">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full p-3 shadow-md">
+                    <i class="fas fa-credit-card text-white text-2xl"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-xl font-semibold text-gray-900">Mercado Pago</h3>
+                    <p class="text-sm text-blue-600 font-medium">Gestão Financeira Integrada</p>
+                    <% if (!checkFeatureAccess(user.plan, 'api')) { %>
+                        <p class="text-red-500 text-sm mt-2">Seu plano atual não inclui acesso à API do Mercado Pago.</p>
+                    <% } %>
+                </div>
+            </div>
+            <span id="mercadoPagoStatus" class="px-3 py-1 text-sm font-semibold text-gray-800 bg-gray-200 rounded-full flex items-center">
+                <i class="fas fa-spinner fa-spin mr-1"></i> Verificando...
+            </span>
+        </div>
+        <div class="mt-4 space-y-2">
+            <p class="text-sm text-gray-600 leading-relaxed">
+                Transforme sua gestão financeira com o poder do Mercado Pago integrado à nossa plataforma:
+            </p>
+            <ul class="text-sm text-gray-700 space-y-1">
+                <li class="flex items-center">
+                    <i class="fas fa-chart-line text-blue-500 mr-2"></i>
+                    <span>Visualize lucros e gastos mensais em gráficos intuitivos</span>
+                </li>
+                <li class="flex items-center">
+                    <i class="fas fa-money-bill-wave text-green-500 mr-2"></i>
+                    <span>Acompanhe pagamentos e PIX em tempo real</span>
+                </li>
+                <li class="flex items-center">
+                    <i class="fas fa-sync text-purple-500 mr-2"></i>
+                    <span>Sincronização automática com sua conta bancária</span>
+                </li>
+                <li class="flex items-center">
+                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                    <span>Obtenha insights valiosos sobre sua saúde financeira</span>
+                </li>
+            </ul>
+        </div>
+        <div class="mt-6 flex justify-between items-center">
+            <a href="/integrations/mercadopago" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-105">
+                <i class="fas fa-cog mr-2"></i> Configurar Integração
+            </a>
+            <button class="text-blue-600 hover:text-blue-800 transition-colors duration-200 focus:outline-none">
+                <i class="fas fa-info-circle mr-1"></i> Saiba mais
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Mercado Pago App Card -->
+<div class="integration-card bg-white overflow-hidden shadow-lg rounded-lg hover:shadow-2xl transition-shadow duration-300">
+    <div class="px-6 py-6">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full p-3 shadow-md">
+                    <i class="fas fa-shopping-cart text-white text-2xl"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-xl font-semibold text-gray-900">Mercado Pago App</h3>
+                    <p class="text-sm text-yellow-600 font-medium">Geração e Verificação de Pagamentos</p>
+                    <% if (!checkFeatureAccess(user.plan, 'api')) { %>
+                        <p class="text-red-500 text-sm mt-2">Seu plano atual não inclui acesso à API do Mercado Pago.</p>
+                    <% } %>
+                </div>
+            </div>
+            <span id="mpAppStatus" class="px-3 py-1 text-sm font-semibold text-gray-800 bg-gray-200 rounded-full flex items-center">
+                <i class="fas fa-spinner fa-spin mr-1"></i> Verificando...
+            </span>
+            
+        </div>
+        <div class="mt-4 space-y-2">
+            <p class="text-sm text-gray-600 leading-relaxed">
+                Integre pagamentos diretamente em seu fluxo de autoresposta:
+            </p>
+            <ul class="text-sm text-gray-700 space-y-1">
+                <li class="flex items-center">
+                    <i class="fas fa-qrcode text-yellow-500 mr-2"></i>
+                    <span>Geração de pagamentos PIX</span>
+                </li>
+                <li class="flex items-center">
+                    <i class="fas fa-check-double text-green-500 mr-2"></i>
+                    <span>Verificação de status de pagamento</span>
+                </li>
+                <li class="flex items-center">
+                    <i class="fas fa-cogs text-blue-500 mr-2"></i>
+                    <span>Integração direta com o fluxo de autoresposta</span>
+                </li>
+            </ul>
+        </div>
+        <div class="mt-6 flex justify-between items-center">
+            <button id="configureMPApp" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-all duration-300 transform hover:scale-105">
+                <i class="fas fa-cog mr-2"></i> Configurar App
+            </button>
+            <button id="testMPApp" class="text-yellow-600 hover:text-yellow-800 transition-colors duration-200 focus:outline-none" style="display: none;">
+                <i class="fas fa-vial mr-1"></i> Testar Integração
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Card do Cartpanda -->
+<div class="integration-card bg-white overflow-hidden shadow-lg rounded-lg hover:shadow-2xl transition-shadow duration-300">
+    <div class="px-6 py-6">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full p-3 shadow-md">
+                    <i class="fas fa-shopping-bag text-white text-2xl"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-xl font-semibold text-gray-900">Cartpanda</h3>
+                    <p class="text-sm text-purple-600 font-medium">Automação de E-commerce</p>
+                </div>
+            </div>
+            <span id="cartpandaStatus" class="px-3 py-1 text-sm font-semibold text-gray-800 bg-gray-200 rounded-full flex items-center">
+                <i class="fas fa-spinner fa-spin mr-1"></i> Verificando...
+            </span>
+        </div>
+        <div class="mt-4 space-y-2">
+            <p class="text-sm text-gray-600 leading-relaxed">
+                Automatize suas comunicações com clientes do e-commerce:
+            </p>
+            <ul class="text-sm text-gray-700 space-y-1">
+                <li class="flex items-center">
+                    <i class="fas fa-cart-arrow-down text-purple-500 mr-2"></i>
+                    <span>Recuperação de carrinhos abandonados</span>
+                </li>
+                <li class="flex items-center">
+                    <i class="fas fa-qrcode text-pink-500 mr-2"></i>
+                    <span>Notificações de PIX gerado</span>
+                </li>
+                <li class="flex items-center">
+                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                    <span>Confirmação de pagamentos</span>
+                </li>
+                <li class="flex items-center">
+                    <i class="fas fa-box text-blue-500 mr-2"></i>
+                    <span>Acompanhamento de pedidos</span>
+                </li>
+            </ul>
+        </div>
+        <div class="mt-6 flex justify-between items-center">
+            <button id="configureCartpanda" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300 transform hover:scale-105">
+                <i class="fas fa-cog mr-2"></i> Configurar Integração
+            </button>
+            <button id="editCartpandaEvents" style="display: none;" class="text-purple-600 hover:text-purple-800 transition-colors duration-200 focus:outline-none">
+                <i class="fas fa-edit mr-1"></i> Editar Eventos
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Webhook -->
+<div id="webhookUrlModal" class="modal" style="display: none;">
+    <div class="modal-content bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full">
+        <div class="sm:flex sm:items-start">
+            <div class="w-full">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">
+                        URL do Webhook Cartpanda
+                    </h3>
+                    <button class="text-gray-400 hover:text-gray-500" onclick="closeWebhookModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="mt-2 bg-gray-50 p-4 rounded-lg">
+                    <p class="text-sm text-gray-600 mb-2">Configure esta URL no seu painel Cartpanda:</p>
+                    <div class="flex items-center bg-white rounded border">
+                        <input id="webhookUrlInput" type="text" readonly class="flex-1 p-2 text-sm text-gray-800 bg-transparent outline-none" />
+                        <button onclick="copyToClipboard(document.getElementById('webhookUrlInput').value)" 
+                                class="px-4 py-2 bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors duration-200">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Clique no botão ao lado para copiar a URL
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="webhookUrlModal" class="modal" style="display: none;">
+    <div class="modal-content bg-white rounded-lg px-6 pt-5 pb-6 text-left overflow-hidden shadow-xl transform transition-all sm:max-w-2xl sm:w-full mx-4">
+        <div class="sm:flex sm:items-start">
+            <div class="w-full">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-medium text-gray-900">
+                        URL do Webhook Cartpanda
+                    </h3>
+                    <button class="text-gray-400 hover:text-gray-500" onclick="closeWebhookModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="mt-2 bg-gray-50 p-6 rounded-lg">
+                    <p class="text-sm text-gray-600 mb-3">Configure esta URL no seu painel Cartpanda:</p>
+                    <div class="flex items-center bg-white rounded border">
+                        <input id="webhookUrlInput" type="text" readonly class="flex-1 p-3 text-sm text-gray-800 bg-transparent outline-none font-mono" />
+                        <button onclick="copyToClipboard(document.getElementById('webhookUrlInput').value)" 
+                                class="px-6 py-3 bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors duration-200 font-medium">
+                            <i class="fas fa-copy mr-2"></i> Copiar
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Esta URL é única para sua integração
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Eventos -->
+<div id="cartpandaEventsModal" class="modal" style="display: none;">
+    <div class="modal-content bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all w-full max-w-5xl mx-4">
+        <div class="px-6 py-5 bg-gray-50 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-medium text-gray-900 flex items-center">
+                    <i class="fas fa-cog text-purple-500 mr-3"></i>
+                    Configurar Eventos Cartpanda
+                </h3>
+                <button class="text-gray-400 hover:text-gray-500 p-2" onclick="closeEventsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <p class="mt-2 text-sm text-gray-500">Configure as mensagens automáticas para cada evento do Cartpanda</p>
+        </div>
+        
+        <div class="px-6 py-6">
+            <div class="space-y-6" id="cartpandaEventsContainer">
+                <!-- Os eventos serão inseridos aqui dinamicamente -->
+            </div>
+        </div>
+
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+            <div class="flex justify-between items-center">
+                <p class="text-sm text-gray-500">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    As alterações são salvas automaticamente
+                </p>
+                <button onclick="closeEventsModal()" 
+                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Template para cada evento -->
+<template id="eventTemplate">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200" data-event-type="{eventType}">
+        <div class="p-6">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h4 class="text-lg font-semibold text-gray-900 mb-2">
+                        {eventTitle}
+                    </h4>
+                    <p class="text-sm text-gray-600">
+                        {eventDescription}
+                    </p>
+                </div>
+                <label class="flex items-center cursor-pointer ml-4">
+                    <div class="relative">
+                        <input type="checkbox" class="sr-only event-active" {checked}>
+                        <div class="w-14 h-7 bg-gray-200 rounded-full shadow-inner"></div>
+                        <div class="dot absolute w-7 h-7 bg-white rounded-full shadow -left-1 -top-1 transition-all duration-200"></div>
+                    </div>
+                    <span class="ml-3 text-sm font-medium text-gray-700 whitespace-nowrap">Ativo</span>
+                </label>
+            </div>
+            
+            <div class="space-y-6">
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            Mensagem
+                        </label>
+                        <span class="text-xs text-gray-500">
+                            Variáveis disponíveis: 
+                            <code class="bg-gray-100 px-1 py-0.5 rounded">orderNumber</code>, 
+                            <code class="bg-gray-100 px-1 py-0.5 rounded">customerName</code>, 
+                            <code class="bg-gray-100 px-1 py-0.5 rounded">total</code>, 
+                            <code class="bg-gray-100 px-1 py-0.5 rounded">products</code>
+                        </span>
+                    </div>
+                    <textarea 
+                        class="event-message w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500 text-sm"
+                        rows="4"
+                        placeholder="Digite a mensagem que será enviada..."
+                    >{message}</textarea>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Atraso no envio
+                        </label>
+                        <div class="relative rounded-md shadow-sm max-w-xs">
+                            <input 
+                                type="number" 
+                                class="event-delay w-full pl-4 pr-16 py-2.5 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                                value="{delay}"
+                                min="0"
+                            >
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-4">
+                                <span class="text-gray-500 sm:text-sm">segundos</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <button onclick="saveEvent('{eventType}')"
+                                class="inline-flex items-center px-5 py-2.5 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                            <i class="fas fa-save mr-2"></i>
+                            Salvar Alterações
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style>
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    z-index: 1000;
+    padding-top: 4rem;
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    max-height: calc(100vh - 8rem);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.modal-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 3px;
+}
+
+/* Estilo para os switches */
+.dot {
+    transition: all 0.3s ease-in-out;
+}
+
+input:checked ~ .dot {
+    transform: translateX(1.75rem) !important;
+    background-color: #8B5CF6 !important;
+}
+
+/* Estilo para os inputs e textareas */
+.event-message:focus, .event-delay:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+}
+
+/* Animações suaves */
+.modal-content {
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+</style>
+
+                <!-- Placeholder para futuras integrações -->
+                <div class="integration-card bg-white overflow-hidden shadow rounded-lg border-2 border-dashed border-gray-300">
+                    <div class="px-4 py-5 sm:p-6 text-center">
+                        <div class="animate-pulse">
+                            <i class="fas fa-plus-circle text-gray-400 text-5xl mb-4"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900">Nova Integração</h3>
+                        <p class="mt-1 text-sm text-gray-500">Adicione uma nova integração à sua plataforma</p>
+                        <div class="mt-6">
+                            <button id="openModalBtn" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
+                                <i class="fas fa-plus mr-2"></i> Adicionar Integração
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal -->
+ 
+
+    <script>
+
+        // Função para fechar o modal de Webhook
+function closeWebhookModal() {
+    const webhookModal = document.getElementById('webhookUrlModal');
+    if (webhookModal) {
+        webhookModal.style.display = 'none';
+    }
+}
+
+// Função para fechar o modal de Eventos
+function closeEventsModal() {
+    const eventsModal = document.getElementById('cartpandaEventsModal');
+    if (eventsModal) {
+        eventsModal.style.display = 'none';
+    }
+}
+
+
+        function updateIntegrationStatus(elementId, isConfigured, isActive, configuredText, activeText, notConfiguredText) {
+            const statusElement = document.getElementById(elementId);
+            if (isActive) {
+                statusElement.innerHTML = `<i class="fas fa-check-circle mr-1"></i> ${activeText}`;
+                statusElement.className = 'px-3 py-1 text-sm font-semibold text-green-800 bg-green-100 rounded-full flex items-center';
+            } else if (isConfigured) {
+                statusElement.innerHTML = `<i class="fas fa-exclamation-circle mr-1"></i> ${configuredText}`;
+                statusElement.className = 'px-3 py-1 text-sm font-semibold text-yellow-800 bg-yellow-100 rounded-full flex items-center';
+            } else {
+                statusElement.innerHTML = `<i class="fas fa-times-circle mr-1"></i> ${notConfiguredText}`;
+                statusElement.className = 'px-3 py-1 text-sm font-semibold text-red-800 bg-red-100 rounded-full flex items-center';
+            }
+        }
+
+        async function checkElevenLabsStatus() {
+            try {
+                const response = await axios.get('/integrations/elevenlabs/check-config');
+                updateIntegrationStatus(
+                    'elevenlabsStatus',
+                    response.data.configured,
+                    response.data.active,
+                    'Configurado, não testado',
+                    'Ativo',
+                    'Não configurado'
+                );
+            } catch (error) {
+                console.error('Erro ao verificar status do ElevenLabs:', error);
+            }
+        }
+
+        async function checkMercadoPagoStatus() {
+    try {
+        const response = await axios.get('/integrations/mercadopago/status');
+        const data = response.data;
+        updateIntegrationStatus(
+            'mercadoPagoStatus',
+            data.configured,
+            data.active,
+            'Configurado, não testado',
+            'Ativo',
+            'Não configurado'
+        );
+        
+        // Atualizar o botão de configuração se necessário
+        const configButton = document.querySelector('a[href="/integrations/mercadopago"]');
+        if (configButton) {
+            configButton.textContent = data.configured ? 'Reconfigurar Integração' : 'Configurar Integração';
+        }
+
+        // Exibir mensagem sobre o plano, se aplicável
+        if (data.planMessage) {
+            // Adicione um elemento para exibir esta mensagem no seu HTML
+            const planMessageElement = document.getElementById('mercadoPagoPlanMessage');
+            if (planMessageElement) {
+                planMessageElement.textContent = data.planMessage;
+                planMessageElement.style.display = 'block';
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao verificar status do Mercado Pago:', error);
+        updateIntegrationStatus(
+            'mercadoPagoStatus',
+            false,
+            false,
+            '',
+            '',
+            'Erro ao verificar'
+        );
+    }
+}
+
+
+        async function checkMercadoPagoAppStatus() {
+            try {
+                const response = await axios.get('/integrations/mercadopago-app/status');
+                updateIntegrationStatus(
+                    'mpAppStatus',
+                    response.data.configured,
+                    response.data.active,
+                    'Configurado, não testado',
+                    'Ativo',
+                    'Não configurado'
+                );
+            } catch (error) {
+                console.error('Erro ao verificar status do Mercado Pago App:', error);
+            }
+        }
+
+        async function updateActiveIntegrationsCount() {
+    try {
+        const response = await axios.get('/integrations/active-count');
+        const activeCount = response.data.activeIntegrations;
+        const activeIntegrationsElement = document.getElementById('activeIntegrations');
+        if (activeIntegrationsElement) {
+            activeIntegrationsElement.textContent = activeCount;
+        }
+    } catch (error) {
+        console.error('Erro ao obter contagem de integrações ativas:', error);
+        const activeIntegrationsElement = document.getElementById('activeIntegrations');
+        if (activeIntegrationsElement) {
+            activeIntegrationsElement.textContent = 'Erro';
+        }
+    }
+}
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkElevenLabsStatus();
+            checkMercadoPagoStatus();
+            updateActiveIntegrationsCount();
+            checkMercadoPagoAppStatus();
+        });
+
+        // ... (mantenha as outras funções JavaScript existentes) ...
+    </script>
+
+    <script>
+
+           // Funções para Mercado Pago App
+           async function updateMercadoPagoAppStatus() {
+        try {
+            const response = await fetch('/integrations/mercadopago-app/status');
+            const data = await response.json();
+            const statusElement = document.getElementById('mpAppStatus');
+            const configureButton = document.getElementById('configureMPApp');
+            const testButton = document.getElementById('testMPApp');
+
+            if (data.configured) {
+                statusElement.innerHTML = `<i class="fas fa-check-circle mr-1"></i> Configurado: ${data.maskedToken}`;
+                statusElement.className = 'px-3 py-1 text-sm font-semibold text-green-800 bg-green-100 rounded-full flex items-center';
+                configureButton.textContent = 'Reconfigurar';
+                testButton.style.display = 'inline-flex';
+            } else {
+                statusElement.innerHTML = '<i class="fas fa-question-circle mr-1"></i> Não configurado';
+                statusElement.className = 'px-3 py-1 text-sm font-semibold text-gray-800 bg-gray-200 rounded-full flex items-center';
+                configureButton.textContent = 'Configurar App';
+                testButton.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar status:', error);
+        }
+    }
+
+    // Chamar a função ao carregar a página
+    document.addEventListener('DOMContentLoaded', updateMercadoPagoAppStatus);
+
+
+    function updateElevenLabsStatus() {
+        axios.get('/integrations/elevenlabs/check-config')
+            .then(response => {
+                const statusElement = document.getElementById('elevenlabsStatus');
+                if (response.data.active) {
+                    statusElement.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Ativo';
+                    statusElement.className = 'px-3 py-1 text-sm font-semibold text-green-800 bg-green-100 rounded-full flex items-center';
+                } else if (response.data.configured) {
+                    statusElement.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i> Configurado, não testado';
+                    statusElement.className = 'px-3 py-1 text-sm font-semibold text-yellow-800 bg-yellow-100 rounded-full flex items-center';
+                } else {
+                    statusElement.innerHTML = '<i class="fas fa-question-circle mr-1"></i> Não configurado';
+                    statusElement.className = 'px-3 py-1 text-sm font-semibold text-gray-800 bg-gray-200 rounded-full flex items-center';
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao verificar status do ElevenLabs:', error);
+            });
+    }
+
+    // Chamar a função ao carregar a página
+
+    document.addEventListener('DOMContentLoaded', updateElevenLabsStatus);
+
+    // Atualizar a função de configuração para chamar updateMercadoPagoAppStatus após a configuração
+    document.getElementById('configureMPApp').addEventListener('click', async () => {
+        const accessToken = prompt("Por favor, insira seu Access Token do Mercado Pago:");
+        if (accessToken) {
+            try {
+                const response = await fetch('/integrations/mercadopago-app/configure', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ accessToken }),
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert('Configuração salva com sucesso!');
+                    updateMercadoPagoAppStatus();
+                } else {
+                    alert('Erro ao salvar configuração: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao salvar configuração');
+            }
+        }
+    });
+
+
+    document.getElementById('testMPApp').addEventListener('click', async () => {
+        try {
+            const response = await fetch('/integrations/mercadopago-app/test');
+            const data = await response.json();
+            if (data.success) {
+                alert('Teste bem-sucedido! Sua integração está funcionando corretamente.');
+            } else {
+                alert('Erro no teste: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            alert('Erro ao realizar o teste');
+        }
+    });
+
+        // JavaScript para controlar o modal
+        const modal = document.getElementById('integrationModal');
+        const openModalBtn = document.getElementById('openModalBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        openModalBtn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        closeModalBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+    <script>
+let cartpandaConfig = null;
+
+async function updateCartpandaStatus() {
+    try {
+        const response = await axios.get('/cartpanda/status');
+        const data = response.data;
+        cartpandaConfig = data;
+
+        const statusElement = document.getElementById('cartpandaStatus');
+        const configureButton = document.getElementById('configureCartpanda');
+        const editButton = document.getElementById('editCartpandaEvents');
+
+        if (data.configured) {
+            statusElement.innerHTML = data.active ? 
+                '<i class="fas fa-check-circle mr-1"></i> Ativo' :
+                '<i class="fas fa-exclamation-circle mr-1"></i> Configurado';
+            statusElement.className = data.active ?
+                'px-3 py-1 text-sm font-semibold text-green-800 bg-green-100 rounded-full flex items-center' :
+                'px-3 py-1 text-sm font-semibold text-yellow-800 bg-yellow-100 rounded-full flex items-center';
+            
+            configureButton.textContent = 'Reconfigurar Webhook';
+            editButton.style.display = 'inline-flex';
+        } else {
+            statusElement.innerHTML = '<i class="fas fa-times-circle mr-1"></i> Não configurado';
+            statusElement.className = 'px-3 py-1 text-sm font-semibold text-red-800 bg-red-100 rounded-full flex items-center';
+            
+            configureButton.textContent = 'Configurar Integração';
+            editButton.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Erro ao verificar status do Cartpanda:', error);
+        showNotification('Erro ao verificar status', 'error');
+    }
+}
+
+// Modal de webhook URL
+function generateWebhookToken(length = 32) {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let token = '';
+    for (let i = 0; i < length; i++) {
+        token += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return token;
+}
+
+// Função para gerar URL do webhook
+function generateWebhookUrl(token) {
+    const baseUrl = window.location.origin; // Pega a URL base do site atual
+    return `${baseUrl}/cartpanda/webhook/${token}`;
+}
+
+// Função principal para mostrar o modal
+function showConfigurationModal() {
+    // Gerar token e URL
+    const webhookToken = generateWebhookToken();
+    const webhookUrl = generateWebhookUrl(webhookToken);
+
+    const modalHtml = `
+    <div id="cartpandaConfigModal" class="modal" style="display: block;">
+        <div class="modal-content bg-white rounded-lg px-6 pt-5 pb-6 text-left overflow-hidden shadow-xl transform transition-all sm:max-w-2xl sm:w-full mx-4">
+            <div class="sm:flex sm:items-start">
+                <div class="w-full">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-medium text-gray-900">
+                            Configurar Cartpanda
+                        </h3>
+                        <button id="closeConfigModal" class="text-gray-400 hover:text-gray-500">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-6">
+                        <!-- Seletor de Instância -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Selecione a Instância do WhatsApp
+                            </label>
+                            <select id="instanceSelect" 
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
+                                <option value="">Carregando instâncias...</option>
+                            </select>
+                            <p class="mt-1 text-sm text-gray-500">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Esta instância será usada para enviar as mensagens automáticas
+                            </p>
+                        </div>
+
+                        <!-- URL do Webhook com badge de status -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex justify-between items-center mb-2">
+                                <p class="text-sm text-gray-600">URL do Webhook:</p>
+                                <span class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">
+                                    <i class="fas fa-clock mr-1"></i> Aguardando configuração
+                                </span>
+                            </div>
+                            <div class="flex items-center bg-white rounded border">
+                                <input id="webhookUrlInput" 
+                                       type="text" 
+                                       value="${webhookUrl}" 
+                                       readonly 
+                                       class="flex-1 p-3 text-sm text-gray-800 bg-transparent outline-none font-mono" />
+                                <button id="copyUrlButton" 
+                                        class="px-4 py-2 bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors duration-200">
+                                    <i class="fas fa-copy mr-2"></i> Copiar
+                                </button>
+                            </div>
+                            <p class="mt-2 text-xs text-gray-500">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Copie esta URL e configure no seu painel Cartpanda
+                            </p>
+                        </div>
+
+                        <!-- Botões -->
+                        <div class="flex justify-between items-center pt-4">
+                            <button id="testWebhookButton" 
+                                    class="px-4 py-2 text-purple-600 border border-purple-200 rounded-md text-sm font-medium hover:bg-purple-50"
+                                    disabled>
+                                <i class="fas fa-vial mr-2"></i> Testar Webhook
+                            </button>
+                            <div class="space-x-3">
+                                <button id="cancelConfigButton"
+                                        class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                    Cancelar
+                                </button>
+                                <button id="saveConfigButton"
+                                        class="px-4 py-2 bg-purple-600 text-white rounded-md text-sm font-medium hover:bg-purple-700">
+                                    Salvar Configuração
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    loadInstances();
+    attachModalEventListeners(webhookToken);
+}
+
+function attachModalEventListeners(webhookToken) {
+    const modal = document.getElementById('cartpandaConfigModal');
+    const closeButton = document.getElementById('closeConfigModal');
+    const cancelButton = document.getElementById('cancelConfigButton');
+    const saveButton = document.getElementById('saveConfigButton');
+    const copyButton = document.getElementById('copyUrlButton');
+    const testButton = document.getElementById('testWebhookButton');
+
+    const closeModal = () => modal.remove();
+
+    closeButton.addEventListener('click', closeModal);
+    cancelButton.addEventListener('click', closeModal);
+    
+    copyButton.addEventListener('click', () => {
+        const urlInput = document.getElementById('webhookUrlInput');
+        urlInput.select();
+        document.execCommand('copy');
+        showNotification('URL copiada com sucesso!', 'success');
+    });
+
+    saveButton.addEventListener('click', async () => {
+        const instanceSelect = document.getElementById('instanceSelect');
+        const instanceKey = instanceSelect.value;
+//
+        if (!instanceKey) {
+            showNotification('Por favor, selecione uma instância', 'error');
+            return;
+        }
+
+        try {
+            console.log('Salvando configuração...');
+            const response = await axios.post('/cartpanda/configure', {
+                instanceKey,
+                webhookToken,
+                webhookUrl: generateWebhookUrl(webhookToken)
+            });
+            
+            if (response.data.success) {
+                showNotification('Configuração salva com sucesso!', 'success');
+                testButton.disabled = false;
+                await updateCartpandaStatus();
+                // Atualizar o badge de status
+                const statusBadge = modal.querySelector('.bg-yellow-100');
+                statusBadge.className = 'text-xs px-2 py-1 rounded-full bg-green-100 text-green-800';
+                statusBadge.innerHTML = '<i class="fas fa-check mr-1"></i> Configurado';
+            }
+        } catch (error) {
+            console.error('Erro ao salvar:', error);
+            showNotification('Erro ao salvar configuração', 'error');
+        }
+    });
+
+    testButton.addEventListener('click', async () => {
+        try {
+            const response = await axios.post('/cartpanda/test-webhook');
+            if (response.data.success) {
+                showNotification('Webhook testado com sucesso!', 'success');
+            }
+        } catch (error) {
+            console.error('Erro ao testar webhook:', error);
+            showNotification('Erro ao testar webhook', 'error');
+        }
+    });
+}
+
+function closeWebhookModal() {
+    const modal = document.getElementById('webhookUrlModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+async function loadInstances() {
+    try {
+        const response = await axios.get('/whatsapp/list');
+        const instances = response.data;
+        const select = document.getElementById('instanceSelect');
+        
+        select.innerHTML = `
+            <option value="">Selecione uma instância...</option>
+            ${instances.map(instance => `
+                <option value="${instance.name}" ${instance.isConnected ? '' : 'disabled'}>
+                    ${instance.name} ${instance.isConnected ? '(Conectado)' : '(Desconectado)'}
+                </option>
+            `).join('')}
+        `;
+    } catch (error) {
+        console.error('Erro ao carregar instâncias:', error);
+        showNotification('Erro ao carregar instâncias do WhatsApp', 'error');
+    }
+}
+
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showNotification('URL copiada com sucesso!', 'success');
+    }).catch(() => {
+        showNotification('Erro ao copiar URL', 'error');
+    });
+}
+
+async function saveCartpandaConfig() {
+    const instanceSelect = document.getElementById('instanceSelect');
+    if (!instanceSelect) {
+        showNotification('Erro ao salvar configuração', 'error');
+        return;
+    }
+
+    const instanceKey = instanceSelect.value;
+    
+    if (!instanceKey) {
+        showNotification('Por favor, selecione uma instância do WhatsApp', 'error');
+        return;
+    }
+
+    try {
+        const response = await axios.post('/cartpanda/configure', {
+            instanceKey: instanceKey
+        });
+
+        if (response.data.success) {
+            showNotification('Configuração salva com sucesso!', 'success');
+            closeWebhookModal();
+            await updateCartpandaStatus();
+        }
+    } catch (error) {
+        console.error('Erro ao salvar configuração:', error);
+        showNotification('Erro ao salvar configuração', 'error');
+    }
+}
+
+// Atualizar o event listener do botão de configuração
+document.getElementById('configureCartpanda').addEventListener('click', () => {
+    showConfigurationModal();
+});
+
+function createEventFields(event, funnels) {
+    const eventTypes = {
+        'abandoned_cart': {
+            title: 'Carrinho Abandonado',
+            description: 'Dispare um funil quando um cliente abandona itens no carrinho'
+        },
+        'pix_generated': {
+            title: 'PIX Gerado',
+            description: 'Dispare um funil quando um novo PIX é gerado'
+        },
+        'payment_confirmed': {
+            title: 'Pagamento Confirmado',
+            description: 'Dispare um funil após a confirmação do pagamento'
+        },
+        'order_created': {
+            title: 'Pedido Criado',
+            description: 'Dispare um funil quando um novo pedido é criado'
+        }
+    };
+
+    const eventInfo = eventTypes[event.eventType];
+    
+    // Criar as opções de funis
+    const funnelOptions = funnels
+        .filter(funnel => funnel.name) // Garante que só funis com nome sejam incluídos
+        .map(funnel => 
+            `<option value="${funnel.id}" ${event.funnelId === funnel.id ? 'selected' : ''}>
+                ${funnel.name}
+            </option>`
+        ).join('');
+
+    return `
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-4" data-event-type="${event.eventType}">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h4 class="text-lg font-semibold text-gray-900 mb-1">
+                        ${eventInfo.title}
+                    </h4>
+                    <p class="text-sm text-gray-600">
+                        ${eventInfo.description}
+                    </p>
+                </div>
+                <label class="flex items-center cursor-pointer ml-4">
+                    <div class="relative">
+                        <input type="checkbox" class="sr-only event-active" ${event.isActive ? 'checked' : ''}>
+                        <div class="w-14 h-7 bg-gray-200 rounded-full shadow-inner"></div>
+                        <div class="dot absolute w-7 h-7 bg-white rounded-full shadow -left-1 -top-1 transition-all duration-200"></div>
+                    </div>
+                    <span class="ml-3 text-sm font-medium text-gray-700">Ativo</span>
+                </label>
+            </div>
+            
+            <div class="space-y-6">
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            Selecione o Funil
+                        </label>
+                        <span class="text-xs text-gray-500">
+                            ${funnels.length} funis disponíveis
+                        </span>
+                    </div>
+                    <select 
+                        class="funnel-select w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500 text-sm bg-white"
+                    >
+                        <option value="">Selecione um funil...</option>
+                        ${funnelOptions}
+                    </select>
+                    <p class="mt-1 text-xs text-gray-500">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        O funil selecionado será disparado automaticamente quando este evento ocorrer
+                    </p>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Atraso no disparo
+                        </label>
+                        <div class="relative rounded-md shadow-sm max-w-xs">
+                            <input 
+                                type="number" 
+                                class="event-delay w-full pl-4 pr-16 py-2.5 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                                value="${event.delay || 0}"
+                                min="0"
+                                placeholder="0"
+                            >
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-4">
+                                <span class="text-gray-500 sm:text-sm">segundos</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0 pt-6">
+                        <button onclick="saveEvent('${event.eventType}')"
+                                class="inline-flex items-center px-5 py-2.5 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                            <i class="fas fa-save mr-2"></i>
+                            Salvar Configuração
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+async function loadFunnels() {
+    try {
+        const response = await axios.get('/funnels/api/list');
+        return response.data;
+    } catch (error) {
+        console.error('Erro ao carregar funis:', error);
+        showNotification('Erro ao carregar funis', 'error');
+        return [];
+    }
+}
+
+// Função para abrir o modal de eventos
+async function openEventsModal() {
+    const modal = document.getElementById('cartpandaEventsModal');
+    const container = document.getElementById('cartpandaEventsContainer');
+    
+    if (cartpandaConfig && cartpandaConfig.events) {
+        const funnels = await loadFunnels();
+        container.innerHTML = cartpandaConfig.events
+            .map(event => createEventFields(event, funnels))
+            .join('');
+        modal.style.display = 'block';
+
+        // Atualizar os switches após criar os elementos
+        document.querySelectorAll('.event-active').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                updateSwitchStyle(this);
+            });
+            updateSwitchStyle(checkbox);
+        });
+    }
+}
+
+// Adicionar event listener ao botão de editar eventos
+document.getElementById('editCartpandaEvents').addEventListener('click', openEventsModal);
+
+// Atualizar estilo do switch
+function updateSwitchStyle(checkbox) {
+    const dot = checkbox.parentElement.querySelector('.dot');
+    if (checkbox.checked) {
+        dot.style.transform = 'translateX(1.5rem)';
+        dot.style.backgroundColor = '#8B5CF6';
+    } else {
+        dot.style.transform = 'translateX(0)';
+        dot.style.backgroundColor = '#fff';
+    }
+}
+
+// Atualizar a função saveEvent
+async function saveEvent(eventType) {
+    const eventDiv = document.querySelector(`[data-event-type="${eventType}"]`);
+    const isActive = eventDiv.querySelector('.event-active').checked;
+    const funnelId = eventDiv.querySelector('.funnel-select').value;
+    const delay = parseInt(eventDiv.querySelector('.event-delay').value) || 0;
+
+    if (isActive && !funnelId) {
+        showNotification('Por favor, selecione um funil antes de ativar o evento', 'error');
+        return;
+    }
+
+    try {
+        const response = await axios.post('/cartpanda/event', {
+            eventType,
+            funnelId,
+            isActive,
+            delay
+        });
+
+        if (response.data.success) {
+            cartpandaConfig = response.data.config;
+            showNotification('Evento atualizado com sucesso!', 'success');
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar evento:', error);
+        showNotification('Erro ao atualizar evento', 'error');
+    }
+}
+function showNotification(message, type = 'success') {
+    const notificationDiv = document.createElement('div');
+    notificationDiv.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    } text-white text-sm font-medium z-50`;
+    notificationDiv.textContent = message;
+    
+    document.body.appendChild(notificationDiv);
+    
+    setTimeout(() => {
+        notificationDiv.remove();
+    }, 3000);
+}
+
+// Fecha os modais quando clica fora
+window.addEventListener('click', (event) => {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        if (event.target === modal) {
+            if (modal.id === 'webhookUrlModal') {
+                modal.remove();
+            } else {
+                modal.style.display = 'none';
+            }
+        }
+    });
+});
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', () => {
+    updateCartpandaStatus();
+    
+    // Adicionar event listener para fechar modal
+    document.querySelector('.closeCartpandaModal')?.addEventListener('click', () => {
+        document.getElementById('cartpandaEventsModal').style.display = 'none';
+    });
+});
+</script>
+</body>
+</html>

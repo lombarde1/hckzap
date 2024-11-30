@@ -1,0 +1,1499 @@
+<!-- views/maturation/dashboard.ejs -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maturação de Chips - HocketZap</title>
+    
+     <!-- Estilos -->
+     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+     <link href="https://cdn.jsdelivr.net/npm/daisyui@2.6.0/dist/full.css" rel="stylesheet">
+     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" rel="stylesheet">
+     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+     
+     <!-- Scripts -->
+     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.8/dist/sweetalert2.all.min.js"></script>
+</head>
+
+<body class="bg-gray-50">
+    <div x-data="maturationDashboard()" class="min-h-screen">
+        <!-- Header -->
+     <!-- Header Section -->
+<header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Title and Online Users Bar -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+            <!-- Title Section -->
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-white/10 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold">Maturação de Chips</h1>
+                    <p class="text-blue-100">Sistema Automático de Maturação</p>
+                </div>
+            </div>
+
+            <!-- Online Users Stats -->
+            <div class="w-full md:w-auto">
+                <div class="bg-white/10 backdrop-blur-lg rounded-xl p-4 shadow-lg">
+                    <div class="flex items-center justify-between space-x-8">
+                        <div class="flex items-center space-x-3">
+                            <div class="relative">
+                                <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-ping"></div>
+                                <div class="relative w-3 h-3 bg-green-500 rounded-full"></div>
+                            </div>
+                            <div>
+                                <p class="text-sm text-blue-100">Usuários Online</p>
+                                <h3 class="text-2xl font-bold" x-text="onlineUsers">0</h3>
+                            </div>
+                        </div>
+                        
+                        <div class="h-12 w-px bg-white/20"></div>
+                        
+                        <div>
+                            <p class="text-sm text-blue-100">Sessões Ativas</p>
+                            <h3 class="text-2xl font-bold" x-text="activeSessions.length">0</h3>
+                        </div>
+                        
+                        <div class="h-12 w-px bg-white/20"></div>
+                        
+                        <div>
+                            <p class="text-sm text-blue-100">Taxa de Sucesso</p>
+                            <h3 class="text-2xl font-bold" x-text="calculateOverallSuccessRate() + '%'">0%</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Stats Bar -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+            <div class="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
+                <div class="flex items-center">
+                    <div class="p-2 bg-white/10 rounded-lg mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-blue-100">Tempo Total</p>
+                        <p class="text-xl font-semibold" x-text="calculateTotalTime()">0h</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
+                <div class="flex items-center">
+                    <div class="p-2 bg-white/10 rounded-lg mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-blue-100">Sessões Hoje</p>
+                        <p class="text-xl font-semibold" x-text="getTodaySessions()">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
+                <div class="flex items-center">
+                    <div class="p-2 bg-white/10 rounded-lg mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-blue-100">Total Interações</p>
+                        <p class="text-xl font-semibold" x-text="getTotalInteractions()">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
+                <div class="flex items-center">
+                    <div class="p-2 bg-white/10 rounded-lg mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-blue-100">Taxa Média</p>
+                        <p class="text-xl font-semibold" x-text="getAverageSuccessRate() + '%'">0%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+        <!-- Main Content -->
+      <!-- Nova Maturação Section -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <!-- Header com efeito gradiente -->
+        <div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-6">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Nova Sessão de Maturação
+            </h2>
+            <p class="text-indigo-100 mt-1">Configure os parâmetros para iniciar uma nova sessão</p>
+        </div>
+
+        <form @submit.prevent="startMaturation" class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Seleção de Instância -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        Instância WhatsApp
+                    </label>
+                    <div class="relative">
+                        <select x-model="form.instanceKey"
+                                :class="{
+                                    'mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md shadow-sm': true,
+                                    'animate-pulse': instances.length === 0
+                                }"
+                                :disabled="instances.length === 0 || isSubmitting">
+                            <option value="">Selecione uma instância...</option>
+                            <template x-for="instance in instances" :key="instance.key">
+                                <option :value="instance.key" x-text="instance.name"></option>
+                            </template>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                            <template x-if="instances.length === 0">
+                                <svg class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </template>
+                            <template x-if="instances.length > 0">
+                                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                                </svg>
+                            </template>
+                        </div>
+                    </div>
+                    <p class="mt-1 text-sm text-gray-500" x-text="instances.length + ' instâncias disponíveis'"></p>
+                </div>
+
+                <!-- Duração -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        Duração (dias)
+                    </label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <input type="number"
+                               x-model="form.durationDays"
+                               min="1"
+                               max="30"
+                               :disabled="isSubmitting"
+                               class="block w-full pr-10 border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500 sm:text-sm">dias</span>
+                        </div>
+                    </div>
+                    <div class="mt-1">
+                        <div class="relative pt-1">
+                            <input type="range"
+                                   x-model="form.durationDays"
+                                   class="range range-primary"
+                                   min="1"
+                                   max="30"
+                                   step="1">
+                            <div class="flex justify-between text-xs text-gray-500">
+                                <span>1 dia</span>
+                                <span>15 dias</span>
+                                <span>30 dias</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Métodos de Maturação -->
+            <div class="mt-6">
+                <label class="block text-sm font-medium text-gray-700 mb-3">
+                    Métodos de Maturação
+                </label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Interação com Grupos -->
+                    <label class="relative flex items-start">
+                        <div class="flex items-center h-5">
+                            <input type="checkbox"
+                                   x-model="form.methods"
+                                   value="ownerInteraction"
+                                   checked
+                                   required
+                                   class="form-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                        </div>
+                        <div class="ml-3 flex flex-col">
+                            <span class="block text-sm font-medium text-gray-700">
+                                Interação com Donos de Grupos
+                            </span>
+                            <span class="block text-xs text-gray-500">
+                                Envia mensagens estrategicas automáticas para donos de grupos 
+                            </span>
+                        </div>
+                        <!-- Badge de Recomendado -->
+                        <span class="absolute -top-2 -right-2 px-2 py-1 text-xs font-semibold text-white bg-green-500 rounded-full">
+                            Recomendado
+                        </span>
+                    </label>
+
+                    <!-- Comunicação P2P -->
+                    <label class="relative flex items-start">
+                        <div class="flex items-center h-5">
+                            <input type="checkbox"
+                                   x-model="form.methods"
+                                   value="p2pCommunication"
+                                   checked
+                                   required
+                                   class="form-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                        </div>
+                        <div class="ml-3 flex flex-col">
+                            <span class="block text-sm font-medium text-gray-700">
+                                Comunicação P2P
+                            </span>
+                            <span class="block text-xs text-gray-500">
+                                Estabelece comunicação entre instâncias ativas
+                            </span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Botão de Submit com estados -->
+            <div class="mt-6">
+                <button type="submit"
+                        :disabled="isSubmitting || !form.instanceKey || form.methods.length === 0"
+                        :class="{
+                            'w-full flex justify-center items-center px-4 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-gradient-to-r focus:outline-none focus:ring-2 focus:ring-offset-2': true,
+                            'from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700': !isSubmitting && form.instanceKey && form.methods.length > 0,
+                            'from-gray-400 to-gray-500 cursor-not-allowed': isSubmitting || !form.instanceKey || form.methods.length === 0
+                        }">
+                    <template x-if="!isSubmitting">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            Iniciar Maturação
+                        </div>
+                    </template>
+                    <template x-if="isSubmitting">
+                        <div class="flex items-center">
+                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Iniciando...
+                        </div>
+                    </template>
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+<!-- Sessões Ativas Section -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header da Seção -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900">Sessões Ativas</h2>
+            <p class="text-gray-500">Gerenciamento e monitoramento de sessões em tempo real</p>
+        </div>
+        
+        <!-- Filtros e Visualização -->
+        <div class="flex items-center gap-4">
+            <!-- Filtro de Status -->
+            <select x-model="statusFilter" 
+                    class="rounded-lg border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                <option value="all">Todos os Status</option>
+                <option value="active">Ativos</option>
+                <option value="paused">Pausados</option>
+                <option value="error">Com Erro</option>
+            </select>
+
+            <!-- Toggle de Visualização -->
+            <div class="flex items-center bg-gray-100 rounded-lg p-1">
+                <button @click="viewMode = 'grid'" 
+                        :class="{'bg-white shadow-sm': viewMode === 'grid', 'text-gray-500': viewMode !== 'grid'}"
+                        class="p-2 rounded-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                </button>
+                <button @click="viewMode = 'list'" 
+                        :class="{'bg-white shadow-sm': viewMode === 'list', 'text-gray-500': viewMode !== 'list'}"
+                        class="p-2 rounded-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid de Sessões -->
+    <div x-show="activeSessions.length > 0">
+        <template x-if="viewMode === 'grid'">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <template x-for="session in filteredSessions" :key="session.id">
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+                         :class="{
+                             'ring-2 ring-green-500': session.status === 'active',
+                             'ring-2 ring-yellow-500': session.status === 'paused',
+                             'ring-2 ring-red-500': session.status === 'error'
+                         }">
+                        <!-- Card Header -->
+                        <div class="p-6 bg-gradient-to-r"
+                             :class="{
+                                'from-green-50 to-blue-50': session.status === 'active',
+                                'from-yellow-50 to-orange-50': session.status === 'paused',
+                                'from-red-50 to-pink-50': session.status === 'error'
+                             }">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900" x-text="session.instanceKey"></h3>
+                                    <p class="text-sm text-gray-500">
+                                        Iniciado: <span x-text="formatDate(session.startDate)" class="font-medium"></span>
+                                    </p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <!-- Status Badge -->
+                                    <span class="px-3 py-1 rounded-full text-sm font-medium"
+                                          :class="{
+                                              'bg-green-100 text-green-800': session.status === 'active',
+                                              'bg-yellow-100 text-yellow-800': session.status === 'paused',
+                                              'bg-red-100 text-red-800': session.status === 'error'
+                                          }"
+                                          x-text="session.status">
+                                    </span>
+                                    <!-- Menu Dropdown -->
+                                    <div class="relative" x-data="{ open: false }">
+                                        <button @click="open = !open" class="p-1 rounded-full hover:bg-gray-100">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                            </svg>
+                                        </button>
+                                        <div x-show="open" 
+                                             @click.away="open = false"
+                                             class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50"
+                                             x-transition:enter="transition ease-out duration-100"
+                                             x-transition:enter-start="transform opacity-0 scale-95"
+                                             x-transition:enter-end="transform opacity-100 scale-100"
+                                             x-transition:leave="transition ease-in duration-75"
+                                             x-transition:leave-start="transform opacity-100 scale-100"
+                                             x-transition:leave-end="transform opacity-0 scale-95">
+                                            <div class="py-1">
+                                                <template x-if="session.status === 'active'">
+                                                    <button @click="pauseSession(session.id)" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                        <i class="fas fa-pause mr-2"></i> Pausar
+                                                    </button>
+                                                </template>
+                                                <template x-if="session.status === 'paused'">
+                                                    <button @click="resumeSession(session.id)" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                        <i class="fas fa-play mr-2"></i> Retomar
+                                                    </button>
+                                                </template>
+                                                <button @click="stopSession(session.id)" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                                    <i class="fas fa-stop mr-2"></i> Encerrar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Progress and Timer -->
+                            <div class="space-y-4">
+                                <!-- Progress Bar -->
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-600">Progresso</span>
+                                        <span class="font-medium" x-text="session.progress.percentageComplete + '%'"></span>
+                                    </div>
+                                    <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="h-full transition-all duration-500 rounded-full"
+                                             :class="{
+                                                 'bg-green-500': session.status === 'active',
+                                                 'bg-yellow-500': session.status === 'paused',
+                                                 'bg-red-500': session.status === 'error'
+                                             }"
+                                             :style="'width: ' + session.progress.percentageComplete + '%'">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Next Action Timer -->
+                                <div x-show="session.status === 'active'"
+                                     class="bg-white/50 rounded-lg p-3 border border-gray-100">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-600">Próxima Ação</span>
+                                        <span class="text-lg font-mono font-medium"
+                                              x-text="formatCountdown(session.nextScheduledAction)"
+                                              :class="{
+                                                  'text-green-600': !isCountdownExpired(session.nextScheduledAction),
+                                                  'text-red-600': isCountdownExpired(session.nextScheduledAction)
+                                              }">
+                                        </span>
+                                    </div>
+                                    <div class="mt-1 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-indigo-500 transition-all duration-1000"
+                                             :style="getCountdownProgressStyle(session.nextScheduledAction)">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Statistics Grid -->
+                        <div class="grid grid-cols-2 divide-x divide-y border-t">
+                            <div class="p-4">
+                                <p class="text-sm text-gray-500">Interações</p>
+                                <p class="text-xl font-semibold" x-text="session.stats.interactions.total">0</p>
+                            </div>
+                            <div class="p-4">
+                                <p class="text-sm text-gray-500">Taxa de Sucesso</p>
+                                <p class="text-xl font-semibold" x-text="calculateSuccessRate(session.stats.interactions) + '%'">0%</p>
+                            </div>
+                            <div class="p-4">
+                                <p class="text-sm text-gray-500">Métodos Ativos</p>
+                                <p class="text-xl font-semibold" x-text="Object.values(session.methods).filter(m => m.enabled).length">0</p>
+                            </div>
+                            <div class="p-4">
+                                <p class="text-sm text-gray-500">Tempo Ativo</p>
+                                <p class="text-xl font-semibold" x-text="calculateSessionDuration(session)">0h</p>
+                            </div>
+                        </div>
+
+                        <!-- Activity Timeline -->
+                        <div class="border-t p-4">
+                            <h4 class="text-sm font-medium text-gray-900 mb-3">Últimas Atividades</h4>
+                            <div class="space-y-3">
+                                <template x-for="activity in session.activities" :key="activity.timestamp">
+                                    <div class="flex items-start space-x-3">
+                                        <div :class="{
+                                            'w-2 h-2 mt-1.5 rounded-full flex-shrink-0': true,
+                                            'bg-green-400': activity.details.success,
+                                            'bg-red-400': !activity.details.success
+                                        }"></div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm text-gray-900 truncate" x-text="formatActivityMessage(activity)"></p>
+                                            <p class="text-xs text-gray-500" x-text="formatDate(activity.timestamp)"></p>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+
+        <!-- Lista View -->
+        <template x-if="viewMode === 'list'">
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Instance</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Progresso</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Próxima Ação</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Interações</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <template x-for="session in filteredSessions" :key="session.id">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                <div class="h-full w-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                                                    <span x-text="session.instanceKey.charAt(0).toUpperCase()"></span>
+                                                </div>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900" x-text="session.instanceKey"></div>
+                                                <div class="text-sm text-gray-500" x-text="formatDate(session.startDate)"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                              :class="{
+                                                  'bg-green-100 text-green-800': session.status === 'active',
+                                                  'bg-yellow-100 text-yellow-800': session.status === 'paused',
+                                                  'bg-red-100 text-red-800': session.status === 'error'
+                                              }"
+                                              x-text="session.status">
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden" style="width: 150px;">
+                                            <div class="h-full transition-all duration-500 rounded-full bg-indigo-600"
+                                                 :style="'width: ' + session.progress.percentageComplete + '%'">
+                                            </div>
+                                        </div>
+                                        <span class="text-sm text-gray-500 mt-1" x-text="session.progress.percentageComplete + '%'"></span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900 font-mono" x-text="formatCountdown(session.nextScheduledAction)"></div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="text-sm font-medium text-gray-900" x-text="session.stats.interactions.total"></div>
+                                            <span class="mx-2 text-gray-500">/</span>
+                                            <div class="text-sm text-gray-500" x-text="calculateSuccessRate(session.stats.interactions) + '% sucesso'"></div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex items-center space-x-2">
+                                            <template x-if="session.status === 'active'">
+                                                <button @click="pauseSession(session.id)" 
+                                                        class="text-yellow-600 hover:text-yellow-800">
+                                                    <i class="fas fa-pause"></i>
+                                                </button>
+                                            </template>
+                                            <template x-if="session.status === 'paused'">
+                                                <button @click="resumeSession(session.id)" 
+                                                        class="text-green-600 hover:text-green-800">
+                                                    <i class="fas fa-play"></i>
+                                                </button>
+                                            </template>
+                                            <button @click="stopSession(session.id)" 
+                                                    class="text-red-600 hover:text-red-800">
+                                                <i class="fas fa-stop"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Estado Vazio -->
+    <template x-if="activeSessions.length === 0">
+        <div class="text-center py-12 bg-white rounded-lg shadow">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhuma Sessão Ativa</h3>
+            <p class="mt-1 text-sm text-gray-500">Comece criando uma nova sessão de maturação</p>
+            <div class="mt-6">
+                <button @click="scrollToNewSession()" 
+                        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    Nova Sessão
+                </button>
+            </div>
+        </div>
+    </template>
+</section>
+
+<!-- Histórico de Sessões -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900">Histórico de Sessões</h3>
+            <p class="mt-1 text-sm text-gray-500">Registro das últimas sessões de maturação</p>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Instância
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Início
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Duração
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Interações
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Taxa de Sucesso
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <template x-for="entry in sessionHistory" :key="entry.id">
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="text-sm font-medium text-gray-900" x-text="entry.instanceKey"></div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                      :class="{
+                                          'bg-green-100 text-green-800': entry.status === 'completed',
+                                          'bg-yellow-100 text-yellow-800': entry.status === 'paused',
+                                          'bg-red-100 text-red-800': entry.status === 'error'
+                                      }"
+                                      x-text="entry.status">
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="formatDate(entry.startDate)"></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="calculateDuration(entry.startDate, entry.endDate)"></td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-sm text-gray-900" x-text="entry.interactions.total"></span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-sm text-gray-900" x-text="calculateSuccessRate(entry.interactions) + '%'"></span>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginação -->
+        <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+            <div class="flex-1 flex justify-between sm:hidden">
+                <button @click="prevPage()" 
+                        :disabled="currentPage === 1"
+                        class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    Anterior
+                </button>
+                <button @click="nextPage()"
+                        :disabled="currentPage === totalPages"
+                        class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    Próximo
+                </button>
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-700">
+                        Mostrando
+                        <span class="font-medium" x-text="((currentPage - 1) * itemsPerPage) + 1"></span>
+                        até
+                        <span class="font-medium" x-text="Math.min(currentPage * itemsPerPage, totalItems)"></span>
+                        de
+                        <span class="font-medium" x-text="totalItems"></span>
+                        resultados
+                    </p>
+                </div>
+                <div>
+                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                        <button @click="prevPage()"
+                                :disabled="currentPage === 1"
+                                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <span class="sr-only">Anterior</span>
+                            <i class="fas fa-chevron-left w-5 h-5"></i>
+                        </button>
+                        <template x-for="page in pagesArray">
+                            <button @click="goToPage(page)"
+                                    :class="{
+                                        'z-10 bg-indigo-50 border-indigo-500 text-indigo-600': currentPage === page,
+                                        'bg-white border-gray-300 text-gray-500 hover:bg-gray-50': currentPage !== page
+                                    }"
+                                    class="relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                <span x-text="page"></span>
+                            </button>
+                        </template>
+                        <button @click="nextPage()"
+                                :disabled="currentPage === totalPages"
+                                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <span class="sr-only">Próximo</span>
+                                <i class="fas fa-chevron-right w-5 h-5"></i>
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Informações adicionais -->
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                <div class="text-sm text-gray-500 flex justify-between items-center">
+                    <span>
+                        <template x-if="totalItems > 0">
+                            <span>
+                                Mostrando página <span class="font-medium" x-text="currentPage"></span> 
+                                de <span class="font-medium" x-text="totalPages"></span>
+                            </span>
+                        </template>
+                        <template x-if="totalItems === 0">
+                            <span>Nenhum registro encontrado</span>
+                        </template>
+                    </span>
+                    
+                    <!-- Seletor de itens por página -->
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-500">Itens por página:</span>
+                        <select 
+                            x-model="itemsPerPage" 
+                            @change="currentPage = 1; loadSessionHistory()"
+                            class="form-select rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    </div>
+
+  
+    <script>
+       // public/js/maturation.js
+
+document.addEventListener('alpine:init', () => {
+    Alpine.data('maturationDashboard', () => ({
+        instances: [],
+        activeSessions: [],
+        onlineUsers: 0,
+        viewMode: 'grid',
+        statusFilter: 'all',
+        sessionHistory: [],
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10,
+        isSubmitting: false,
+        form: {
+            instanceKey: '',
+            methods: [],
+            durationDays: 1
+        },
+
+        init() {
+    this.loadInstances();
+    this.loadActiveSessions();
+    this.loadSessionHistory();
+    
+    // Configura polling para dados em tempo real
+    setInterval(() => {
+        this.loadActiveSessions();
+        this.loadOnlineCount();
+    }, 5000); // Atualiza a cada 5 segundos
+},
+
+async loadOnlineCount() {
+    try {
+        const response = await fetch('/maturation/online-instances');
+        const data = await response.json();
+        if (data.success) {
+            this.onlineUsers = data.data.length;
+        }
+    } catch (error) {
+        console.error('Error loading online count:', error);
+    }
+},
+
+
+    getPaginationRange() {
+        const range = [];
+        const maxButtons = 5; // Número máximo de botões de página para mostrar
+        const sidePages = Math.floor(maxButtons / 2);
+        
+        let start = Math.max(1, this.currentPage - sidePages);
+        let end = Math.min(this.totalPages, start + maxButtons - 1);
+        
+        if (end - start + 1 < maxButtons) {
+            start = Math.max(1, end - maxButtons + 1);
+        }
+        
+        for (let i = start; i <= end; i++) {
+            range.push(i);
+        }
+        
+        return range;
+    },
+
+    get pagesArray() {
+        return this.getPaginationRange();
+    },
+
+    updateItemsPerPage() {
+        this.currentPage = 1;
+        this.loadSessionHistory();
+    },
+
+    // Função auxiliar para verificar se deve mostrar reticências
+    shouldShowEllipsis(position) {
+        const range = this.getPaginationRange();
+        if (position === 'start') {
+            return range[0] > 1;
+        }
+        return range[range.length - 1] < this.totalPages;
+    },
+
+    get pagesArray() {
+        const pages = [];
+        for (let i = 1; i <= this.totalPages; i++) {
+            pages.push(i);
+        }
+        return pages;
+    },
+
+    async loadSessionHistory() {
+        try {
+            const response = await fetch(`/maturation/history?page=${this.currentPage}&limit=${this.itemsPerPage}`);
+            const data = await response.json();
+            
+            this.sessionHistory = data.history;
+            this.totalPages = data.totalPages;
+            this.totalItems = data.total;
+        } catch (error) {
+            console.error('Error loading session history:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: 'Falha ao carregar histórico de sessões'
+            });
+        }
+    },
+
+    prevPage() {
+        if (this.currentPage > 1) {
+            this.currentPage--;
+            this.loadSessionHistory();
+        }
+    },
+
+    nextPage() {
+        if (this.currentPage < this.totalPages) {
+            this.currentPage++;
+            this.loadSessionHistory();
+        }
+    },
+
+    goToPage(page) {
+        if (page !== this.currentPage && page >= 1 && page <= this.totalPages) {
+            this.currentPage = page;
+            this.loadSessionHistory();
+        }
+    },
+
+    calculateDuration(startDate, endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate || Date.now());
+        const diff = end - start;
+        
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+        if (days > 0) {
+            return `${days}d ${hours}h`;
+        }
+        if (hours > 0) {
+            return `${hours}h ${minutes}m`;
+        }
+        return `${minutes}m`;
+    },
+
+
+
+        async loadInstances() {
+            try {
+                console.log('Buscando instâncias...');
+                const response = await fetch('/whatsapp/list');
+                const data = await response.json();
+                console.log('Instâncias recebidas:', data);
+                
+                this.instances = data.map(instance => ({
+                    key: instance.name,
+                    name: `${instance.whatsappName} (${instance.number})`
+                }));
+            } catch (error) {
+                console.error('Erro ao carregar instâncias:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro',
+                    text: 'Falha ao carregar instâncias'
+                });
+            }
+        },
+
+         // Computed property para sessões filtradas
+    get filteredSessions() {
+        return this.activeSessions.filter(session => 
+            this.statusFilter === 'all' || session.status === this.statusFilter
+        );
+    },
+
+    // Funções auxiliares para cálculos de tempo e progresso
+    getCountdownProgressStyle(nextAction) {
+        if (!nextAction) return 'width: 0%';
+        const total = 5 * 60 * 1000; // 5 minutos em ms
+        const remaining = new Date(nextAction) - new Date();
+        const progress = Math.max(0, Math.min(100, (remaining / total) * 100));
+        return `width: ${progress}%`;
+    },
+
+    calculateProgress(session) {
+    if (!session.configuration || !session.configuration.startDate || !session.configuration.endDate) {
+        return 0;
+    }
+
+    const start = new Date(session.configuration.startDate);
+    const end = new Date(session.configuration.endDate);
+    const now = new Date();
+
+    // Se já passou da data final
+    if (now > end) return 100;
+    // Se ainda não começou
+    if (now < start) return 0;
+
+    // Cálculo baseado no tempo decorrido e ações realizadas
+    const totalTimeInMs = end.getTime() - start.getTime();
+    const elapsedTimeInMs = now.getTime() - start.getTime();
+    const timeProgress = (elapsedTimeInMs / totalTimeInMs) * 100;
+
+    // Cálculo baseado nas ações (se tiver um limite diário)
+    let actionsProgress = 0;
+    if (session.methods.groupOwnerInteraction.enabled) {
+        const totalExpectedActions = session.methods.groupOwnerInteraction.dailyLimit * 
+                                   session.configuration.durationDays;
+        const completedActions = session.activities ? session.activities.length : 0;
+        actionsProgress = (completedActions / totalExpectedActions) * 100;
+    }
+
+    // Média entre progresso de tempo e ações
+    const totalProgress = (timeProgress + actionsProgress) / 2;
+    return Math.min(Math.round(totalProgress), 100);
+},
+
+    calculateSessionDuration(session) {
+        const start = new Date(session.startDate);
+        const now = new Date();
+        const diff = now - start;
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        return `${hours}h${minutes}m`;
+    },
+
+    formatActivityMessage(activity) {
+        const messages = {
+            'owner_message': () => {
+                const group = activity.details.groupName;
+                const success = activity.details.success;
+                return success 
+                    ? `✅ Mensagem enviada para "${group}"`
+                    : `❌ Falha ao enviar mensagem para "${group}"`;
+            },
+            'p2p_communication': () => {
+                return `🔄 Comunicação P2P realizada`;
+            },
+            'default': () => 'Atividade registrada'
+        };
+        
+        return (messages[activity.type] || messages.default)();
+    },
+
+    async scrollToNewSession() {
+        const form = document.querySelector('#new-session-form');
+        if (form) {
+            form.scrollIntoView({ behavior: 'smooth' });
+        }
+    },
+
+    // Timer e progresso
+    startTimers() {
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        
+        this.timerInterval = setInterval(() => {
+            this.activeSessions = this.activeSessions.map(session => {
+                if (session.status !== 'active') return session;
+
+                // Atualiza progresso
+                const start = new Date(session.startDate);
+                const now = new Date();
+                const end = new Date(session.configuration.endDate);
+                const total = end - start;
+                const current = now - start;
+                const progress = Math.min(100, (current / total) * 100);
+
+                return {
+                    ...session,
+                    progress: {
+                        ...session.progress,
+                        percentageComplete: Math.round(progress)
+                    }
+                };
+            });
+        }, 1000);
+    },
+
+    // Cleanup on component destroy
+    cleanup() {
+        if (this.countdownInterval) {
+        clearInterval(this.countdownInterval);
+    }
+    },
+    
+    async loadActiveSessions() {
+    try {
+        const response = await fetch('/maturation/sessions');
+        const data = await response.json();
+        
+        this.activeSessions = data.sessions.map(session => ({
+            ...session,
+            progress: {
+                ...session.progress,
+                percentageComplete: this.calculateProgress(session)
+            },
+            startDate: new Date(session.configuration.startDate),
+            status: session.status,
+            nextScheduledAction: session.nextScheduledAction ? new Date(session.nextScheduledAction) : null
+        }));
+
+        this.onlineUsers = data.onlineUsers;
+        this.updateCountdowns();
+    } catch (error) {
+        console.error('Error loading sessions:', error);
+    }
+},
+
+
+updateCountdowns() {
+    if (!this.countdownInterval) {
+        this.countdownInterval = setInterval(() => {
+            const now = new Date();
+            
+            this.activeSessions = this.activeSessions.map(session => {
+                if (session.status === 'active' && session.nextScheduledAction) {
+                    const remaining = new Date(session.nextScheduledAction) - now;
+                    if (remaining <= 0) {
+                        // Se expirou, marca para atualização
+                        session.needsUpdate = true;
+                    }
+                }
+                return session;
+            });
+
+            // Se alguma sessão precisa de atualização, recarrega todas
+            if (this.activeSessions.some(s => s.needsUpdate)) {
+                this.loadActiveSessions();
+            }
+        }, 1000);
+    }
+},
+
+startCountdownUpdates() {
+    // Limpa intervalo anterior se existir
+    if (this.countdownInterval) {
+        clearInterval(this.countdownInterval);
+    }
+
+    // Inicia novo intervalo
+    this.countdownInterval = setInterval(() => {
+        this.activeSessions = this.activeSessions.map(session => {
+            if (session.status === 'active' && session.nextScheduledAction) {
+                // Só atualiza o countdown se a sessão estiver ativa e tiver próxima ação
+                const remaining = new Date(session.nextScheduledAction) - new Date();
+                
+                if (remaining <= 0) {
+                    // Se o tempo expirou, recarrega as sessões para obter nova próxima ação
+                    this.loadActiveSessions();
+                }
+            }
+            return session;
+        });
+    }, 1000);
+},
+
+async stopSession(sessionId) {
+    if (!sessionId) {
+        console.error('ID da sessão não fornecido');
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'ID da sessão não encontrado'
+        });
+        return;
+    }
+
+    try {
+        const result = await Swal.fire({
+            title: 'Confirmação',
+            text: 'Tem certeza que deseja encerrar esta sessão?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sim, encerrar',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (result.isConfirmed) {
+            const response = await fetch(`/maturation/sessions/${sessionId}`, {
+                method: 'DELETE'
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                await this.loadActiveSessions(); // Recarrega as sessões
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sucesso',
+                    text: 'Sessão encerrada com sucesso'
+                });
+            } else {
+                throw new Error(data.message || 'Erro ao encerrar sessão');
+            }
+        }
+    } catch (error) {
+        console.error('Error stopping session:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: error.message || 'Falha ao encerrar sessão'
+        });
+    }
+},
+
+async pauseSession(sessionId) {
+    if (!sessionId) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'ID da sessão não encontrado'
+        });
+        return;
+    }
+
+    const session = this.activeSessions.find(s => s.id === sessionId);
+    if (!session) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'Sessão não encontrada'
+        });
+        return;
+    }
+
+    try {
+        const response = await fetch(`/maturation/sessions/${sessionId}/toggle`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action: 'pause',
+                sessionId: sessionId
+            })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            await this.loadActiveSessions();
+            Swal.fire({
+                icon: 'success',
+                title: 'Sucesso',
+                text: 'Sessão pausada com sucesso'
+            });
+        } else {
+            throw new Error(data.message || 'Erro ao pausar sessão');
+        }
+    } catch (error) {
+        console.error('Error pausing session:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: error.message || 'Falha ao pausar sessão'
+        });
+    }
+},
+        async resumeSession(sessionId) {
+            try {
+                const response = await fetch(`/maturation/sessions/${sessionId}/toggle`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'resume',
+                        sessionId: sessionId
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    await this.loadActiveSessions();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Sucesso',
+                        text: 'Sessão retomada com sucesso'
+                    });
+                } else {
+                    throw new Error(data.message || 'Erro ao retomar sessão');
+                }
+            } catch (error) {
+                console.error('Error resuming session:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro',
+                    text: error.message || 'Falha ao retomar sessão'
+                });
+            }
+        },
+
+       
+    calculateOverallSuccessRate() {
+        if (!this.activeSessions.length) return 0;
+        
+        const totalSuccessful = this.activeSessions.reduce((acc, session) => {
+            return acc + (session.stats.interactions.successful || 0);
+        }, 0);
+        
+        const totalInteractions = this.activeSessions.reduce((acc, session) => {
+            return acc + (session.stats.interactions.total || 0);
+        }, 0);
+        
+        return totalInteractions ? Math.round((totalSuccessful / totalInteractions) * 100) : 0;
+    },
+
+    calculateTotalTime() {
+        if (!this.activeSessions.length) return '0h';
+        
+        const totalMinutes = this.activeSessions.reduce((acc, session) => {
+            const startTime = new Date(session.startDate);
+            const duration = (Date.now() - startTime) / (1000 * 60);
+            return acc + duration;
+        }, 0);
+        
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = Math.floor(totalMinutes % 60);
+        
+        return `${hours}h${minutes}m`;
+    },
+
+    getTodaySessions() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        return this.activeSessions.filter(session => {
+            const sessionDate = new Date(session.startDate);
+            return sessionDate >= today;
+        }).length;
+    },
+
+    getTotalInteractions() {
+        return this.activeSessions.reduce((acc, session) => {
+            return acc + (session.stats.interactions.total || 0);
+        }, 0);
+    },
+
+    getAverageSuccessRate() {
+        if (!this.activeSessions.length) return 0;
+        
+        const rates = this.activeSessions.map(session => 
+            this.calculateSuccessRate(session.stats.interactions)
+        );
+        
+        const average = rates.reduce((a, b) => a + b, 0) / rates.length;
+        return Math.round(average);
+    },
+
+    async updateSessionData() {
+    try {
+        const [sessionsResponse, onlineResponse] = await Promise.all([
+            fetch('/maturation/sessions'),
+            fetch('/maturation/online-instances')
+        ]);
+
+        const sessionsData = await sessionsResponse.json();
+        const onlineData = await onlineResponse.json();
+
+        if (sessionsData.success) {
+            this.updateSessions(sessionsData.sessions);
+        }
+
+        if (onlineData.success) {
+            this.onlineUsers = onlineData.data.length;
+        }
+    } catch (error) {
+        console.error('Error updating session data:', error);
+    }
+},
+
+updateSessions(sessions) {
+    sessions.forEach(newSession => {
+        const index = this.activeSessions.findIndex(s => s.id === newSession.id);
+        if (index !== -1) {
+            this.activeSessions[index] = {
+                ...this.activeSessions[index],
+                ...newSession,
+                nextScheduledAction: newSession.nextScheduledAction ? new Date(newSession.nextScheduledAction) : null
+            };
+        }
+    });
+},
+
+        startWebSocket() {
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${wsProtocol}//${window.location.host}`;
+            const socket = new WebSocket(wsUrl);
+            
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'sessionUpdate') {
+                    this.updateSession(data.session);
+                } else if (data.type === 'onlineUsers') {
+                    this.onlineUsers = data.count;
+                }
+            };
+        },
+
+        async startMaturation() {
+        if (this.isSubmitting) return;
+        
+        if (!this.validateForm()) {
+            Swal.fire({
+                title: 'Configuração Incompleta',
+                text: 'Por favor, selecione uma instância e pelo menos um método de maturação.',
+                icon: 'warning',
+                confirmButtonText: 'Ok',
+                customClass: {
+                    confirmButton: 'btn btn-primary'
+                }
+            });
+            return;
+        }
+
+        this.isSubmitting = true;
+        
+        try {
+            const response = await fetch('/maturation/start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(this.form)
+            });
+
+            const data = await response.json();
+            
+         // Modifique a parte do startMaturation onde mostra o alerta de sucesso
+if (data.success) {
+    Swal.fire({
+        title: 'Maturação Iniciada!',
+        text: 'Sua sessão de maturação foi iniciada com sucesso.',
+        icon: 'success',
+        timer: 1500,
+        showConfirmButton: false
+    });
+    
+    await this.loadActiveSessions();
+    this.resetForm();
+}else {
+                throw new Error(data.message);
+            }
+        } catch (error) {
+            Swal.fire({
+                title: 'Erro',
+                text: error.message || 'Falha ao iniciar maturação',
+                icon: 'error',
+                confirmButtonText: 'Tentar Novamente'
+            });
+        } finally {
+            this.isSubmitting = false;
+        }
+    },
+
+    validateForm() {
+        return this.form.instanceKey && 
+               this.form.methods.length > 0 && 
+               this.form.durationDays >= 1 && 
+               this.form.durationDays <= 30;
+    },
+
+    resetForm() {
+        this.form = {
+            instanceKey: '',
+            methods: [],
+            durationDays: 1
+        };
+    },
+
+
+      // Função para verificar se o countdown expirou
+isCountdownExpired(date) {
+    return new Date(date) - new Date() <= 0;
+},
+
+// Função atualizada para formatar o countdown
+formatCountdown(nextScheduledAction) {
+    if (!nextScheduledAction) return 'Aguardando...';
+    
+    const remaining = new Date(nextScheduledAction) - new Date();
+    if (remaining <= 0) return 'Executando...';
+    
+    const hours = Math.floor(remaining / 3600000);
+    const minutes = Math.floor((remaining % 3600000) / 60000);
+    const seconds = Math.floor((remaining % 60000) / 1000);
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+},
+
+        // Melhora o formatador de datas
+        formatDate(date) {
+    if (!date) return 'Data não disponível';
+    
+    try {
+        const d = new Date(date);
+        if (isNaN(d.getTime())) return 'Data inválida';
+        
+        return d.toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return 'Data inválida';
+    }
+},
+
+        formatActivityMessage(activity) {
+            switch (activity.type) {
+                case 'owner_message':
+                    return `Mensagem enviada para dono do grupo "${activity.details.groupName}"`;
+                case 'p2p_communication':
+                    return 'Comunicação P2P realizada';
+                default:
+                    return 'Atividade desconhecida';
+            }
+        },
+
+        calculateSuccessRate(interactions) {
+            if (!interactions?.total) return 0;
+            return Math.round((interactions.successful / interactions.total) * 100);
+        }
+    }));
+});
+
+    </script>
+</body>
+</html>

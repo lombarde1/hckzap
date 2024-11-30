@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentação da API - HocketZap</title>
+    
+    <!-- Tailwind e DaisyUI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.6.0/dist/full.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    
+    <!-- Prism.js para highlight de código -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-json.min.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-900">API HocketZap</h1>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-500">
+                        Status: 
+                        <span class="text-green-600 font-semibold">Online</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- API Key Section -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Sua API Key</h2>
+            
+            <% if (user.apiKey) { %>
+                <div class="flex items-center space-x-4 mb-4">
+                    <input type="text" value="<%= user.apiKey %>" 
+                           class="flex-1 p-2 border rounded bg-gray-50" readonly>
+                    <button onclick="copyApiKey()" class="btn btn-ghost btn-circle">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <button onclick="revokeApiKey()" class="btn btn-error btn-sm">
+                    Revogar API Key
+                </button>
+            <% } else { %>
+                <button onclick="generateApiKey()" class="btn btn-primary">
+                    Gerar API Key
+                </button>
+            <% } %>
+        </div>
+
+        <!-- API Documentation -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-6">Documentação</h2>
+
+            <!-- Authentication Section -->
+            <section class="mb-8">
+                <h3 class="text-lg font-semibold mb-4">Autenticação</h3>
+                <p class="text-gray-600 mb-4">
+                    Todas as requisições à API devem incluir sua API key no header 'x-api-key'.
+                </p>
+                <div class="bg-gray-800 rounded-lg p-4">
+                    <pre><code class="language-javascript">
+const headers = {
+    'x-api-key': 'sua_api_key_aqui',
+    'Content-Type': 'application/json'
+};
+                    </code></pre>
+                </div>
+            </section>
+
+            <!-- Endpoints Section -->
+            <section>
+                <h3 class="text-lg font-semibold mb-4">Endpoints</h3>
+
+                <!-- Send Text Message -->
+                <div class="border rounded-lg p-4 mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-semibold">Enviar Mensagem de Texto</h4>
+                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">POST</span>
+                    </div>
+                    <p class="text-gray-600 mb-2">
+                        /api/v2/message/send-text
+                    </p>
+                    <div class="bg-gray-800 rounded-lg p-4 mb-2">
+                        <pre><code class="language-javascript">
+// Request
+{
+    "instanceKey": "sua_instancia",
+    "number": "5511999999999",
+    "message": "Sua mensagem aqui"
+}
+
+// Response
+{
+    "success": true,
+    "messageId": "123456789"
+}
+                        </code></pre>
+                    </div>
+                </div>
+
+                <!-- Send Media -->
+                <div class="border rounded-lg p-4 mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-semibold">Enviar Mídia</h4>
+                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">POST</span>
+                    </div>
+                    <p class="text-gray-600 mb-2">
+                        /api/v2/message/send-media
+                    </p>
+                    <div class="bg-gray-800 rounded-lg p-4 mb-2">
+                        <pre><code class="language-javascript">
+// Request
+{
+    "instanceKey": "sua_instancia",
+                "number": "5511999999999",
+                "mediaUrl": "https://exemplo.com/imagem.jpg",
+                "type": "image", // ou "video", "audio"
+                "caption": "Legenda opcional"
+}
+
+// Response
+{
+    "success": true,
+    "messageId": "123456789"
+}
+                        </code></pre>
+                    </div>
+                </div>
+
+                <!-- Execute Funnel -->
+                <div class="border rounded-lg p-4 mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-semibold">Executar Funil</h4>
+                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">POST</span>
+                    </div>
+                    <p class="text-gray-600 mb-2">
+                        /api/v2/funnel/execute
+                    </p>
+                    <div class="bg-gray-800 rounded-lg p-4 mb-2">
+                        <pre><code class="language-javascript">
+// Request
+{
+    "funnelId": "id_do_funil",
+    "instanceKey": "sua_instancia",
+    "chatId": "5511999999999"
+}
+
+// Response
+{
+    "success": true,
+    "message": "Funil iniciado com sucesso"
+}
+                        </code></pre>
+                    </div>
+                </div>
+
+                <!-- Test Connection -->
+                <div class="border rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-semibold">Testar Conexão</h4>
+                        <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">GET</span>
+                    </div>
+                    <p class="text-gray-600 mb-2">
+                        /api/v2/test-connection
+                    </p>
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <pre><code class="language-javascript">
+// Response
+{
+    "success": true,
+    "message": "Conexão estabelecida com sucesso",
+    "user": {
+        "name": "Seu Nome",
+        "plan": "premium"
+    }
+}
+                        </code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Code Examples -->
+            <section class="mt-8">
+                <h3 class="text-lg font-semibold mb-4">Exemplos de Uso</h3>
+
+                <!-- JavaScript Example -->
+                <div class="mb-4">
+                    <h4 class="font-semibold mb-2">JavaScript/Node.js</h4>
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <pre><code class="language-javascript">
+const axios = require('axios');
+
+const API_KEY = 'sua_api_key';
+const BASE_URL = 'https://dev.hocketzap.com/api/v2';
+
+// Configuração do cliente
+const client = axios.create({
+    baseURL: BASE_URL,
+    headers: {
+        'x-api-key': API_KEY,
+        'Content-Type': 'application/json'
+    }
+});
+
+// Exemplo: Enviar mensagem de texto
+async function sendMessage(instanceKey, number, message) {
+    try {
+        const response = await client.post('/message/send-text', {
+            instanceKey,
+            number,
+            message
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Erro:', error.response?.data || error.message);
+        throw error;
+    }
+}
+
+// Exemplo: Executar funil
+async function executeFunnel(funnelId, instanceKey, chatId) {
+    try {
+        const response = await client.post('/funnel/execute', {
+            funnelId,
+            instanceKey,
+            chatId
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Erro:', error.response?.data || error.message);
+        throw error;
+    }
+}
+                        </code></pre>
+                    </div>
+                </div>
+
+                <!-- Python Example -->
+                <div>
+                    <h4 class="font-semibold mb-2">Python</h4>
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <pre><code class="language-javascript">
+import requests
+
+API_KEY = 'sua_api_key'
+BASE_URL = 'https://dev.hocketzap.com/api/v2'
+
+# Configuração dos headers
+headers = {
+    'x-api-key': API_KEY,
+    'Content-Type': 'application/json'
+}
+
+def send_message(instance_key, number, message):
+    try:
+        response = requests.post(
+            f'{BASE_URL}/message/send-text',
+            json={
+                'instanceKey': instance_key,
+                'number': number,
+                'message': message
+            },
+            headers=headers
+        )
+        return response.json()
+    except Exception as e:
+        print(f'Erro: {str(e)}')
+        raise
+
+def execute_funnel(funnel_id, instance_key, chat_id):
+    try:
+        response = requests.post(
+            f'{BASE_URL}/funnel/execute',
+            json={
+                'funnelId': funnel_id,
+                'instanceKey': instance_key,
+                'chatId': chat_id
+            },
+            headers=headers
+        )
+        return response.json()
+    except Exception as e:
+        print(f'Erro: {str(e)}')
+        raise
+                        </code></pre>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script>
+        // Copiar API Key
+        async function copyApiKey() {
+            const apiKeyInput = document.querySelector('input[type="text"]');
+            await navigator.clipboard.writeText(apiKeyInput.value);
+            
+            const copyBtn = document.querySelector('.fa-copy');
+            copyBtn.classList.remove('fa-copy');
+            copyBtn.classList.add('fa-check');
+            
+            setTimeout(() => {
+                copyBtn.classList.remove('fa-check');
+                copyBtn.classList.add('fa-copy');
+            }, 2000);
+        }
+
+        // Gerar nova API Key
+        async function generateApiKey() {
+            try {
+                const response = await fetch('/api/generate-key', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    window.location.reload();
+                } else {
+                    throw new Error('Erro ao gerar API key');
+                }
+            } catch (error) {
+                alert('Erro ao gerar API key: ' + error.message);
+            }
+        }
+
+        // Revogar API Key
+        async function revokeApiKey() {
+            if (!confirm('Tem certeza que deseja revogar sua API key? Todas as integrações atuais deixarão de funcionar.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/revoke-key', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    throw new Error('Erro ao revogar API key');
+                }
+            } catch (error) {
+                alert('Erro ao revogar API key: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

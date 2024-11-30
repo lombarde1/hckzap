@@ -1,0 +1,3886 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HocketZap - Chat</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.5.0/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <link rel="icon" type="image/png" href="/img/logohock.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
+    
+    <script>
+   tailwind.config = {
+    theme: {
+        extend: {
+            colors: {
+                primary: {"50":"#f0f7ff","100":"#e0effe","200":"#bae0fd","300":"#7ccafb","400":"#36aef8","500":"#0c92e5","600":"#0474c3","700":"#055c9f","800":"#074b80","900":"#0a3f6c"}
+            },
+            fontFamily: {
+                'sans': ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'],
+                'inter': ['Inter', 'sans-serif'],
+            }
+        }
+    }
+}
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        :root {
+            --primary-color: #627d98;
+            --secondary-color: #f0f4f8;
+            --text-color: #334e68;
+            --light-text: #829ab1;
+        }
+
+        /* Adicione ao seu CSS existente */
+.fixed {
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.max-w-[90vw] {
+    max-width: 90vw;
+}
+
+.max-h-[90vh] {
+    max-height: 90vh;
+}
+
+.backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+}
+
+        body {
+            font-family: 'Inter', sans-serif;
+    color: #000000;
+    background-color: #f0f2f5;
+            background-color: var(--secondary-color);
+        }
+
+        #chatOptionsMenu {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+}
+
+#chatOptionsMenu a {
+    transition: all 0.2s;
+}
+
+#chatOptionsMenu a:hover {
+    background-color: #f3f4f6;
+}
+
+.list-tag {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    background-color: #e0f2fe;
+    color: #0369a1;
+    font-weight: 500;
+}
+
+        #sidebarToggle {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            #sidebarToggle {
+                display: block;
+                position: fixed;
+                top: 1rem;
+                left: 1rem;
+                z-index: 1000;
+            }
+
+            #chatList {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                bottom: 0;
+                width: 80%;
+                max-width: 300px;
+                transition: left 0.3s ease-in-out;
+                z-index: 999;
+            }
+
+            #chatList.open {
+                left: 0;
+            }
+
+            .chat-container {
+                margin-left: 0;
+            }
+        }
+
+     
+.chat-item h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a202c;
+    margin-bottom: 4px;
+}
+
+.chat-item p {
+    font-size: 0.875rem;
+    color: #4a5568;
+    margin-bottom: 0;
+}
+
+.text-xs {
+    font-size: 0.75rem;
+    color: #718096;
+}
+
+.bg-primary-100 {
+    background-color: #e6e6ff;
+}
+
+.bg-primary-500 {
+    background-color: #6366f1;
+}
+        /* Fluidez aprimorada */
+        .chat-list, .message-list {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0,0,0,0.2) transparent;
+        }
+
+        
+
+        .chat-list::-webkit-scrollbar, .message-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-list::-webkit-scrollbar-thumb, .message-list::-webkit-scrollbar-thumb {
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 3px;
+        }
+
+        /* Correção de ícones para dispositivos móveis */
+        @media (max-width: 768px) {
+            .fas {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Ajustes responsivos */
+        @media (max-width: 640px) {
+            html {
+                font-size: 14px;
+            }
+
+            .chat-bubble {
+                font-size: 0.95rem;
+                line-height: 1.4;
+                max-width: 90%;
+            }
+
+            .chat-item {
+                padding: 0.5rem;
+            }
+        }
+
+        .message-status {
+    margin-left: 5px;
+    display: inline-block;
+  }
+
+  .message-status svg {
+    width: 16px;
+    height: 16px;
+  }
+
+        #activeFunnelsList {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        #activeFunnelsList div {
+            transition: all 0.3s ease;
+        }
+
+        #activeFunnelsList div:hover {
+            background-color: #d9e2ec;
+        }
+
+        #funnelDetails {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .media-content {
+            max-width: 250px;
+            max-height: 250px;
+            object-fit: cover;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .audio-player {
+        display: flex;
+        align-items: center;
+        background-color: #DCF8C6;
+        border-radius: 18px;
+        padding: 10px 15px;
+        width: 100%;
+        max-width: 300px;
+        margin: 5px 0;
+    }
+
+    .audio-player-icon {
+        font-size: 24px;
+        color: #075E54;
+        margin-right: 15px;
+        cursor: pointer;
+    }
+
+    .audio-player-progress {
+        flex-grow: 1;
+        height: 4px;
+        background-color: #B3E5FC;
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
+    .audio-player-progress-bar {
+        height: 100%;
+        background-color: #075E54;
+        width: 0%;
+    }
+
+    .audio-player-time {
+        font-size: 12px;
+        color: #075E54;
+        margin-left: 10px;
+        white-space: nowrap;
+    }
+
+
+        .video-thumbnail {
+            position: relative;
+            display: inline-block;
+        }
+
+        .video-thumbnail::after {
+            content: '\f144';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .document-link {
+            display: flex;
+            align-items: center;
+            background-color: #d9e2ec;
+            border-radius: 8px;
+            padding: 8px 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .document-link i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+
+        .chat-message {
+            display: flex;
+            flex-direction: column;
+            max-width: 70%;
+        }
+
+        .chat-message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 2px;
+        }
+
+        @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .animate-pulse { animation: pulse 1s infinite; }
+    .animate-bounce { animation: bounce 1s infinite; }
+    .animate-spin { animation: spin 1s linear infinite; }
+
+        .chat-sender {
+            font-weight: bold;
+            font-size: 0.8rem;
+            margin-right: 8px;
+        }
+
+        .chat-time {
+            font-size: 0.7rem;
+            color: #888;
+        }
+
+        .chat-end .chat-bubble {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .chat-start .chat-bubble {
+            background-color: var(--secondary-color);
+        }
+
+        .message-list {
+            scroll-behavior: smooth;
+        }
+
+        .chat-item {
+            background-color: #fff;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    padding: 12px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+        }
+
+        .chat-item:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+
+       
+
+    
+
+    .chat-bubble.with-media {
+        padding: 4px;
+        overflow: hidden;
+        max-width: 80%; /* Aumentado para corresponder à bolha de texto */
+        width: 300px; /* Largura fixa para mídia */
+    }
+
+
+    .media-content {
+        max-width: 100%;
+        height: auto;
+        object-fit: cover;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .message-container {
+  display: flex;
+  flex-direction: column;
+}
+
+    .message-text {
+  white-space: pre-wrap;
+}
+
+.chat-bubble {
+        border-radius: 18px;
+        padding: 10px 15px;
+        max-width: 80%; /* Aumentado de 70% para 80% */
+        width: fit-content; /* Ajusta a largura ao conteúdo */
+        min-width: 200px; /* Define uma largura mínima */
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+    .message-bubble {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 80%;
+  width: fit-content;
+  
+}
+
+        @media (max-width: 768px) {
+            .chat-bubble,
+        .chat-bubble.with-media {
+            max-width: 90%; /* Aumenta ainda mais em telas menores */
+            min-width: 150px; /* Ajusta a largura mínima para telas menores */
+        }
+
+            .media-content {
+                width: 100%;
+            }
+        }
+
+        .message-bubble {
+    max-width: 90%;
+  }
+
+        .unread-indicator {
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+
+        .chat-item.unread {
+            background-color: #e1f5fe;
+            font-weight: bold;
+        }
+
+        .chat-end .chat-bubble {
+            background-color: #627d98;
+            color: white;
+        }
+
+        .chat-start .chat-bubble {
+            background-color: white;
+            color: #334e68;
+        }
+        
+        .full-size-media {
+            max-width: 90%;
+            max-height: 80vh;
+            margin: 10px auto;
+            display: block;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .whitespace-pre-wrap {
+            white-space: pre-wrap;
+        }
+
+        .break-words {
+            word-break: break-word;
+        }
+
+        .full-size-media-container {
+            position: relative;
+            width: 100%;
+            text-align: center;
+        }
+
+        .close-full-size-media {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .group-members-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .group-members-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+        }
+
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-modal:hover,
+        .close-modal:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .chat-list,
+        .message-list {
+            height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+
+        .bg-chat-pattern {
+            background-color: #f0f4f8;
+            background-image: url("https://raw.githubusercontent.com/darkdohot/medias/main/image/fd01f248-601f-44bc-9276-299f29465563.jpg");
+            background-size: cover;
+        }
+
+        .chat-item {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+
+        .chat-item:hover {
+            background-color: #d9e2ec;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-item.unread {
+            background-color: #e1f5fe;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            animation: slideIn 0.5s ease-out;
+            background-color: #334e68;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .notification .close-btn {
+            cursor: pointer;
+            padding: 0 5px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .modal-box {
+            width: 90%;
+            max-width: 400px;
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background-color: #627d98;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #486581;
+            transform: translateY(-2px);
+        }
+
+        .input-bordered {
+            border-radius: 8px;
+        }
+
+        .truncate-message {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+
+        .funnels-container {
+            display: flex;
+            overflow-x: auto;
+            padding: 10px 0;
+            margin-bottom: 10px;
+        }
+
+        .funnel-button {
+            flex: 0 0 auto;
+            margin-right: 10px;
+            padding: 5px 10px;
+            background-color: #627d98;
+            color: white;
+            border-radius: 15px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+
+        .modal-box {
+        background-color: #ffffff;
+        border-radius: 0.5rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        max-width: 32rem;
+        width: 95%;
+    }
+
+    .modal-box .label-text {
+        font-weight: 600;
+        color: #4b5563;
+    }
+
+    @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+    .modal-box .select,
+    .modal-box .textarea {
+        width: 100%;
+        border-radius: 0.375rem;
+        border: 1px solid #d1d5db;
+    }
+
+    .modal-box .btn {
+        text-transform: none;
+        font-weight: 600;
+    }
+
+    .modal-box .btn-primary {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+    }
+
+    .modal-box .btn-primary:hover {
+        background-color: #2563eb;
+        border-color: #2563eb;
+    }
+
+    .modal-box .btn-ghost {
+        color: #4b5563;
+    }
+
+    .modal-box .btn-ghost:hover {
+        background-color: #f3f4f6;
+    }
+
+        .audio-player {
+            max-width: 90%;
+        }
+        
+        @media (max-width: 768px) {
+    .chat-container {
+        flex-direction: column;
+    }
+
+    .chat-sidebar {
+        width: 100%;
+        height: 60px;
+    }
+
+    .chat-main {
+        width: 100%;
+        height: calc(100vh - 60px);
+    }
+
+    .message {
+        max-width: 85%;
+    }
+
+    .chat-input {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 0.5rem;
+    }
+
+    .chat-messages {
+        padding-bottom: 60px;
+    }
+}
+@media (max-width: 768px) {
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+
+    #mobileChats,
+    #mobileMessages {
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    #mobileChatList,
+    #mobileMessageList {
+        height: calc(100vh - 120px);
+    }
+
+    .chat-item {
+        padding: 10px;
+    }
+
+    #mobileMessageInput {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 10px;
+        background: white;
+        z-index: 1000;
+    }
+
+    #mobileChatHeader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+    }
+
+    #mobileMessageList {
+        margin-top: 60px;
+        margin-bottom: 60px;
+        padding-bottom: 20px;
+    }
+}
+
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <!-- Modal de seleção de instância -->
+    <div id="instanceModal" class="modal modal-open">
+        <div class="modal-box p-6 max-w-3xl">
+            <h1 id="connectedInstancesCount" class="text-2xl font-bold mb-4 text-center"></h1>
+            <h3 class="font-bold text-lg mb-4">Selecione uma Instância</h3>
+            <div id="instanceList" class="mb-4 max-h-96 overflow-y-auto"></div>
+            <div id="noInstancesError" class="text-red-500 mt-4 hidden">
+                Nenhuma instância conectada. Por favor, conecte uma instância para continuar.
+            </div>
+            <div class="modal-action mt-6">
+                <button id="confirmInstance" class="btn btn-primary">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container principal do chat -->
+    <div id="chatContainer" class="hidden">
+        <div class="flex h-screen bg-gray-100">
+            <!-- Menu Lateral -->
+           <!-- Menu Lateral -->
+<!-- Menu Lateral -->
+<div class="w-16 md:w-64 bg-gray-800 text-white flex flex-col transition-all duration-300 ease-in-out">
+    <!-- Cabeçalho do Menu com Perfil -->
+    <div class="p-4 bg-gray-900">
+        <div class="flex items-center space-x-4">
+            <img id="profileImage" src="https://cdn-icons-png.flaticon.com/512/4792/4792929.png" alt="Perfil" class="w-12 h-12 rounded-full object-cover border-2 border-white">
+            <div class="hidden md:block overflow-hidden">
+                <p id="profileName" class="font-semibold text-lg truncate">Nome do Usuário</p>
+                <p id="instanceName" class="text-sm text-gray-400 truncate">Instância</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Itens do Menu -->
+    <nav class="flex-grow py-4">
+     
+        <!-- No menu lateral, adicione este item -->
+<a href="#" id="profileButton" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 transition-colors duration-200">
+    <i class="fas fa-user-circle text-xl md:mr-4"></i>
+    <span class="hidden md:inline">Perfil</span>
+</a>
+        <a href="#" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 transition-colors duration-200">
+            <i class="fas fa-comment-alt text-xl md:mr-4"></i>
+            <span class="hidden md:inline">Chats</span>
+        </a>
+        <a href="#" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 transition-colors duration-200">
+            <i class="fas fa-users text-xl md:mr-4"></i>
+            <span class="hidden md:inline">Grupos</span>
+        </a>
+        <a href="#" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 transition-colors duration-200">
+            <i class="fas fa-cog text-xl md:mr-4"></i>
+            <span class="hidden md:inline">Configurações</span>
+        </a>
+       
+    </nav>
+
+    <!-- Botão de Sair -->
+    <div class="p-4 border-t border-gray-700">
+        <a href="#" class="flex items-center text-gray-300 hover:text-white transition-colors duration-200">
+            <i class="fas fa-sign-out-alt text-xl md:mr-4"></i>
+            <span class="hidden md:inline">Mudar Instancia</span>
+        </a>
+    </div>
+
+  
+</div>
+
+<!-- Adicione este código no final do body, antes dos scripts -->
+<div id="profileModal" class="modal">
+    <div class="modal-box w-11/12 max-w-2xl">
+        <h3 class="font-bold text-lg mb-4">Configurações de Perfil</h3>
+        <div class="flex flex-col space-y-4">
+            <div class="flex items-center space-x-4">
+                <img id="currentProfilePicture" src="" alt="Profile Picture" class="w-20 h-20 rounded-full object-cover">
+                <div>
+                    <button id="changeProfilePicture" class="btn btn-primary btn-sm">Alterar Foto</button>
+                    <input type="file" id="profilePictureInput" class="hidden" accept="image/*">
+                </div>
+            </div>
+            <div>
+                <label for="profileName" class="block text-sm font-medium text-gray-700">Nome</label>
+                <input type="text" id="profileName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+            </div>
+            <div>
+                <label for="profileStatus" class="block text-sm font-medium text-gray-700">Status</label>
+                <input type="text" id="profileStatus" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">WhatsApp ID</label>
+                <p id="profileWuid" class="mt-1 text-sm text-gray-600"></p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Conta Business</label>
+                <p id="profileIsBusiness" class="mt-1 text-sm text-gray-600"></p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Descrição</label>
+                <p id="profileDescription" class="mt-1 text-sm text-gray-600"></p>
+            </div>
+            <div>
+                <h4 class="font-medium text-gray-700 mb-2">Configurações de Privacidade</h4>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span>Recibos de Leitura</span>
+                        <select id="readreceipts" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <option value="all">Todos</option>
+                            <option value="none">Ninguém</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span>Perfil</span>
+                        <select id="profile" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <option value="all">Todos</option>
+                            <option value="contacts">Contatos</option>
+                            <option value="none">Ninguém</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-action">
+            <button id="saveProfileChanges" class="btn btn-primary">Salvar Alterações</button>
+            <button id="closeProfileModal" class="btn">Fechar</button>
+        </div>
+    </div>
+</div>
+            <!-- Conteúdo Principal -->
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <!-- Layout para PC -->
+                <div class="hidden md:flex h-full">
+                    <!-- Lista de chats -->
+                    <div class="w-1/3 bg-gray-50 border-r flex flex-col shadow-lg">
+                        <div class="p-4 bg-gradient-to-r from-primary-600 to-primary-800 rounded-b-2xl shadow-md">
+                            <div class="flex justify-between items-center">
+                                <h1 class="text-2xl font-bold text-white tracking-wide">HocketZap</h1>
+                                <div class="flex space-x-2">
+                                    <button id="refreshButton" class="text-white hover:text-indigo-200 transition duration-300">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                        </svg>
+                                    </button>
+                                    <button id="settingsButton" class="text-white hover:text-indigo-200 transition duration-300">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <input type="text" id="searchChat" placeholder="Buscar chat..." class="w-full px-4 py-2 rounded-full bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
+                        </div>
+                        <div id="chatList" class="chat-list p-4 space-y-2 flex-grow overflow-y-auto"></div>
+                    </div>
+                    <!-- Área de mensagens -->
+                    <div class="w-2/3 flex flex-col">
+                        <div id="chatHeader" class="p-4 bg-primary-100 border-b border-primary-200 shadow-sm flex items-center justify-between">
+                        
+                            
+                            <!-- Modal para adicionar contato à lista -->
+                            <div id="addToListModal" class="modal">
+                                <div class="modal-box">
+                                    <h3 class="font-bold text-lg mb-4">Adicionar Contato à Lista</h3>
+                                    <form id="addToListForm">
+                                        <div class="form-control mb-4">
+                                            <label class="label" for="contactList">
+                                                <span class="label-text">Selecione a Lista</span>
+                                            </label>
+                                            <select id="contactList" class="select select-bordered w-full" required>
+                                                <!-- As opções serão preenchidas dinamicamente -->
+                                            </select>
+                                        </div>
+                                        <div class="form-control mb-4">
+                                            <label class="label" for="contactQuality">
+                                                <span class="label-text">Qualidade do Contato</span>
+                                            </label>
+                                            <select id="contactQuality" class="select select-bordered w-full" required>
+                                                <option value="high_ticket">High Ticket</option>
+                                                <option value="low_ticket">Low Ticket</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-control mb-4">
+                                            <label class="label" for="contactDescription">
+                                                <span class="label-text">Descrição</span>
+                                            </label>
+                                            <textarea id="contactDescription" class="textarea textarea-bordered h-24" placeholder="Adicione uma descrição para o contato"></textarea>
+                                        </div>
+                                        <div class="modal-action">
+                                            <button type="submit" class="btn btn-primary">Adicionar</button>
+                                            <button type="button" class="btn btn-ghost" onclick="closeAddToListModal()">Cancelar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="relative">
+                                    <img id="chatAvatar" src="https://cdn-icons-png.flaticon.com/512/4792/4792929.png" alt="Chat Avatar" class="w-12 h-12 rounded-full object-cover">
+                                    <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></span>
+                                </div>
+                                <div class="ml-4">
+                                    <h2 id="chatName" class="text-lg font-semibold text-primary-800">Selecione um chat</h2>
+                                    <p id="chatType" class="text-sm text-primary-600"></p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-4">
+                                <button id="groupMembersButton" class="text-gray-600 hover:text-gray-800 transition duration-300 hidden">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    </svg>
+                                </button>
+                                <button id="chatInfoButton" class="text-gray-600 hover:text-gray-800 transition duration-300">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </button>
+                                <button id="searchMessagesButton" class="text-gray-600 hover:text-gray-800 transition duration-300">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                </button>
+                                <div class="relative">
+                                    <button id="chatOptionsButton" class="text-gray-600 hover:text-gray-800 transition duration-300">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                                        </svg>
+                                    </button>
+                                    <div id="chatOptionsMenu" class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl z-10 hidden overflow-hidden border border-gray-200">
+                                        <div class="py-2">
+                                            <a href="#" id="addToListOption" class="flex items-center px-4 py-3 hover:bg-gray-50 transition-colors duration-150">
+                                                <span class="flex items-center justify-center w-8 h-8 bg-indigo-100 text-indigo-500 rounded-full mr-3">
+                                                    <i class="fas fa-user-plus text-sm"></i>
+                                                </span>
+                                                <span class="text-sm font-medium text-gray-700">Adicionar contato à lista</span>
+                                            </a>
+                                           
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="messageList" class="message-list flex-grow p-6 bg-chat-pattern overflow-y-auto"></div>
+                        <div id="searchMessagesContainer" class="hidden">
+                            <input type="text" id="messageSearch" placeholder="Pesquisar mensagens..." class="w-full px-3 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        
+                        <div class="p-4 bg-white">
+                            <div id="funnelsContainer" class="funnels-container"></div>
+                            <div class="flex items-center">
+                                <button id="attachButton" class="btn btn-ghost btn-circle mr-2">
+                                    <i class="fas fa-paperclip"></i>
+                                </button>
+                                <input type="text" id="messageInput" class="input input-bordered flex-grow mr-2 bg-gray-100" placeholder="Digite uma mensagem">
+                                <button id="voiceButton" class="btn btn-ghost btn-circle mr-2">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
+                                <button id="sendButton" class="btn btn-circle bg-primary-500 hover:bg-primary-600 text-white">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="pullDataModal" class="modal">
+                            <div class="modal-box w-11/12 max-w-2xl">
+                                <h3 class="font-bold text-lg mb-4">Consulta de Dados</h3>
+                                <div class="form-control">
+                                    <label class="label" for="phoneInput">
+                                        <span class="label-text">Número de Telefone</span>
+                                    </label>
+                                    <input type="text" id="phoneInput" class="input input-bordered w-full" placeholder="Digite o número de telefone">
+                                </div>
+                                <div class="mt-4">
+                                    <button id="consultDataBtn" class="btn btn-primary">Consultar Dados</button>
+                                </div>
+                                <div id="dataResult" class="mt-6 hidden">
+                                    <!-- Os resultados serão inseridos aqui -->
+                                </div>
+                                <div class="modal-action">
+                                    <button id="closePullDataModal" class="btn">Fechar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal para membros do grupo -->
+                        <div id="groupMembersModal" class="group-members-modal">
+                            <div class="group-members-content">
+                                <span class="close-modal">&times;</span>
+                                <h2 class="text-xl font-bold mb-4">Membros do Grupo</h2>
+                                <ul id="groupMembersList"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Layout para celular -->
+                <div class="md:hidden">
+                    <!-- Lista de
+                    <!-- Layout para celular -->
+                <div class="md:hidden">
+                    <!-- Lista de chats (tela inicial) -->
+                    <div id="mobileChats" class="h-screen flex flex-col">
+                        <div class="p-4 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-b-2xl shadow-md">
+                            <div class="flex justify-between items-center">
+                                <h1 class="text-2xl font-bold text-white tracking-wide">HocketZap</h1>
+                                <div class="flex space-x-2">
+                                    <button id="mobileRefreshButton" class="text-white hover:text-indigo-200 transition duration-300">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                        </svg>
+                                    </button>
+                                    <button id="mobileSettingsButton" class="text-white hover:text-indigo-200 transition duration-300">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <input type="text" id="mobileSearchChat" placeholder="Buscar chat..." class="w-full px-4 py-2 rounded-full bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
+                        </div>
+                        <div id="mobileChatList" class="chat-list flex-grow p-4 space-y-2 overflow-y-auto"></div>
+                    </div>
+
+                    <!-- Área de mensagens (aparece ao clicar em um chat) -->
+                    <div id="mobileMessages" class="hidden chat-container flex flex-col h-screen bg-white">
+                        <div id="mobileChatHeader" class="p-4 bg-gradient-to-r from-primary-500 to-primary-700 text-white flex items-center justify-between">
+                            <div class="flex items-center">
+                                <button id="backButton" class="mr-2">
+                                    <i class="fas fa-arrow-left"></i>
+                                </button>
+                                <img id="mobileChatAvatar" src="https://cdn-icons-png.flaticon.com/512/4792/4792929.png" alt="Chat Avatar" class="w-10 h-10 rounded-full mr-3">
+                                <div>
+                                    <h2 id="mobileChatName" class="text-xl font-semibold">Selecione um chat</h2>
+                                    <p id="mobileChatType" class="text-sm"></p>
+                                </div>
+                            </div>
+                            <div>
+                              
+                            </div>
+                        </div>
+
+                        <div id="mobileMessageList" class="message-list flex-grow p-4 bg-chat-pattern overflow-y-auto"></div>
+                        <div class="p-4 bg-white">
+                            <div id="mobileFunnelsContainer" class="funnels-container"></div>
+                            <div class="flex items-center">
+                                <button id="mobileAttachButton" class="btn btn-ghost btn-circle mr-2">
+                                    <i class="fas fa-paperclip"></i>
+                                </button>
+                                <input type="text" id="mobileMessageInput" class="input input-bordered flex-grow mr-2 bg-gray-100" placeholder="Digite uma mensagem">
+                                <button id="mobileSendButton" class="btn btn-circle btn-primary">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para membros do grupo (móvel) -->
+        <div id="mobileGroupMembersModal" class="group-members-modal">
+            <div class="group-members-content">
+                <span class="close-modal">&times;</span>
+                <h2 class="text-xl font-bold mb-4">Membros do Grupo</h2>
+                <ul id="mobileGroupMembersList"></ul>
+            </div>
+        </div>
+
+        <!-- Modal de configurações -->
+        <div id="settingsModal" class="modal">
+            <div class="modal-box">
+                <h3 class="font-bold text-lg mb-4">Configurações</h3>
+                <div class="form-control">
+                    <label class="label cursor-pointer">
+                        <span class="label-text">Ativar som de mensagem enviada</span>
+                        <input type="checkbox" id="sendSoundToggle" class="toggle toggle-primary" checked>
+                    </label>
+                </div>
+                <div class="form-control">
+                    <label class="label cursor-pointer">
+                        <span class="label-text">Ativar som de mensagem recebida</span>
+                        <input type="checkbox" id="receiveSoundToggle" class="toggle toggle-primary" checked>
+                    </label>
+                </div>
+                <div class="form-control">
+                    <label class="label cursor-pointer">
+                        <span class="label-text">Mudar papel de parede</span>
+                    </label>
+                    <input type="file" id="wallpaperInput" accept="image/*" class="file-input file-input-bordered w-full max-w-xs">
+                </div>
+                <div class="modal-action">
+                    <button id="closeSettingsModal" class="btn">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="notificationSound" src="https://www.myinstants.com/media/sounds/web_whatsapp.mp3"></audio>
+    <audio id="sendSound" src="/media/send.mp3"></audio>
+
+    <div id="funnelReportPopup" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h3 class="text-2xl font-bold text-primary-700">Relatórios de Funis Ativos</h3>
+                    <button id="closeFunnelReport" class="text-gray-400 hover:text-gray-500">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="mt-4 flex">
+                    <!-- Lista de chats com funis ativos -->
+                    <div id="activeFunnelsList" class="w-1/3 pr-4 border-r">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-2">Chats Ativos</h4>
+                        <!-- Os chats serão inseridos aqui dinamicamente -->
+                    </div>
+                    <!-- Detalhes do relatório do funil selecionado -->
+                    <div id="funnelReportDetails" class="w-2/3 pl-4">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-2">Detalhes do Funil</h4>
+                        <div id="funnelDetails" class="bg-gray-50 p-4 rounded-lg">
+                            <!-- Os detalhes do funil serão inseridos aqui dinamicamente -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal de Geração de Voz -->
+    <div id="voiceModal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg mb-4">Gerar Mensagem de Voz</h3>
+            <textarea id="voiceText" class="textarea textarea-bordered w-full mb-4" placeholder="Digite o texto para converter em áudio"></textarea>
+            <select id="voiceSelect" class="select select-bordered w-full mb-4">
+                <option disabled selected>Selecione uma voz</option>
+            </select>
+            <div class="modal-action">
+                <button id="generateVoiceButton" class="btn btn-primary">Gerar Áudio</button>
+                <button id="closeVoiceModal" class="btn">Fechar</button>
+            </div>
+            <div id="audioPreview" class="mt-4 hidden">
+                <audio id="generatedAudio" controls></audio>
+                <button id="sendVoiceButton" class="btn btn-success mt-2">Enviar Áudio</button>
+            </div>
+        </div>
+    </div>
+    <button id="openFunnelReport"
+        class="fixed bottom-4 right-4 px-4 py-2 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 hidden">
+        <svg class="w-6 h-6 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2">
+            </path>
+        </svg>
+        Ver Relatórios de Funis
+    </button>
+    <div id="emojiPicker" class="hidden absolute bottom-16 right-16 bg-white rounded-lg shadow-xl p-4">
+        <div id="emojiList" class="grid grid-cols-8 gap-2"></div>
+    </div>
+    <div id="statusAnimation" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-white rounded-full shadow-lg p-4 hidden">
+        <div class="flex items-center space-x-3">
+            <div id="animationIcon" class="text-3xl"></div>
+            <div id="animationText" class="text-lg font-medium"></div>
+        </div>
+    </div>
+
+<script>
+    const pullDataOption = document.getElementById('pullDataOption');
+const pullDataModal = document.getElementById('pullDataModal');
+const phoneInput = document.getElementById('phoneInput');
+const consultDataBtn = document.getElementById('consultDataBtn');
+const dataResult = document.getElementById('dataResult');
+const closePullDataModal = document.getElementById('closePullDataModal');
+
+pullDataOption.addEventListener('click', (e) => {
+    e.preventDefault();
+    openPullDataModal();
+    chatOptionsMenu.classList.add('hidden');
+});
+
+function openPullDataModal() {
+    pullDataModal.classList.add('modal-open');
+    const phoneNumber = currentChatId.replace('@c.us', '').replace('55', '');
+    phoneInput.value = phoneNumber;
+}
+
+closePullDataModal.addEventListener('click', () => {
+    pullDataModal.classList.remove('modal-open');
+    dataResult.classList.add('hidden');
+    dataResult.innerHTML = '';
+});
+
+async function consultData(phoneNumber) {
+    try {
+        // Consulta inicial de telefone
+        const phoneResponse = await fetch(`/consulta/telefone/${phoneNumber}`);
+        const phoneData = await phoneResponse.json();
+
+        if (phoneData.message) {
+            const cpf = extractInfo(phoneData.message, 'CPF/CNPJ');
+            displayPhoneData(phoneData.message);
+
+            if (cpf !== 'N/A') {
+                // Consulta CADSUS
+                const cadsusResponse = await fetch(`/consulta/cpf/Cadsus/${cpf}`);
+                const cadsusData = await cadsusResponse.json();
+
+                if (cadsusData.message) {
+                    displayCadsusData(cadsusData.message);
+                }
+
+                // Consulta de foto
+                const photoResponse = await fetch(`/consulta/cpf/Foto/${cpf}`);
+                const photoData = await photoResponse.json();
+
+                if (photoData.message && photoData.message.includes('http')) {
+                    displayPhoto(photoData.message);
+                }
+            }
+        } else {
+            showPopup('Nenhum dado encontrado para este número', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao consultar dados:', error);
+        showPopup('Erro ao consultar dados', 'error');
+    }
+}
+
+function extractInfo(text, field) {
+    const regex = new RegExp(`${field}:\\s*(.+)`, 'i');
+    const match = text.match(regex);
+    return match ? match[1].trim() : 'N/A';
+}
+
+function displayPhoneData(data) {
+    const numero = extractInfo(data, 'TELEFONE');
+    const nome = extractInfo(data, 'NOME');
+    const cpf = extractInfo(data, 'CPF/CNPJ');
+    const operadora = extractInfo(data, 'OPERADORA');
+
+    dataResult.innerHTML = `
+        <div class="bg-gradient-to-r from-purple-400 to-indigo-500 text-white rounded-lg p-6 shadow-lg animate-fade-in">
+            <h4 class="text-2xl font-bold mb-4">Informações do Telefone</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white bg-opacity-20 p-4 rounded-lg">
+                    <svg class="w-8 h-8 text-yellow-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                    <p class="font-semibold">Número: ${numero}</p>
+                </div>
+                <div class="bg-white bg-opacity-20 p-4 rounded-lg">
+                    <svg class="w-8 h-8 text-green-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    <p class="font-semibold">Nome: ${nome}</p>
+                </div>
+                <div class="bg-white bg-opacity-20 p-4 rounded-lg">
+                    <svg class="w-8 h-8 text-blue-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <p class="font-semibold">Operadora: ${operadora}</p>
+                </div>
+                <div class="bg-white bg-opacity-20 p-4 rounded-lg">
+                    <svg class="w-8 h-8 text-red-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <p class="font-semibold">CPF/CNPJ: ${cpf}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    dataResult.classList.remove('hidden');
+}
+
+function displayCadsusData(data) {
+    const cns = extractInfo(data, 'CNS');
+    const dataNascimento = extractInfo(data, 'DATA DE NASCIMENTO');
+    const sexo = extractInfo(data, 'SEXO');
+    const mae = extractInfo(data, 'MÃE');
+    const pai = extractInfo(data, 'PAI');
+    const endereco = extractInfo(data, 'LOGRADOURO');
+    const bairro = extractInfo(data, 'BAIRRO');
+    const cep = extractInfo(data, 'CEP');
+    const numero = extractInfo(data, 'NÚMERO');
+    const municipio = extractInfo(data, 'MUNICÍPIO');
+    const estado = extractInfo(data, 'ESTADO');
+
+    const cadsusHtml = `
+        <div class="bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-lg p-6 shadow-lg animate-fade-in mt-4">
+            <h4 class="text-2xl font-bold mb-4">Informações CADSUS</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white bg-opacity-20 p-4 rounded-lg">
+                    <p class="font-semibold">CNS: ${cns}</p>
+                    <p class="font-semibold">Data de Nascimento: ${dataNascimento}</p>
+                    <p class="font-semibold">Sexo: ${sexo}</p>
+                </div>
+                <div class="bg-white bg-opacity-20 p-4 rounded-lg">
+                    <p class="font-semibold">Mãe: ${mae}</p>
+                    <p class="font-semibold">Pai: ${pai}</p>
+                </div>
+                <div class="bg-white bg-opacity-20 p-4 rounded-lg col-span-2">
+                    <p class="font-semibold">Endereço: ${endereco}, ${numero}</p>
+                    <p class="font-semibold">Bairro: ${bairro}</p>
+                    <p class="font-semibold">CEP: ${cep}</p>
+                    <p class="font-semibold">Município: ${municipio} - ${estado}</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    dataResult.insertAdjacentHTML('beforeend', cadsusHtml);
+}
+
+function displayPhoto(imageUrl) {
+    const photoHtml = `
+        <div class="mt-4 text-center">
+            <img src="${imageUrl}" alt="Foto do usuário" class="mx-auto rounded-lg shadow-lg max-w-full h-auto" style="max-height: 300px;">
+        </div>
+    `;
+    dataResult.insertAdjacentHTML('beforeend', photoHtml);
+}
+
+consultDataBtn.addEventListener('click', () => {
+    const phoneNumber = phoneInput.value.trim();
+    if (phoneNumber) {
+        consultData(phoneNumber);
+    } else {
+        showPopup('Por favor, insira um número de telefone válido', 'error');
+    }
+});
+const userconfig = <%- JSON.stringify(user) %>;
+async function consultData(phoneNumber) {
+    try {
+   
+
+        if (userconfig.plan !== 'premium') {
+            showPopup('Upgrade necessário! Esta funcionalidade está disponível apenas para usuários Premium.', 'error');
+            return;
+        }
+
+        // Consulta inicial de telefone
+        const phoneResponse = await fetch(`/consulta/telefone/${phoneNumber}`);
+        const phoneData = await phoneResponse.json();
+
+        if (phoneData.message) {
+            const cpf = extractInfo(phoneData.message, 'CPF/CNPJ');
+            displayPhoneData(phoneData.message);
+
+            if (cpf !== 'N/A') {
+                // Consulta CADSUS
+                const cadsusResponse = await fetch(`/consulta/cpf/Cadsus/${cpf}`);
+                const cadsusData = await cadsusResponse.json();
+
+                if (cadsusData.message) {
+                    displayCadsusData(cadsusData.message);
+                }
+
+                // Consulta de foto
+                const photoResponse = await fetch(`/consulta/cpf/Foto/${cpf}`);
+            if (photoResponse.ok) {
+                const blob = await photoResponse.blob();
+                const imageUrl = URL.createObjectURL(blob);
+                displayPhoto(imageUrl);
+            }
+            }
+        } else {
+            showPopup('Nenhum dado encontrado para este número', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao consultar dados:', error);
+        showPopup('Erro ao consultar dados', 'error');
+    }
+}
+
+function extractInfo(text, field) {
+    const regex = new RegExp(`${field}:\\s*(.+)`, 'i');
+    const match = text.match(regex);
+    return match ? match[1].trim() : 'N/A';
+}
+
+function displayPhoneData(data) {
+    const numero = extractInfo(data, 'TELEFONE');
+    const nome = extractInfo(data, 'NOME');
+    const cpf = extractInfo(data, 'CPF/CNPJ');
+    const operadora = extractInfo(data, 'OPERADORA');
+
+    dataResult.innerHTML = `
+        <div class="bg-gradient-to-r from-purple-400 to-indigo-500 text-white rounded-lg p-6 shadow-lg animate-fade-in">
+            <h4 class="text-2xl font-bold mb-4">Informações do Telefone</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white bg-opacity-20 p-4 rounded-lg">
+                    <svg class="w-8 h-8 text-yellow-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                    <p class="font-semibold">Número: ${numero}</p>
+                </div>
+                <div class="bg-white bg-opacity-20 p-4 rounded-lg">
+                    <svg class="w-8 h-8 text-green-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    <p class="font-semibold">Nome: ${nome}</p>
+                </div>
+                <div class="bg-white bg-opacity-20 p-4 rounded-lg">
+                    <svg class="w-8 h-8 text-blue-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <p class="font-semibold">Operadora: ${operadora}</p>
+                </div>
+                <div class="bg-white bg-opacity-20 p-4 rounded-lg">
+                    <svg class="w-8 h-8 text-red-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <p class="font-semibold">CPF/CNPJ: ${cpf}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    dataResult.classList.remove('hidden');
+}
+
+function displayCadsusData(data) {
+    const cns = extractInfo(data, 'CNS');
+    const dataNascimento = extractInfo(data, 'DATA DE NASCIMENTO');
+    const sexo = extractInfo(data, 'SEXO');
+    const mae = extractInfo(data, 'MÃE');
+    const pai = extractInfo(data, 'PAI');
+    const endereco = extractInfo(data, 'LOGRADOURO');
+    const bairro = extractInfo(data, 'BAIRRO');
+    const cep = extractInfo(data, 'CEP');
+    const numero = extractInfo(data, 'NÚMERO');
+    const municipio = extractInfo(data, 'MUNICÍPIO');
+    const estado = extractInfo(data, 'ESTADO');
+
+    const cadsusHtml = `
+        <div class="bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-lg p-6 shadow-lg animate-fade-in mt-4">
+            <h4 class="text-2xl font-bold mb-4">Informações CADSUS</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white bg-opacity-20 p-4 rounded-lg">
+                    <p class="font-semibold">CNS: ${cns}</p>
+                    <p class="font-semibold">Data de Nascimento: ${dataNascimento}</p>
+                    <p class="font-semibold">Sexo: ${sexo}</p>
+                </div>
+                <div class="bg-white bg-opacity-20 p-4 rounded-lg">
+                    <p class="font-semibold">Mãe: ${mae}</p>
+                    <p class="font-semibold">Pai: ${pai}</p>
+                </div>
+                <div class="bg-white bg-opacity-20 p-4 rounded-lg col-span-2">
+                    <p class="font-semibold">Endereço: ${endereco}, ${numero}</p>
+                    <p class="font-semibold">Bairro: ${bairro}</p>
+                    <p class="font-semibold">CEP: ${cep}</p>
+                    <p class="font-semibold">Município: ${municipio} - ${estado}</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    dataResult.insertAdjacentHTML('beforeend', cadsusHtml);
+}
+
+function displayPhoto(photoUrl) {
+    const photoHtml = `
+        <div class="mt-4 text-center">
+            <img src="${photoUrl}" alt="Foto do usuário" class="mx-auto rounded-lg shadow-lg max-w-full h-auto" style="max-height: 300px;">
+        </div>
+    `;
+    dataResult.insertAdjacentHTML('beforeend', photoHtml);
+}
+
+
+function displayData(data) {
+    // Função para extrair informações da string
+    function extractInfo(text, field) {
+        const regex = new RegExp(`${field}:\\s*(.+)`, 'i');
+        const match = text.match(regex);
+        return match ? match[1].trim() : 'N/A';
+    }
+
+    // Extrair informações
+    const numero = extractInfo(data, 'TELEFONE');
+    const nome = extractInfo(data, 'NOME');
+    const cpf = extractInfo(data, 'CPF/CNPJ');
+    const operadora = extractInfo(data, 'OPERADORA');
+
+    dataResult.innerHTML = `
+        <div class="bg-gradient-to-r from-purple-400 to-indigo-500 text-white rounded-lg p-6 shadow-lg animate-fade-in">
+            <h4 class="text-2xl font-bold mb-4">Informações do Telefone</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white bg-opacity-20 p-4 rounded-lg">
+                    <svg class="w-8 h-8 text-yellow-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                    <p class="font-semibold">Número: ${numero}</p>
+                </div>
+                <div class="bg-white bg-opacity-20 p-4 rounded-lg">
+                    <svg class="w-8 h-8 text-green-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    <p class="font-semibold">Nome: ${nome}</p>
+                </div>
+                <div class="bg-white bg-opacity-20 p-4 rounded-lg">
+                    <svg class="w-8 h-8 text-blue-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <p class="font-semibold">Operadora: ${operadora}</p>
+                </div>
+                <div class="bg-white bg-opacity-20 p-4 rounded-lg">
+                    <svg class="w-8 h-8 text-red-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <p class="font-semibold">CPF/CNPJ: ${cpf}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    dataResult.classList.remove('hidden');
+}
+// Adicione esta função de animação ao seu CSS
+</script>
+
+    <script>
+        const socket = io();
+        let currentUserImage;
+        let currentInstanceNumber = '';
+        // Funcionalidade de geração de voz
+const voiceButton = document.getElementById('voiceButton');
+const voiceModal = document.getElementById('voiceModal');
+const closeVoiceModal = document.getElementById('closeVoiceModal');
+const generateVoiceButton = document.getElementById('generateVoiceButton');
+const voiceText = document.getElementById('voiceText');
+const voiceSelect = document.getElementById('voiceSelect');
+const audioPreview = document.getElementById('audioPreview');
+const generatedAudio = document.getElementById('generatedAudio');
+const sendVoiceButton = document.getElementById('sendVoiceButton');
+
+let generatedAudioBlob = null;
+
+voiceButton.addEventListener('click', () => {
+    voiceModal.classList.add('modal-open');
+    loadVoices();
+});
+
+closeVoiceModal.addEventListener('click', () => {
+    voiceModal.classList.remove('modal-open');
+    resetVoiceModal();
+});
+
+async function loadVoices() {
+    try {
+        const response = await fetch('/integrations/elevenlabs/config');
+        const data = await response.json();
+        voiceSelect.innerHTML = '<option disabled selected>Selecione uma voz</option>';
+        data.tonsOptions.forEach(voice => {
+            const option = document.createElement('option');
+            option.value = voice.nome;
+            option.textContent = voice.nome;
+            voiceSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Erro ao carregar vozes:', error);
+        showPopup('Erro ao carregar vozes', 'error');
+    }
+}
+
+generateVoiceButton.addEventListener('click', async () => {
+    const text = voiceText.value;
+    const selectedVoice = voiceSelect.value;
+
+    if (!text || !selectedVoice) {
+        showPopup('Por favor, preencha o texto e selecione uma voz', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch('/integrations/elevenlabs/test', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text, tom: selectedVoice }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Erro ao gerar áudio');
+        }
+
+        const audioBlob = await response.blob();
+        generatedAudioBlob = audioBlob;
+        const audioUrl = URL.createObjectURL(audioBlob);
+        generatedAudio.src = audioUrl;
+        audioPreview.classList.remove('hidden');
+    } catch (error) {
+        console.error('Erro ao gerar áudio:', error);
+        showPopup('Erro ao gerar áudio', 'error');
+    }
+});
+
+sendVoiceButton.addEventListener('click', async () => {
+    if (!generatedAudioBlob) {
+        showPopup('Por favor, gere um áudio primeiro', 'error');
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('audio', generatedAudioBlob, 'audio.mp3');
+        formData.append('instanceKey', currentInstanceKey);
+        formData.append('chatId', currentChatId);
+
+        const response = await fetch('/zapvoice/send-audio', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error('Erro ao enviar áudio');
+        }
+
+        showPopup('Áudio enviado com sucesso', 'success');
+        voiceModal.classList.remove('modal-open');
+        resetVoiceModal();
+    } catch (error) {
+        console.error('Erro ao enviar áudio:', error);
+        showPopup('Erro ao enviar áudio', 'error');
+    }
+});
+
+function resetVoiceModal() {
+    voiceText.value = '';
+    voiceSelect.selectedIndex = 0;
+    audioPreview.classList.add('hidden');
+    generatedAudio.src = '';
+    generatedAudioBlob = null;
+}
+
+        function joinInstance(instanceKey) {
+            socket.emit('join instance', instanceKey);
+            socket.emit('request initial chats', instanceKey);
+            console.log('Entrando na instância:', instanceKey);
+        }
+        
+        socket.on('connect', () => {
+            console.log('Conectado ao servidor Socket.IO');
+        });
+        
+
+        socket.on('status', (data) => {
+        if (data.chatId === currentChatId) {
+            showStatusAnimation(data.status, data.duration);
+        }
+    });
+
+    function updateProfileInMenu(instance) {
+    const profileImage = document.getElementById('profileImage');
+    const profileName = document.getElementById('profileName');
+    const instanceName = document.getElementById('instanceName');
+
+    if (instance.foto) {
+        profileImage.src = instance.foto;
+    }
+    if (instance.whatsappName) {
+        profileName.textContent = instance.whatsappName;
+    }
+    if (instance.name) {
+        instanceName.textContent = instance.name;
+    }
+}
+
+
+    function showStatusAnimation(status, duration) {
+        const statusAnimation = document.getElementById('statusAnimation');
+        const animationIcon = document.getElementById('animationIcon');
+        const animationText = document.getElementById('animationText');
+
+        let icon, text;
+
+        switch (status) {
+            case 'typing':
+                icon = '<i class="fas fa-keyboard animate-pulse"></i>';
+                text = 'Digitando...';
+                break;
+            case 'recording':
+                icon = '<i class="fas fa-microphone animate-bounce text-red-500"></i>';
+                text = 'Gravando áudio...';
+                break;
+            case 'waiting':
+                icon = '<i class="fas fa-hourglass-half animate-spin"></i>';
+                text = `Aguardando ${duration} segundos...`;
+                break;
+        }
+
+        animationIcon.innerHTML = icon;
+        animationText.textContent = text;
+        statusAnimation.classList.remove('hidden');
+
+        setTimeout(() => {
+            statusAnimation.classList.add('hidden');
+        }, duration * 1000);
+    }
+
+
+        socket.on('new message', (data) => {
+    console.log('Nova mensagem recebida:', data);
+
+    
+    if (data.chatId === currentChatId) {
+        appendMessage(data.message);
+        scrollToBottom();
+    }
+    updateChatInList(data.chatId, data.message);
+    moveChatToTop(data.chatId);
+    if (!data.message.fromMe) {
+        showNotification(data);
+    } else {
+        // Se a mensagem é minha, zera a contagem e remove o destaque
+        resetUnreadCount(data.chatId);
+    }
+});
+
+
+function resetUnreadCount(chatId) {
+    const chatElement = document.querySelector(`.chat-item[data-chat-id="${chatId}"]`);
+    if (chatElement) {
+        chatElement.classList.remove('bg-primary-100');
+        const unreadIndicator = chatElement.querySelector('.bg-primary-500');
+        if (unreadIndicator) {
+            unreadIndicator.remove();
+        }
+        
+        // Chame a API para marcar como lido
+        fetch(`/chat/mark-as-read/${currentInstanceKey}/${chatId}`, { method: 'POST' })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Falha ao marcar chat como lido');
+                }
+            })
+            .catch(error => console.error('Erro ao marcar chat como lido:', error));
+    }
+}
+
+
+socket.on('new chat', (chat) => {
+    console.log('Novo chat recebido:', chat);
+    createNewChat(chat);
+    chats.unshift(chat); // Adiciona o novo chat ao início do array
+});
+
+socket.on('chat messages', (data) => {
+    if (data.chatId === currentChatId) {
+        renderMessages(data.messages);
+    }
+});
+
+function appendMessage(message) {
+    const messageHTML = createMessageHTML(message);
+    messageList.insertAdjacentHTML('beforeend', messageHTML);
+    scrollToBottom();
+}
+
+socket.on('chat info', (chat) => {
+    addChatToList(chat);
+});
+
+function formatTimestamp(timestamp) {
+    return moment.unix(timestamp).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm:ss');
+}
+
+// Use esta função em vez de new Date().toLocaleString() em todos os lugares onde você exibe timestamps
+
+function createMessageHTML(message) {
+    const messageClass = message.fromMe ? 'chat-end' : 'chat-start';
+    const bubbleClass = message.fromMe ? 'bg-blue-500 text-white' : 'bg-white text-gray-800';
+    const formattedTimestamp = formatTimestamp(message.timestamp);
+
+    let senderImage;
+    if (message.fromMe) {
+        senderImage = currentUserImage || 'https://cdn-icons-png.flaticon.com/512/4792/4792929.png';
+    } else {
+        senderImage = profileImageCache[currentChatId] || 'https://cdn-icons-png.flaticon.com/512/4792/4792929.png';
+    }
+
+    let contentHtml = '';
+
+
+    let quotedMessageHtml = '';
+if (message.quotedMessage) {
+  const quotedSender = message.quotedParticipant.replace("@s.whatsapp.net", "") || 'Desconhecido';
+  quotedMessageHtml = `
+    <div class="quoted-message bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 p-3 rounded-lg mb-2 border-l-4 border-indigo-500 shadow-sm transition-all duration-300 hover:shadow-md">
+      <div class="flex items-center mb-1">
+        <svg class="w-4 h-4 text-indigo-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+        </svg>
+        <span class="text-xs font-semibold text-gray-600 dark:text-gray-300">${quotedSender}</span>
+      </div>
+      <p class="text-sm text-gray-700 dark:text-gray-200 line-clamp-2">${message.quotedMessage}</p>
+    </div>
+  `;
+}
+
+    switch (message.type) {
+        case 'text':
+            contentHtml = `<div class="chat-bubble ${bubbleClass}">${formatTextWithLinks(message.content)}</div>`;
+            break;
+        case 'image':
+            contentHtml = `
+                <div class="chat-bubble ${bubbleClass} p-1">
+                    <img src="${message.content}" alt="Image" class="media-content rounded-lg cursor-pointer" onclick="openMediaPopup('${message.content}', 'image')">
+                </div>`;
+            break;
+        case 'video':
+            contentHtml = `
+                <div class="chat-bubble ${bubbleClass} p-1">
+                    <video src="${message.content}" class="media-content rounded-lg cursor-pointer" onclick="openMediaPopup('${message.content}', 'video')"></video>
+                </div>`;
+            break;
+            case 'audio':
+                contentHtml = `
+                    <div class="chat-bubble ${bubbleClass} p-1">
+                        <div class="audio-player">
+                            <i class="fas fa-play audio-player-icon" onclick="toggleAudio(this)"></i>
+                            <div class="audio-player-progress">
+                                <div class="audio-player-progress-bar"></div>
+                            </div>
+                            <span class="audio-player-time">0:00</span>
+                            <audio src="${message.content}" preload="none"></audio>
+                        </div>
+                    </div>`;
+                break;
+        case 'document':
+            contentHtml = `
+                <div class="chat-bubble ${bubbleClass}">
+                    <a href="${message.content}" target="_blank" class="flex items-center space-x-2 text-blue-600 hover:underline">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Ver documento</span>
+                    </a>
+                </div>`;
+            break;
+        case 'sticker':
+            contentHtml = `
+                <div class="chat-bubble ${bubbleClass} p-1">
+                    <img src="${message.content}" alt="Sticker" class="max-w-[150px] max-h-[150px]">
+                </div>`;
+            break;
+        default:
+            contentHtml = `<div class="chat-bubble ${bubbleClass}">${formatTextWithLinks(message.content)}</div>`;
+    }
+
+
+    let statusIcon = '';
+    if (message.fromMe) {
+        statusIcon = `
+            <span class="message-status">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                </svg>
+            </span>
+        `;
+    }
+
+    return `
+ <div class="chat ${messageClass} mb-4" data-chat-id="${message.fromMe ? 'me' : currentChatId}">
+            <div class="chat-image avatar">
+                <div class="w-10 rounded-full">
+                     <img src="${senderImage}" alt="${message.sender}">
+                </div>
+            </div>
+            <div class="chat-header text-xs opacity-50 mb-1">
+                ${message.sender}
+                ${formattedTimestamp}
+            </div>
+            <div class="chat-bubble-wrapper">
+            ${quotedMessageHtml}
+                ${contentHtml}
+                ${statusIcon}
+            </div>
+        </div>
+    `;
+}
+
+function toggleAudio(icon) {
+        const audioPlayer = icon.closest('.audio-player');
+        const audio = audioPlayer.querySelector('audio');
+        const progressBar = audioPlayer.querySelector('.audio-player-progress-bar');
+        const timeDisplay = audioPlayer.querySelector('.audio-player-time');
+
+        if (audio.paused) {
+            audio.play();
+            icon.classList.replace('fa-play', 'fa-pause');
+            updateAudioProgress(audio, progressBar, timeDisplay);
+        } else {
+            audio.pause();
+            icon.classList.replace('fa-pause', 'fa-play');
+        }
+    }
+
+    function updateAudioProgress(audio, progressBar, timeDisplay) {
+        const updateProgress = () => {
+            const progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = `${progress}%`;
+            timeDisplay.textContent = formatTime(audio.currentTime);
+        };
+
+        audio.addEventListener('timeupdate', updateProgress);
+        audio.addEventListener('ended', () => {
+            progressBar.style.width = '0%';
+            timeDisplay.textContent = '0:00';
+            audio.currentTime = 0;
+            const icon = audio.closest('.audio-player').querySelector('.audio-player-icon');
+            icon.classList.replace('fa-pause', 'fa-play');
+        });
+    }
+
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+
+function addChatToList(chat) {
+    const chatHTML = createChatHTML(chat);
+    chatList.insertAdjacentHTML('afterbegin', chatHTML);
+    addChatListeners();
+}
+
+async function loadAllProfileImages(instanceKey, chats) {
+    const imagePromises = chats.map(chat => fetchProfileImage(instanceKey, chat.id));
+    await Promise.all(imagePromises);
+    renderChats(chats);
+}
+
+function createChatHTML(chat) {
+    const lastMessageContent = getMediaDescription(chat.lastMessageType, chat.lastMessage);
+    const chatTypeIcon = chat.chatType === 'grupo' ? '👥' : '👤';
+    const unreadCount = chat.unreadCount || 0;
+    const unreadClass = unreadCount > 0 ? 'bg-primary-100' : '';
+    const unreadIndicator = unreadCount > 0 ? `<span class="bg-primary-500 text-white text-xs font-bold px-2 py-1 rounded-full">${unreadCount}</span>` : '';
+    const avatarUrl = chat.image || 'https://cdn-icons-png.flaticon.com/512/4792/4792929.png';
+
+      // Adicione esta linha para determinar a cor da última mensagem
+      const lastMessageColor = chat.lastMessageFromMe ? 'text-blue-600' : 'text-gray-600';
+
+    return `
+       <div class="chat-item p-3 hover:bg-primary-50 cursor-pointer rounded-lg transition duration-200 ease-in-out ${unreadClass}" data-chat-id="${chat.id}" data-chat-type="${chat.chatType}">
+            <div class="flex items-center space-x-3">
+                <img src="${avatarUrl}" alt="${chat.name}" class="w-12 h-12 rounded-full object-cover">
+                <div class="flex-grow min-w-0">
+                    <div class="flex justify-between items-baseline">
+                       <h3 class="font-semibold text-primary-800 truncate">${chatTypeIcon} ${chat.name}</h3>
+                        <span class="text-xs text-primary-600">${formatTimestamp(chat.lastMessageTimestamp)}</span>
+                    </div>
+                   <p class="text-sm ${lastMessageColor} truncate">${lastMessageContent}</p>
+                </div>
+                ${unreadIndicator}
+                  <button class="delete-chat-btn text-red-500 hover:text-red-700" data-chat-id="${chat.id}">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+socket.on('initial chats', (initialChats) => {
+    chats = initialChats;
+    renderChats(chats);
+     loadAllProfileImages(currentInstanceKey, chats);
+});
+
+
+socket.on('presence update', (data) => {
+  updatePresence(data.chatId, data.presence, data.timestamp);
+});
+
+socket.on('chat update', (data) => {
+  updateLastSeen(data.chatId, data.timestamp);
+});
+
+
+function updatePresence(chatId, presence, timestamp) {
+            const chatElement = document.querySelector(`.chat-item[data-chat-id="${chatId}"]`);
+            const chatTypeElement = document.getElementById('chatType');
+            
+            if (chatElement) {
+                const lastMessageElement = chatElement.querySelector('.text-sm.text-gray-600');
+                if (presence === 'composing') {
+                    lastMessageElement.textContent = 'Digitando...';
+                    lastMessageElement.classList.add('text-green-500', 'font-semibold');
+                } else {
+                    // Restaurar a última mensagem
+                    const chat = chats.find(c => c.id === chatId);
+                    if (chat) {
+                        lastMessageElement.textContent = getMediaDescription(chat.lastMessageType, chat.lastMessage);
+                        lastMessageElement.classList.remove('text-green-500', 'font-semibold');
+                    }
+                }
+            }
+
+            if (currentChatId === chatId) {
+                if (presence === 'composing') {
+                    chatTypeElement.textContent = 'Digitando...';
+                    chatTypeElement.classList.add('text-green-500', 'font-semibold');
+                } else {
+                    chatTypeElement.textContent = 'Chat Individual';
+                    chatTypeElement.classList.remove('text-green-500', 'font-semibold');
+                    updateLastSeen(chatId, timestamp);
+                }
+            }
+        }
+
+        function updateLastSeen(chatId, timestamp) {
+    lastSeenCache[chatId] = timestamp;
+    localStorage.setItem('lastSeenCache', JSON.stringify(lastSeenCache));
+    
+    const chatTypeElement = document.getElementById('chatType');
+    if (currentChatId === chatId) {
+        const lastSeen = moment(timestamp).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm:ss');
+        chatTypeElement.textContent = `Visto por último: ${lastSeen}`;
+        chatTypeElement.classList.remove('text-green-500', 'font-semibold');
+    }
+}
+
+
+function deleteChat(chatId) {
+    if (confirm('Tem certeza que deseja deletar este chat?')) {
+        fetch(`/chat/delete/${currentInstanceKey}/${chatId}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const chatElement = document.querySelector(`.chat-item[data-chat-id="${chatId}"]`);
+                if (chatElement) {
+                    chatElement.remove();
+                }
+                chats = chats.filter(chat => chat.id !== chatId);
+                showPopup('Chat deletado com sucesso', 'success');
+            } else {
+                showPopup('Erro ao deletar chat', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao deletar chat:', error);
+            showPopup('Erro ao deletar chat', 'error');
+        });
+    }
+}
+
+
+
+
+        // Função para atualizar a lista de chats com a nova mensagem
+        function updateChatInList(chatId, lastMessage) {
+    const chatElement = document.querySelector(`.chat-item[data-chat-id="${chatId}"]`);
+    if (chatElement) {
+        const lastMessageElement = chatElement.querySelector('.text-sm.text-gray-600');
+        lastMessageElement.textContent = getMediaDescription(lastMessage.type, lastMessage.content);
+        
+        const timestampElement = chatElement.querySelector('.text-xs.text-gray-500');
+        const formattedTime = moment(lastMessage.timestamp * 1000).format('HH:mm');
+        timestampElement.textContent = formattedTime;
+
+        const chat = chats.find(c => c.id === chatId);
+        if (chat) {
+            chat.lastMessage = lastMessage.content;
+            chat.lastMessageTimestamp = lastMessage.timestamp;
+            chat.lastMessageType = lastMessage.type;
+            chat.lastMessageFromMe = lastMessage.fromMe
+            
+            if (chatId !== currentChatId) {
+                chat.unreadCount = (chat.unreadCount || 0) + 1;
+                const unreadIndicator = chatElement.querySelector('.bg-primary-500') || document.createElement('span');
+                unreadIndicator.className = 'bg-primary-500 text-white text-xs font-bold px-2 py-1 rounded-full';
+                unreadIndicator.textContent = chat.unreadCount;
+                chatElement.querySelector('.flex-grow').appendChild(unreadIndicator);
+            }
+        }
+        moveChatToTop(chatId);
+    } else {
+        // Se o chat não existir na lista, solicite as informações do chat
+        socket.emit('request chat info', chatId);
+    }
+}
+        </script>
+
+    <script>
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Remover o elemento nav com classe "text-gray-500 dark:text-gray-400 text-sm mb-4"
+    const breadcrumbNav = document.querySelector('nav.text-gray-500.dark\\:text-gray-400.text-sm.mb-4');
+    if (breadcrumbNav) {
+        breadcrumbNav.remove();
+    }
+
+    // Remover o elemento nav com classe "bg-white dark:bg-gray-800 shadow-md"
+    const headerNav = document.querySelector('nav.bg-white.dark\\:bg-gray-800.shadow-md');
+    if (headerNav) {
+        headerNav.remove();
+    }
+
+    console.log('Elementos de navegação removidos');
+});
+
+        const searchMessagesButton = document.getElementById('searchMessagesButton');
+const searchMessagesContainer = document.getElementById('searchMessagesContainer');
+
+searchMessagesButton.addEventListener('click', () => {
+    searchMessagesContainer.classList.toggle('hidden');
+    if (!searchMessagesContainer.classList.contains('hidden')) {
+        document.getElementById('messageSearch').focus();
+    }
+});
+
+        const messageSearch = document.getElementById('messageSearch');
+    
+        messageSearch.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const messageElements = document.querySelectorAll('.chat-bubble');
+    
+            messageElements.forEach(element => {
+                const messageText = element.textContent.toLowerCase();
+                if (messageText.includes(searchTerm)) {
+                    element.style.backgroundColor = 'yellow';
+                } else {
+                    element.style.backgroundColor = '';
+                }
+            });
+        });
+    </script>
+    <script>
+
+const profileButton = document.getElementById('profileButton');
+const profileModal = document.getElementById('profileModal');
+const closeProfileModal = document.getElementById('closeProfileModal');
+const changeProfilePicture = document.getElementById('changeProfilePicture');
+const profilePictureInput = document.getElementById('profilePictureInput');
+const currentProfilePicture = document.getElementById('currentProfilePicture');
+const profileName = document.getElementById('profileName');
+const profileStatus = document.getElementById('profileStatus');
+const saveProfileChanges = document.getElementById('saveProfileChanges');
+
+profileButton.addEventListener('click', openProfileModal);
+closeProfileModal.addEventListener('click', closeProfileModalFunction);
+changeProfilePicture.addEventListener('click', () => profilePictureInput.click());
+profilePictureInput.addEventListener('change', handleProfilePictureChange);
+saveProfileChanges.addEventListener('click', saveProfileSettings);
+
+function openProfileModal() {
+    profileModal.classList.add('modal-open');
+    loadProfileSettings();
+}
+
+function closeProfileModalFunction() {
+    profileModal.classList.remove('modal-open');
+}
+
+// Substitua as funções existentes por estas versões atualizadas
+
+async function loadProfileSettings() {
+    try {
+        // Mostrar indicador de carregamento
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.id = 'profileLoadingIndicator';
+        loadingIndicator.innerHTML = '<i class="fas fa-spinner fa-spin fa-3x"></i>';
+        loadingIndicator.style.position = 'absolute';
+        loadingIndicator.style.top = '50%';
+        loadingIndicator.style.left = '50%';
+        loadingIndicator.style.transform = 'translate(-50%, -50%)';
+        document.querySelector('.modal-box').appendChild(loadingIndicator);
+
+        const response = await fetch(`/zapprofile/${currentInstanceKey}/fetch`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ number: currentInstanceNumber })
+        });
+        const profileData = await response.json();
+        
+        // Remover indicador de carregamento
+        document.getElementById('profileLoadingIndicator').remove();
+
+        // Atualizar imagem de perfil
+        currentProfilePicture.src = profileData.picture || 'https://cdn-icons-png.flaticon.com/512/4792/4792929.png';
+        
+        // Preencher campos
+        profileName.value = profileData.name || '';
+        profileStatus.value = profileData.status || '';
+
+        // Exibir informações adicionais
+        document.getElementById('profileWuid').textContent = profileData.wuid;
+        document.getElementById('profileIsBusiness').textContent = profileData.isBusiness ? 'Sim' : 'Não';
+        document.getElementById('profileDescription').textContent = profileData.description || 'Sem descrição';
+
+        // Carregar configurações de privacidade
+        const privacyResponse = await fetch(`/zapprofile/${currentInstanceKey}/privacySettings`);
+        const privacySettings = await privacyResponse.json();
+        document.getElementById('readreceipts').value = privacySettings.readreceipts || 'all';
+        document.getElementById('profile').value = privacySettings.profile || 'all';
+    } catch (error) {
+        console.error('Erro ao carregar configurações de perfil:', error);
+        showPopup('Erro ao carregar configurações de perfil', 'error');
+    }
+}
+async function handleProfilePictureChange(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const response = await fetch(`/zapprofile/${currentInstanceKey}/updatePicture`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ picture: e.target.result }),
+                });
+                
+                if (response.ok) {
+                    currentProfilePicture.src = e.target.result;
+                    showPopup('Foto de perfil atualizada com sucesso');
+                } else {
+                    throw new Error('Falha ao atualizar foto de perfil');
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar foto de perfil:', error);
+                showPopup('Erro ao atualizar foto de perfil', 'error');
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+async function saveProfileSettings() {
+    try {
+        const updatedName = profileName.value;
+        const updatedStatus = profileStatus.value;
+        const updatedPrivacySettings = {
+            readreceipts: document.getElementById('readreceipts').value,
+            profile: document.getElementById('profile').value,
+            // Adicione mais configurações de privacidade conforme necessário
+        };
+
+        const nameResponse = await fetch(`/zapprofile/${currentInstanceKey}/updateName`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name: updatedName }),
+        });
+
+        const statusResponse = await fetch(`/zapprofile/${currentInstanceKey}/updateStatus`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: updatedStatus }),
+        });
+
+        const privacyResponse = await fetch(`/zapprofile/${currentInstanceKey}/updatePrivacySettings`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedPrivacySettings),
+        });
+
+        if (nameResponse.ok && statusResponse.ok && privacyResponse.ok) {
+            showPopup('Configurações de perfil atualizadas com sucesso');
+            closeProfileModalFunction();
+        } else {
+            throw new Error('Falha ao atualizar configurações de perfil');
+        }
+    } catch (error) {
+        console.error('Erro ao salvar configurações de perfil:', error);
+        showPopup('Erro ao salvar configurações de perfil', 'error');
+    }
+}
+
+// Adicione esta função para remover a foto de perfil
+async function removeProfilePicture() {
+    try {
+        const response = await fetch(`/zapprofile/${currentInstanceKey}/removePicture`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            currentProfilePicture.src = 'https://cdn-icons-png.flaticon.com/512/4792/4792929.png';
+            showPopup('Foto de perfil removida com sucesso');
+        } else {
+            throw new Error('Falha ao remover foto de perfil');
+        }
+    } catch (error) {
+        console.error('Erro ao remover foto de perfil:', error);
+        showPopup('Erro ao remover foto de perfil', 'error');
+    }
+}
+
+// Adicione um event listener para o botão de remover foto de perfil
+
+
+        const emojiButton = document.getElementById('emojiButton');
+        const emojiPicker = document.getElementById('emojiPicker');
+        const emojiList = document.getElementById('emojiList');
+    
+        const emojis = ['😀', '😂', '😍', '🥳', '😎', '🤔', '😊', '👍', '❤️', '🎉', '🔥', '💯'];
+    
+        emojis.forEach(emoji => {
+            const emojiSpan = document.createElement('span');
+            emojiSpan.textContent = emoji;
+            emojiSpan.className = 'text-2xl cursor-pointer hover:bg-gray-200 rounded p-1';
+            emojiSpan.onclick = () => addEmojiToInput(emoji);
+            emojiList.appendChild(emojiSpan);
+        });
+    
+        emojiButton.addEventListener('click', () => {
+            emojiPicker.classList.toggle('hidden');
+        });
+    
+        function addEmojiToInput(emoji) {
+            const input = document.getElementById('messageInput');
+            input.value += emoji;
+            input.focus();
+        }
+    
+        // Fechar o emoji picker quando clicar fora dele
+        document.addEventListener('click', (event) => {
+            if (!emojiPicker.contains(event.target) && event.target !== emojiButton) {
+                emojiPicker.classList.add('hidden');
+            }
+        });
+    </script>
+    <script>
+
+const lastSeenCache = {};
+
+        const instanceModal = document.getElementById('instanceModal');
+        const instanceSelect = document.getElementById('instanceSelect');
+        const confirmInstance = document.getElementById('confirmInstance');
+        const chatContainer = document.getElementById('chatContainer');
+        const chatList = document.getElementById('chatList');
+        const mobileChatList = document.getElementById('mobileChatList');
+        const messageList = document.getElementById('messageList');
+        const mobileMessageList = document.getElementById('mobileMessageList');
+        const chatName = document.getElementById('chatName');
+        const mobileChatName = document.getElementById('mobileChatName');
+        const chatAvatar = document.getElementById('chatAvatar');
+        const mobileChatAvatar = document.getElementById('mobileChatAvatar');
+        const messageInput = document.getElementById('messageInput');
+        const mobileMessageInput = document.getElementById('mobileMessageInput');
+        const sendButton = document.getElementById('sendButton');
+        const mobileSendButton = document.getElementById('mobileSendButton');
+        const mobileChats = document.getElementById('mobileChats');
+        const mobileMessages = document.getElementById('mobileMessages');
+        const backButton = document.getElementById('backButton');
+        const refreshButton = document.getElementById('refreshButton');
+        const mobileRefreshButton = document.getElementById('mobileRefreshButton');
+        const searchChat = document.getElementById('searchChat');
+        const mobileSearchChat = document.getElementById('mobileSearchChat');
+        const notificationSound = document.getElementById('notificationSound');
+        const sendSound = document.getElementById('sendSound');
+        const settingsModal = document.getElementById('settingsModal');
+        const closeSettingsModal2 = document.getElementById('closeSettingsModal');
+        const sendSoundToggle = document.getElementById('sendSoundToggle');
+        const receiveSoundToggle = document.getElementById('receiveSoundToggle');
+        const wallpaperInput = document.getElementById('wallpaperInput');
+        const funnelsContainer = document.getElementById('funnelsContainer');
+        const mobileFunnelsContainer = document.getElementById('mobileFunnelsContainer');
+
+
+        const funnelReportPopup = document.getElementById('funnelReportPopup');
+        const openFunnelReportBtn = document.getElementById('openFunnelReport');
+        const closeFunnelReportBtn = document.getElementById('closeFunnelReport');
+        const totalStepsElement = document.getElementById('totalSteps');
+        const currentStepElement = document.getElementById('currentStep');
+        const hasInputElement = document.getElementById('hasInput');
+        const waitingForInputElement = document.getElementById('waitingForInput');
+        const waitingForInputAlert = document.getElementById('waitingForInputAlert');
+        const currentContentElement = document.getElementById('currentContent');
+        const funnelAnimationElement = document.getElementById('funnelAnimation');
+
+
+
+        const activeFunnelsList = document.getElementById('activeFunnelsList');
+        const funnelDetails = document.getElementById('funnelDetails');
+
+        let activeFunnels = {};
+        let currentSelectedFunnel = null;
+
+
+
+        let funnelReportInterval;
+
+        let currentChatInfo = null;
+        let currentInstanceKey = '';
+        let currentChatId = '';
+        let chats = [];
+        let userFunnels = [];
+
+
+        const chatOptionsButton = document.getElementById('chatOptionsButton');
+const chatOptionsMenu = document.getElementById('chatOptionsMenu');
+const addToListOption = document.getElementById('addToListOption');
+
+chatOptionsButton.addEventListener('click', () => {
+    chatOptionsMenu.classList.toggle('hidden');
+});
+
+addToListOption.addEventListener('click', (e) => {
+    e.preventDefault();
+    openAddToListModal();
+    chatOptionsMenu.classList.add('hidden');
+});
+
+document.addEventListener('click', (e) => {
+    if (!chatOptionsButton.contains(e.target) && !chatOptionsMenu.contains(e.target)) {
+        chatOptionsMenu.classList.add('hidden');
+    }
+});
+
+function openAddToListModal() {
+    // Implemente a lógica para abrir o modal de adicionar à lista aqui
+    console.log('Abrir modal de adicionar à lista');
+}
+
+        // Variáveis globais
+let currentContactLists = [];
+
+// Função para carregar as listas de contatos do usuário
+async function loadContactLists() {
+    try {
+        const response = await fetch('/contact-lists');
+        currentContactLists = await response.json();
+        const contactListSelect = document.getElementById('contactList');
+        contactListSelect.innerHTML = currentContactLists.map(list => 
+            `<option value="${list._id}">${list.name}</option>`
+        ).join('');
+    } catch (error) {
+        console.error('Erro ao carregar listas de contatos:', error);
+        showPopup('Erro ao carregar listas de contatos', 'error');
+    }
+}
+
+// Função para abrir o modal de adicionar à lista
+function openAddToListModal() {
+    loadContactLists();
+    document.getElementById('addToListModal').classList.add('modal-open');
+}
+
+// Função para fechar o modal de adicionar à lista
+function closeAddToListModal() {
+    document.getElementById('addToListModal').classList.remove('modal-open');
+}
+
+// Função para adicionar o contato à lista selecionada
+async function addContactToList(event) {
+    event.preventDefault();
+    
+    const listId = document.getElementById('contactList').value;
+    const quality = document.getElementById('contactQuality').value;
+    const description = document.getElementById('contactDescription').value;
+    
+    const contact = {
+        name: chatName.textContent,
+        phoneNumber: currentChatId.split('@')[0],
+        photo: chatAvatar.src,
+        quality: quality,
+        description: description
+    };
+
+    try {
+        const response = await fetch(`/contact-lists/${listId}/contacts`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(contact),
+        });
+
+        if (response.ok) {
+            showPopup('Contato adicionado com sucesso à lista');
+            closeAddToListModal();
+        } else {
+            throw new Error('Falha ao adicionar contato à lista');
+        }
+    } catch (error) {
+        console.error('Erro ao adicionar contato à lista:', error);
+        showPopup('Erro ao adicionar contato à lista', 'error');
+    }
+}
+
+// Event listeners
+
+document.getElementById('addToListForm').addEventListener('submit', addContactToList);
+
+// Adicione esta linha à sua função de inicialização existente
+loadContactLists();
+
+ 
+        function openSettingsModal() {
+            settingsModal.classList.add('modal-open');
+            // Prevenir que o modal feche imediatamente em dispositivos móveis
+            setTimeout(() => {
+                settingsModal.addEventListener('click', closeSettingsModalOutside);
+            }, 100);
+        }
+
+        function loadLastSeenCache() {
+    const cachedData = localStorage.getItem('lastSeenCache');
+    if (cachedData) {
+        Object.assign(lastSeenCache, JSON.parse(cachedData));
+    }
+}
+
+loadLastSeenCache();
+
+        function closeSettingsModalOutside(event) {
+            if (event.target === settingsModal) {
+                closeSettingsModal();
+            }
+        }
+
+        function closeSettingsModal() {
+            settingsModal.classList.remove('modal-open');
+            settingsModal.removeEventListener('click', closeSettingsModalOutside);
+        }
+
+        // Atualize os event listeners
+        document.getElementById('settingsButton').addEventListener('click', openSettingsModal);
+        document.getElementById('mobileSettingsButton').addEventListener('click', openSettingsModal);
+        closeSettingsModal2.addEventListener('click', closeSettingsModal);
+
+        // Função para carregar instâncias
+        async function loadInstances() {
+            const response = await fetch('/whatsapp/list');
+            const instances = await response.json();
+            const instanceList = document.getElementById('instanceList');
+            instanceList.innerHTML = '';
+
+            let connectedCount = 0;
+            instances.forEach(instance => {
+                if (instance.isConnected) {
+                    connectedCount++;
+                    const instanceElement = document.createElement('div');
+                    instanceElement.className = 'bg-white p-4 rounded-lg shadow-md transition-all duration-300 hover:shadow-lg mb-4 transform hover:scale-102';
+                    instanceElement.innerHTML = `
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                        <div class="mb-4 sm:mb-0">
+                            <h3 class="text-xl font-semibold text-purple-700">${instance.name}</h3>
+                            <p class="text-sm text-gray-600">Chave: ${instance.key}</p>
+                            <p class="text-sm ${instance.isConnected ? 'text-green-600' : 'text-red-600'} font-medium mt-2">
+                                <i class="fas fa-${instance.isConnected ? 'check-circle' : 'times-circle'} mr-2"></i>
+                                ${instance.isConnected ? 'Conectado' : 'Desconectado'}
+                            </p>
+                            ${instance.whatsappName ? `<p class="text-sm text-blue-600 font-medium">WhatsApp: ${instance.whatsappName}</p>` : ''}
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="selectInstance('${instance.name}', '${instance.foto}', '${instance}')" class="btn btn-primary btn-sm" ${!instance.isConnected ? 'disabled' : ''}>
+                                <i class="fas fa-check mr-1"></i> Selecionar
+                            </button>
+                        </div>
+                    </div>
+                `;
+                currentInstanceNumber = instance.number; // Armazena o número da instância
+                    instanceList.appendChild(instanceElement);
+                }
+            });
+
+            const connectedInstancesCount = document.getElementById('connectedInstancesCount');
+            const noInstancesError = document.getElementById('noInstancesError');
+
+            if (connectedCount > 0) {
+                connectedInstancesCount.textContent = `${connectedCount} Instância(s) Conectada(s)`;
+                noInstancesError.classList.add('hidden');
+            } else {
+                connectedInstancesCount.textContent = 'Nenhuma Instância Conectada';
+                noInstancesError.classList.remove('hidden');
+            }
+        }
+
+        async function fetchProfileImage(instanceKey, chatId) {
+    if (profileImageCache[chatId]) {
+        updateProfileImage(chatId, profileImageCache[chatId]);
+        return;
+    }
+
+    try {
+        const response = await fetch('/chat/profile-image', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ instanceKey, chatId }),
+        });
+
+        if (response.ok) {
+            const blob = await response.blob();
+            const imageUrl = URL.createObjectURL(blob);
+            profileImageCache[chatId] = imageUrl;
+            updateProfileImage(chatId, imageUrl);
+            updateMessageImages(chatId, imageUrl);
+        } else {
+            console.error('Falha ao obter imagem de perfil');
+        }
+    } catch (error) {
+        console.error('Erro ao buscar imagem de perfil:', error);
+    }
+}
+
+
+
+
+
+function updateMessageImages(chatId, imageUrl) {
+    const messageElements = document.querySelectorAll(`.chat[data-chat-id="${chatId}"] .chat-image img`);
+    messageElements.forEach(img => {
+        img.src = imageUrl;
+    });
+}
+
+        // Função para selecionar uma instância
+        function selectInstance(instanceKey, foto, instance) {
+    currentInstanceKey = instanceKey;
+    currentUserImage = foto || 'https://cdn-icons-png.flaticon.com/512/4792/4792929.png';
+    instanceModal.classList.remove('modal-open');
+   
+    chatContainer.classList.remove('hidden');
+    joinInstance(instanceKey);
+    updateProfileInMenu(instance);
+    loadUserFunnels();
+    loadCurrentInstanceProfile()
+}
+
+        // Função para carregar os funis do usuário
+        async function loadUserFunnels() {
+    try {
+        const response = await fetch('/funnels/api/list');
+        if (!response.ok) {
+            throw new Error('Failed to fetch user funnels');
+        }
+        userFunnels = await response.json();
+        renderFunnels();
+    } catch (error) {
+        console.error('Erro ao carregar funis:', error);
+        showPopup('Erro ao carregar funis', 'error');
+    }
+}
+
+
+
+        // Função para iniciar o funil
+        async function startFunnel(funnelId) {
+            if (!currentInstanceKey || !currentChatId) {
+                showPopup('Selecione um chat antes de iniciar um funil', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/chat/start-funnel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        funnelId: funnelId,
+                        instanceKey: currentInstanceKey,
+                        chatId: currentChatId
+                    }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showPopup('Funil iniciado com sucesso');
+                    addActiveFinnel(funnelId, currentInstanceKey, currentChatId);
+                    updateFunnelReportButton();
+                } else {
+                    const errorData = await response.json();
+                    showPopup(errorData.error || 'Erro ao iniciar funil', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao iniciar funil:', error);
+                showPopup('Erro ao iniciar funil', 'error');
+            }
+        }
+
+        // Função para adicionar um funil ativo
+        function addActiveFinnel(funnelId, instanceKey, chatId) {
+            const key = `${instanceKey}:${chatId}`;
+            activeFunnels[key] = { funnelId, instanceKey, chatId };
+            updateActiveFunnelsList();
+        }
+
+
+        function formatPhoneNumber(num) {
+            const cleaned = num.replace(/\D/g, '');
+            const ddd = parseInt(cleaned.slice(0, 2));
+            if (ddd <= 27) {
+                return cleaned.padStart(13, '55'); // Ensure 11 digits for DDD <= 27
+            } else {
+                return cleaned.padStart(12, '55'); // Ensure 10 digits for DDD > 27
+            }
+        }
+
+        function formatarNumeroBrasileiro(numero) {
+            // Remove todos os caracteres não numéricos
+            numero = numero.replace(/\D/g, '');
+
+            // Verifica se o número começa com 55 (DDI do Brasil)
+            if (!numero.startsWith('55')) {
+                return false;
+            }
+
+            // Remove o DDI
+            numero = numero.slice(2);
+
+            // Extrai o DDD
+            const ddd = parseInt(numero.slice(0, 2));
+
+            // Verifica se o DDD é válido
+            if (ddd < 11 || ddd > 99) {
+                return false;
+            }
+
+            // Aplica as regras de formatação
+            if (ddd <= 27) {
+                // DDD até 27: deve ter 11 dígitos
+                if (numero.length < 11) {
+                    // Adiciona o 9 se estiver faltando
+                    numero = numero.slice(0, 2) + '9' + numero.slice(2);
+                } else if (numero.length > 11) {
+                    // Remove dígitos extras
+                    numero = numero.slice(0, 11);
+                }
+            } else {
+                // DDD 28 ou mais: deve ter 10 dígitos
+                if (numero.length > 10) {
+                    // Remove o 9 extra ou dígitos adicionais
+                    numero = numero.slice(0, 2) + numero.slice(3).slice(0, 8);
+                } else if (numero.length < 10) {
+                    // Número inválido se tiver menos de 10 dígitos
+                    return false;
+                }
+            }
+
+            // Retorna o número formatado com o DDI
+            return '55' + numero;
+        }
+
+        // Função para atualizar a lista de funis ativos
+        function updateActiveFunnelsList() {
+            activeFunnelsList.innerHTML = '';
+            Object.entries(activeFunnels).forEach(async ([key, funnel]) => {
+
+                const formattedNumber = formatPhoneNumber(funnel.chatId);
+                if (!formattedNumber) {
+                    return res.status(400).json({ message: 'Número de telefone inválido.' });
+                }
+
+                const numfinal = formattedNumber.startsWith('55')
+                    ? await formatarNumeroBrasileiro(formattedNumber)
+                    : formattedNumber;
+
+
+                const listItem = document.createElement('div');
+                listItem.className = 'p-2 hover:bg-gray-100 cursor-pointer rounded';
+                listItem.textContent = `Chat: ${numfinal}`;
+                listItem.onclick = () => selectFunnel(key);
+                activeFunnelsList.appendChild(listItem);
+            });
+        }
+
+        // Função para selecionar um funil
+        function selectFunnel(key) {
+            currentSelectedFunnel = activeFunnels[key];
+            updateFunnelDetails();
+        }
+
+        // Função para atualizar os detalhes do funil
+        async function updateFunnelDetails() {
+    if (!currentSelectedFunnel) return;
+
+    try {
+        const response = await fetch(`/chat/status?funnelId=${currentSelectedFunnel.funnelId}&instanceKey=${currentSelectedFunnel.instanceKey}&chatId=${currentSelectedFunnel.chatId}`);
+        const data = await response.json();
+
+        funnelDetails.innerHTML = `
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="bg-blue-50 p-3 rounded-lg">
+                    <p class="text-sm font-medium text-blue-800">Total de passos</p>
+                    <p class="text-2xl font-bold text-blue-600">${data.totalNodes}</p>
+                </div>
+                <div class="bg-green-50 p-3 rounded-lg">
+                    <p class="text-sm font-medium text-green-800">Passo atual</p>
+                    <p class="text-2xl font-bold text-green-600">${data.currentNodeIndex}</p>
+                </div>
+                <div class="bg-yellow-50 p-3 rounded-lg">
+                    <p class="text-sm font-medium text-yellow-800">Contém input</p>
+                    <p class="text-2xl font-bold text-yellow-600">${data.hasInput ? 'Sim' : 'Não'}</p>
+                </div>
+                <div class="bg-purple-50 p-3 rounded-lg">
+                    <p class="text-sm font-medium text-purple-800">Aguardando resposta</p>
+                    <p class="text-2xl font-bold text-purple-600">${data.waitingForInput ? 'Sim' : 'Não'}</p>
+                </div>
+            </div>
+            <div class="mt-4">
+                <h4 class="text-lg font-semibold text-gray-700 mb-2">Conteúdo Atual</h4>
+                <div id="currentContent" class="bg-gray-100 p-4 rounded-lg">
+                    ${formatCurrentContent(data.currentContent)}
+                </div>
+            </div>
+            <div id="funnelAnimation" class="mt-6 h-40 w-full">
+                ${createFunnelAnimation(data.currentNodeIndex, data.totalNodes)}
+            </div>
+        `;
+
+        if (data.status === 'completed') {
+            delete activeFunnels[`${currentSelectedFunnel.instanceKey}:${currentSelectedFunnel.chatId}`];
+            updateActiveFunnelsList();
+            showCompletionMessage(currentSelectedFunnel.chatId);
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar detalhes do funil:', error);
+    }
+}
+
+async function loadUserInfo() {
+    try {
+        const response = await fetch('/whatsapp/list');
+        const instances = await response.json();
+
+   
+        if (instances.length > 0) {
+            const instance = instances[0]; // Assumindo que queremos a primeira instância
+            document.getElementById('profileName').textContent = instance.whatsappName || 'Nome não disponível';
+            document.getElementById('instanceName').textContent = instance.name || 'instancia não disponível';
+            if (instance.foto) {
+                document.getElementById('profileImage').src = instance.foto;
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao carregar informações do usuário:', error);
+    }
+}
+
+loadUserInfo();
+
+function updateProfileInMenu(instance) {
+    const profileImage = document.getElementById('profileImage');
+    const profileName = document.getElementById('profileName');
+    const instanceName = document.getElementById('instanceName');
+
+    if (instance.foto) {
+        profileImage.src = instance.foto;
+    }
+    if (instance.whatsappName) {
+        profileName.textContent = instance.whatsappName;
+    }
+    if (instance.name) {
+        instanceName.textContent = instance.name;
+    }
+
+    console.log('Atualizando menu com:', instance); // Para depuração
+}
+
+// Chame esta função quando selecionar uma instância ou quando a página carregar
+function loadCurrentInstanceProfile() {
+    // Substitua isso pela lógica real para obter a instância atual
+    
+
+    fetch(`/whatsapp/instance/${currentInstanceKey}`)
+        .then(response => response.json())
+        .then(instanceData => {
+            updateProfileInMenu(instanceData);
+        })
+        .catch(error => console.error('Erro ao carregar perfil da instância:', error));
+}
+
+
+// Chame esta função quando a página carregar
+
+
+        // Função para formatar o conteúdo atual
+        function formatCurrentContent(content) {
+            switch (content.type) {
+                case 'text':
+                    return `<p class="text-gray-700">${content.value}</p>`;
+                case 'image':
+                    return `<img src="${content.value}" alt="Current step image" class="max-w-full h-auto rounded-lg">`;
+                case 'video':
+                    return `
+                <video controls class="w-full rounded-lg">
+                    <source src="${content.value}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            `;
+                case 'audio':
+                    return `
+                <audio controls class="w-full">
+                    <source src="${content.value}" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            `;
+                default:
+                    return `<p class="text-gray-500">Conteúdo não disponível</p>`;
+            }
+        }
+
+        // Função para criar a animação do funil
+        function createFunnelAnimation(currentStep, totalSteps) {
+            const progress = (currentStep / totalSteps) * 100;
+            return `
+        <svg class="w-full h-full" viewBox="0 0 100 100">
+            <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#4f46e5" />
+                    <stop offset="100%" stop-color="#7c3aed" />
+                </linearGradient>
+            </defs>
+            <path d="M10 10 L90 10 L50 90 Z" fill="none" stroke="#e2e8f0" stroke-width="2" />
+            <path d="M10 10 L90 10 L50 90 Z" fill="none" stroke="url(#gradient)" stroke-width="2" stroke-dasharray="280" stroke-dashoffset="${280 - (280 * progress / 100)}">
+                <animate attributeName="stroke-dashoffset" from="280" to="${280 - (280 * progress / 100)}" dur="1s" fill="freeze" />
+            </path>
+            <circle cx="50" cy="${10 + (80 * progress / 100)}" r="5" fill="url(#gradient)">
+                <animate attributeName="cy" from="10" to="${10 + (80 * progress / 100)}" dur="1s" fill="freeze" />
+            </circle>
+        </svg>
+    `;
+        }
+
+        // Função para mostrar mensagem de conclusão
+        function showCompletionMessage(chatId) {
+            const completionMessage = document.createElement('div');
+            completionMessage.className = 'fixed bottom-4 left-4 bg-green-500 text-white px-6 py-3 rounded-full shadow-lg';
+            completionMessage.textContent = `Funil concluído com sucesso para o chat ${chatId}!`;
+            document.body.appendChild(completionMessage);
+
+            setTimeout(() => {
+                completionMessage.remove();
+            }, 5000);
+        }
+
+        // Função para atualizar o botão de relatório de funil
+        function updateFunnelReportButton() {
+            if (Object.keys(activeFunnels).length > 0) {
+                openFunnelReportBtn.classList.remove('hidden');
+            } else {
+                openFunnelReportBtn.classList.add('hidden');
+            }
+        }
+
+        // Função para abrir o popup de relatório
+        function openFunnelReportPopup() {
+            funnelReportPopup.classList.remove('hidden');
+            updateActiveFunnelsList();
+            startFunnelReportInterval();
+        }
+
+        // Função para fechar o popup de relatório
+        function closeFunnelReportPopup() {
+            funnelReportPopup.classList.add('hidden');
+            stopFunnelReportInterval();
+        }
+
+        // Função para iniciar o intervalo de atualização do relatório
+        function startFunnelReportInterval() {
+            stopFunnelReportInterval(); // Garante que não haja intervalos duplicados
+            funnelReportInterval = setInterval(() => {
+                if (currentSelectedFunnel) {
+                    updateFunnelDetails();
+                }
+            }, 2000);
+        }
+
+        // Função para parar o intervalo de atualização do relatório
+        function stopFunnelReportInterval() {
+            if (funnelReportInterval) {
+                clearInterval(funnelReportInterval);
+            }
+        }
+
+        // Event listeners
+        openFunnelReportBtn.addEventListener('click', openFunnelReportPopup);
+        closeFunnelReportBtn.addEventListener('click', closeFunnelReportPopup);
+
+
+        // Atualizar a função renderFunnels para usar a nova função startFunnel
+        function renderFunnels() {
+    const funnelHTML = userFunnels.map(funnel => `
+        <button class="px-4 py-2 bg-primary-100 text-primary-800 rounded-full text-sm font-medium hover:bg-primary-200 transition-colors duration-200" data-funnel-id="${funnel.id}">
+            ${funnel.name}
+        </button>
+    `).join('');
+    funnelsContainer.innerHTML = funnelHTML;
+    mobileFunnelsContainer.innerHTML = funnelHTML;
+
+    document.querySelectorAll('[data-funnel-id]').forEach(button => {
+        button.addEventListener('click', () => {
+            const funnelId = button.dataset.funnelId;
+            startFunnel(funnelId);
+        });
+    });
+}
+        // Função para verificar funis ativos periodicamente
+        function checkActiveFunnels() {
+            setInterval(async () => {
+                const activeFunnelKeys = Object.keys(activeFunnels);
+                for (const key of activeFunnelKeys) {
+                    const [instanceKey, chatId] = key.split(':');
+                    const funnel = activeFunnels[key];
+                    try {
+                        const response = await fetch(`/funnels/status?funnelId=${funnel.funnelId}&instanceKey=${instanceKey}&chatId=${chatId}`);
+                        const data = await response.json();
+                        if (data.status === 'completed') {
+                            delete activeFunnels[key];
+                            updateActiveFunnelsList();
+                            updateFunnelReportButton();
+                            showCompletionMessage(chatId);
+                        }
+                    } catch (error) {
+                        console.error('Erro ao verificar status do funil:', error);
+                    }
+                }
+            }, 5000); // Verifica a cada 5 segundos
+        }
+
+        // Inicializar a verificação de funis ativos
+        checkActiveFunnels();
+
+        function getMediaDescription(messageType, content) {
+            switch (messageType) {
+                case 'image':
+                    return '🖼️ Imagem';
+                case 'video':
+                    return '🎥 Vídeo';
+                case 'audio':
+                    return '🎵 Áudio';
+                case 'document':
+                    return '📄 Documento';
+                case 'sticker':
+                    return '😊 Sticker';
+                default:
+                    return content;
+            }
+        }
+
+        // Carregar chats
+       /*/ async function loadChats(instanceKey) {
+
+
+    // Seleciona o elemento <nav> pela classe ou qualquer seletor apropriado
+    var navElement = document.querySelector("nav.bg-white.dark\\:bg-gray-800.shadow-md");
+    
+    // Verifica se o elemento foi encontrado
+    if (navElement) {
+        // Remove o elemento da página
+        navElement.remove();
+    }
+
+
+    var breadcrumbNav = document.querySelector('nav.text-gray-500.dark\\:text-gray-400.text-sm.mb-4');
+
+// Verifica se o elemento foi encontrado
+if (breadcrumbNav) {
+    // Remove o elemento da página
+    breadcrumbNav.remove();
+}
+            const response = await fetch(`/chat/chats/${instanceKey}`);
+            chats = await response.json();
+            renderChats(chats);
+        }/*/
+
+        async function renderChats(chatsToRender) {
+    // Buscar as listas de contatos
+    let contactLists = [];
+    try {
+        const response = await fetch('/contact-lists');
+        contactLists = await response.json();
+    } catch (error) {
+        console.error('Erro ao buscar listas de contatos:', error);
+    }
+
+    const sortedChats = chatsToRender.sort((a, b) => b.lastMessageTimestamp - a.lastMessageTimestamp);
+    const chatHTML = await Promise.all(sortedChats.map(async (chat) => {
+        const lastMessageContent = getMediaDescription(chat.lastMessageType, chat.lastMessage);
+        const chatTypeIcon = chat.chatType === 'grupo' 
+            ? '<svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>' 
+            : '<svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>';
+        const unreadCount = chat.unreadCount || 0;
+        const unreadClass = unreadCount > 0 ? 'bg-primary-100' : '';
+        const unreadIndicator = unreadCount > 0 ? `<span class="bg-primary-500 text-white text-xs font-bold px-2 py-1 rounded-full">${unreadCount}</span>` : '';
+        const avatarUrl = profileImageCache[chat.id] || chat.image || 'https://cdn-icons-png.flaticon.com/512/4792/4792929.png';
+        const formattedTime = formatTimestamp(chat.lastMessageTimestamp);
+        const lastMessageColor = chat.lastMessageFromMe ? 'text-blue-600' : 'text-gray-600';
+
+        // Encontrar a lista à qual o contato pertence
+        const listName = contactLists.find(list => 
+            list.contacts.some(contact => contact.phoneNumber === chat.id.split('@')[0])
+        )?.name;
+
+        const listTag = listName ? `<span class="list-tag ml-2">${listName}</span>` : '';
+
+        return `
+            <div class="chat-item p-3 hover:bg-gray-100 cursor-pointer rounded-lg transition duration-200 ease-in-out ${unreadClass}" data-chat-id="${chat.id}" data-chat-type="${chat.chatType}">
+                <div class="flex items-center space-x-3">
+                    <img src="${avatarUrl}" alt="${chat.name}" class="w-12 h-12 rounded-full object-cover">
+                    <div class="flex-grow min-w-0">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                ${chatTypeIcon}
+                                <h3 class="font-semibold text-gray-900 truncate ml-1">${chat.name}</h3>
+                                ${listTag}
+                            </div>
+                            <span class="text-xs text-gray-500">${formattedTime}</span>
+                        </div>
+                        <p class="text-sm ${lastMessageColor} truncate">${lastMessageContent}</p>
+                    </div>
+                    ${unreadIndicator}
+                    <button class="delete-chat-btn text-red-500 hover:text-red-700" data-chat-id="${chat.id}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }));
+
+    chatList.innerHTML = chatHTML.join('');
+    mobileChatList.innerHTML = chatHTML.join('');
+    addChatListeners();
+}
+        // Função para carregar mensagens atualizada
+     /*/   async function loadMessages(instanceKey, chatId) {
+            try {
+                const response = await fetch(`/chat/messages/${instanceKey}/${chatId}`);
+                const messages = await response.json();
+                renderMessages(messages, chatId);
+                scrollToBottom();
+            } catch (error) {
+                console.error('Erro ao carregar mensagens:', error);
+                showPopup('Erro ao carregar mensagens', 'error');
+            }
+        }/*/
+
+        function loadMessages(instanceKey, chatId) {
+    socket.emit('request chat messages', instanceKey, chatId);
+}
+
+        async function markChatAsRead(chatId) {
+            try {
+                await fetch(`/chat/mark-as-read/${currentInstanceKey}/${chatId}`, { method: 'POST' });
+                updateChatReadStatus(chatId);
+            } catch (error) {
+                console.error('Erro ao marcar chat como lido:', error);
+            }
+        }
+
+        function updateChatReadStatus(chatId) {
+    const chatElement = document.querySelector(`.chat-item[data-chat-id="${chatId}"]`);
+    if (chatElement) {
+        chatElement.classList.remove('unread');
+        const unreadIndicator = chatElement.querySelector('.bg-primary-500');
+        if (unreadIndicator) {
+            unreadIndicator.remove();
+        }
+        const chat = chats.find(c => c.id === chatId);
+        if (chat) {
+            chat.unreadCount = 0;
+        }
+    }
+}
+
+        function getSenderName(message, chatId, currentChatInfo) {
+    if (!currentChatInfo || (currentChatInfo.chatType !== 'grupo')) {
+        return '';
+    }
+
+    let senderName = message.sender;
+    if (message.info && message.info.userQueEnviou) {
+        senderName = message.info.userQueEnviou;
+    }
+    const senderNameHtml = `
+    <div class="chat-header text-sm font-semibold text-indigo-600 dark:text-indigo-400 mb-1 font-inter">
+        ${senderName}
+    </div>`;
+    return senderNameHtml
+}
+
+function moveChatToTop(chatId) {
+    const chatElement = document.querySelector(`.chat-item[data-chat-id="${chatId}"]`);
+    if (chatElement && chatElement.parentNode) {
+        chatElement.parentNode.prepend(chatElement);
+    }
+}
+
+        function getAvatarUrl(chat, chatId) {
+            const defaultGroupImage = "https://portais.univasf.edu.br/reitoria/imagens/5ba6d9f7590b4a7d8f4456737206be0e.png/@@images/image.png";
+            const defaultUserImage = "https://cdn-icons-png.flaticon.com/512/4792/4792929.png";
+
+            if (chatId.includes("@g.us")) {
+                return chat.senderImage || defaultGroupImage;
+            }
+
+            return chat.senderImage || defaultUserImage;
+        }
+
+        function renderMessages(messages, chatId) {
+    const messageHTML = messages.map(message => {
+        const messageClass = message.fromMe ? 'chat-end' : 'chat-start';
+        const bubbleClass = message.fromMe ? 'bg-primary-500 text-white' : 'bg-white text-primary-800';
+        let contentHtml = '';
+
+        let senderImage;
+    if (message.fromMe) {
+        senderImage = currentUserImage || 'https://cdn-icons-png.flaticon.com/512/4792/4792929.png';
+    } else {
+        senderImage = profileImageCache[currentChatId] || 'https://cdn-icons-png.flaticon.com/512/4792/4792929.png';
+    }
+
+
+
+    let quotedMessageHtml = '';
+if (message.quotedMessage) {
+  const quotedSender = message.quotedParticipant.replace("@s.whatsapp.net", "") || 'Desconhecido';
+  quotedMessageHtml = `
+    <div class="quoted-message bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 p-3 rounded-lg mb-2 border-l-4 border-indigo-500 shadow-sm transition-all duration-300 hover:shadow-md">
+      <div class="flex items-center mb-1">
+        <svg class="w-4 h-4 text-indigo-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+        </svg>
+        <span class="text-xs font-semibold text-gray-600 dark:text-gray-300">${quotedSender}</span>
+      </div>
+      <p class="text-sm text-gray-700 dark:text-gray-200 line-clamp-2">${message.quotedMessage}</p>
+    </div>
+  `;
+}
+
+    let statusIcon = '';
+    if (message.fromMe) {
+        statusIcon = `
+            <span class="message-status">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                </svg>
+            </span>
+        `;
+    }
+
+
+        switch (message.type) {
+            case 'texto':
+            case 'text':
+                contentHtml = `<div class="chat-bubble ${bubbleClass}">${formatTextWithLinks(message.content)}</div>`;
+                break;
+            case 'image':
+                contentHtml = `
+                    <div class="chat-bubble ${bubbleClass} p-1">
+                        <img src="${message.content}" alt="Image" class="media-content rounded-lg cursor-pointer" onclick="openMediaPopup('${message.content}', 'image')">
+                    </div>`;
+                break;
+            case 'video':
+                contentHtml = `
+                    <div class="chat-bubble ${bubbleClass} p-1">
+                        <video src="${message.content}" class="media-content rounded-lg cursor-pointer" onclick="openMediaPopup('${message.content}', 'video')"></video>
+                    </div>`;
+                break;
+                case 'audio':
+    contentHtml = `
+        <div class="chat-bubble ${bubbleClass} p-1">
+            <audio src="${message.content}" class="w-full" controls preload="none"></audio>
+        </div>`;
+    break;
+            case 'document':
+                contentHtml = `
+                    <div class="chat-bubble ${bubbleClass}">
+                        <a href="${message.content}" target="_blank" class="flex items-center space-x-2 text-blue-600 hover:underline">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Ver documento</span>
+                        </a>
+                    </div>`;
+                break;
+                case 'sticker':
+    contentHtml = `
+        <div class="chat-bubble ${bubbleClass} p-1">
+            <img src="${message.content}" alt="Sticker" class="max-w-[150px] max-h-[150px]">
+        </div>`;
+    break;
+            default:
+                contentHtml = `<div class="chat-bubble ${bubbleClass}">${formatTextWithLinks(message.content)}</div>`;
+        }
+
+        const senderNameHtml = getSenderName(message, chatId, currentChatInfo);
+        if (!message.fromMe) {
+            fetchProfileImage(currentInstanceKey, chatId);
+        }
+        return `
+           <div class="chat ${messageClass} mb-4" data-chat-id="${message.fromMe ? 'me' : currentChatId}">
+                <div class="chat-image avatar">
+                    <div class="w-10 rounded-full">
+                      <img src="${senderImage}" alt="${message.sender}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4792/4792929.png'">
+                    </div>
+                </div>
+                <div class="chat-header text-xs opacity-50 mb-1">
+                    ${senderNameHtml}
+                    ${new Date(message.timestamp * 1000).toLocaleString()}
+                </div>
+                <div class="chat-bubble-wrapper">
+                      ${quotedMessageHtml}
+                    ${contentHtml}
+                      ${statusIcon}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    messageList.innerHTML = messageHTML;
+    mobileMessageList.innerHTML = messageHTML;
+    scrollToBottom();
+}
+
+function formatTextWithLinks(text) {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, (url) => {
+        if (url.match(/\.(jpeg|jpg|gif|png)$/)) {
+            return `<img src="${url}" alt="Image" class="inline-media rounded-lg cursor-pointer" onclick="openMediaPopup('${url}', 'image')">`;
+        } else if (url.match(/\.(mp4|webm|ogg)$/)) {
+            return `<video src="${url}" class="inline-media rounded-lg cursor-pointer" onclick="openMediaPopup('${url}', 'video')"></video>`;
+        } else if (url.match(/\.(mp3|wav)$/)) {
+            return `<audio src="${url}" class="w-full" controls></audio>`;
+        } else {
+            return `<a href="${url}" target="_blank" class="text-blue-600 hover:underline">${url}</a>`;
+        }
+    });
+}
+        function scrollToBottom() {
+            messageList.scrollTop = messageList.scrollHeight;
+            mobileMessageList.scrollTop = mobileMessageList.scrollHeight;
+        }
+
+        function openMediaPopup(src, type) {
+    const mediaContainer = document.createElement('div');
+    mediaContainer.className = 'fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-90';
+    
+    let content;
+    if (type === 'image') {
+        content = `
+            <div class="relative max-w-[90vw] max-h-[90vh]">
+                <img src="${src}" alt="Full size image" class="max-w-full max-h-[90vh] object-contain rounded-lg">
+                <button class="absolute top-2 right-2 bg-white/20 hover:bg-white/40 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 backdrop-blur-sm" onclick="this.closest('.fixed').remove()">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>`;
+    } else if (type === 'video') {
+        content = `
+            <div class="relative max-w-[90vw] max-h-[90vh]">
+                <video src="${src}" controls class="max-w-full max-h-[90vh] object-contain rounded-lg"></video>
+                <button class="absolute top-2 right-2 bg-white/20 hover:bg-white/40 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 backdrop-blur-sm" onclick="this.closest('.fixed').remove()">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>`;
+    }
+
+    mediaContainer.innerHTML = content;
+
+    // Adicionar evento de clique no fundo para fechar
+    mediaContainer.addEventListener('click', (e) => {
+        if (e.target === mediaContainer) {
+            mediaContainer.remove();
+        }
+    });
+
+    // Adicionar evento de tecla Esc para fechar
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && document.contains(mediaContainer)) {
+            mediaContainer.remove();
+        }
+    });
+
+    document.body.appendChild(mediaContainer);
+
+    // Prevenir scroll do body quando o popup está aberto
+    document.body.style.overflow = 'hidden';
+
+    // Restaurar scroll quando o popup for fechado
+    const restoreScroll = () => {
+        document.body.style.overflow = '';
+    };
+
+    const closeBtn = mediaContainer.querySelector('button');
+    closeBtn.addEventListener('click', () => {
+        restoreScroll();
+    });
+
+    mediaContainer.addEventListener('click', (e) => {
+        if (e.target === mediaContainer) {
+            restoreScroll();
+        }
+    });
+}
+        function displayChatInfo(chat) {
+            currentChatInfo = chat;
+            chatName.textContent = chat.name;
+            mobileChatName.textContent = chat.name;
+            
+            if (chat.chatType === 'grupo') {
+        chatType.textContent = 'Grupo';
+       // groupMembersButton.classList.remove('hidden');
+    //   mobileGroupMembersButton.classList.remove('hidden');
+    } else {
+        const lastSeen = lastSeenCache[chat.id];
+        chatType.textContent = lastSeen ? `Visto por último: ${new Date(lastSeen).toLocaleString()}` : 'Chat Individual';
+     //   groupMembersButton.classList.add('hidden');
+     //   mobileGroupMembersButton.classList.add('hidden');
+    }
+
+            const imageUrl = profileImageCache[chat.id] || 'https://cdn-icons-png.flaticon.com/512/4792/4792929.png';
+            chatAvatar.src = imageUrl;
+            mobileChatAvatar.src = imageUrl;
+        }
+
+        [messageInput, mobileMessageInput].forEach(input => {
+            input.addEventListener('input', () => {
+                clearTimeout(typingTimer);
+                sendTypingStatus('composing');
+
+                typingTimer = setTimeout(() => {
+                    sendTypingStatus('paused');
+                }, typingTimeout);
+            });
+
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    clearTimeout(typingTimer);
+                    sendTypingStatus('paused');
+                    sendMessage(input.value);
+                }
+            });
+        });
+
+        function sendTypingStatus(status) {
+            socket.emit('typing status', {
+                instanceKey: currentInstanceKey,
+                chatId: currentChatId,
+                status: status
+            });
+        }
+
+        const profileImageCache = {};
+
+async function fetchProfileImage(instanceKey, chatId) {
+    // Verificar se a imagem já está em cache
+    if (profileImageCache[chatId]) {
+        updateProfileImage(chatId, profileImageCache[chatId]);
+        return;
+    }
+
+    try {
+        const response = await fetch('/chat/profile-image', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ instanceKey, chatId }),
+        });
+
+        if (response.ok) {
+            const blob = await response.blob();
+            const imageUrl = URL.createObjectURL(blob);
+            
+            // Armazenar a imagem em cache
+            profileImageCache[chatId] = imageUrl;
+            
+            updateProfileImage(chatId, imageUrl);
+        } else {
+            console.error('Falha ao obter imagem de perfil');
+        }
+    } catch (error) {
+        console.error('Erro ao buscar imagem de perfil:', error);
+    }
+}
+
+function updateProfileImage(chatId, imageUrl) {
+    if (!imageUrl) return;
+
+    // Atualizar a imagem no chat aberto
+    if (currentChatId === chatId) {
+        chatAvatar.src = imageUrl;
+        mobileChatAvatar.src = imageUrl;
+    }
+
+    // Atualizar a imagem na lista de chats
+    const chatItems = document.querySelectorAll(`.chat-item[data-chat-id="${chatId}"] img`);
+    chatItems.forEach(item => {
+        item.src = imageUrl;
+    });
+
+    // Atualizar o cache de chats
+    const chatIndex = chats.findIndex(chat => chat.id === chatId);
+    if (chatIndex !== -1) {
+        chats[chatIndex].image = imageUrl;
+    }
+
+    // Forçar uma re-renderização da lista de chats
+    renderChats(chats);
+}
+
+
+
+function addChatListeners() {
+    document.querySelectorAll('.chat-item').forEach(item => {
+        item.addEventListener('click', async(event) => {
+            if (!event.target.closest('.delete-chat-btn')) {
+        currentChatId = item.dataset.chatId;
+        const chatType = item.dataset.chatType;
+        const chat = chats.find(c => c.id === currentChatId);
+        displayChatInfo(chat);
+        loadMessages(currentInstanceKey, currentChatId);
+        if (window.innerWidth < 768) {
+          mobileChats.classList.add('hidden');
+          mobileMessages.classList.remove('hidden');
+        }
+        await markChatAsRead(currentChatId);
+        item.classList.remove('bg-primary-100');
+        item.querySelector('.bg-primary-500')?.remove();
+      
+        }
+        });
+        const deleteBtn = item.querySelector('.delete-chat-btn');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const chatId = event.currentTarget.dataset.chatId;
+                deleteChat(chatId);
+            });
+        }
+
+    });
+}
+
+        function showGroupMembers() {
+            if (currentChatInfo && currentChatInfo.chatType === 'grupo') {
+                const membersList = document.getElementById('groupMembersList');
+                membersList.innerHTML = currentChatInfo.participants.map(participant =>
+                    `<li class="mb-2">${participant.name || participant.id}</li>`
+                ).join('');
+                document.getElementById('groupMembersModal').style.display = 'block';
+            }
+        }
+
+        async function updateChats() {
+            const response = await fetch(`/chat/chats/${currentInstanceKey}`);
+            const newChats = await response.json();
+            const newChatIds = new Set(newChats.map(chat => chat.id));
+            const oldChatIds = new Set(chats.map(chat => chat.id));
+            await loadAllProfileImages(currentInstanceKey, newChats);
+
+            // Verificar novos chats ou mensagens
+            newChats.forEach(newChat => {
+                const oldChat = chats.find(chat => chat.id === newChat.id);
+                if (!oldChat || newChat.lastMessageTimestamp > oldChat.lastMessageTimestamp) {
+                    showNotification(newChat);
+                }
+            });
+
+            chats = newChats.sort((a, b) => b.lastMessageTimestamp - a.lastMessageTimestamp);
+            renderChats(chats);
+        }
+
+        function createNewChat(chat) {
+    const chatHTML = createChatHTML(chat);
+    chatList.insertAdjacentHTML('afterbegin', chatHTML);
+    mobileChatList.insertAdjacentHTML('afterbegin', chatHTML);
+    addChatListeners();
+    loadAllProfileImages()
+}
+
+function showNotification(data) {
+    if (data.message.fromMe === true) return;
+    
+    if (receiveSoundToggle.checked) {
+        notificationSound.play().catch(error => console.error('Erro ao tocar som:', error));
+    }
+
+    const lastMessageContent = getMediaDescription(data.message.type, data.message.content);
+    const chatId = data.chatId || data.message.key.remoteJid; // Ajuste conforme necessário
+    const senderImage = profileImageCache[chatId] || 'https://cdn-icons-png.flaticon.com/512/4792/4792929.png';
+
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 max-w-sm w-full transition-all duration-300 ease-in-out transform translate-y-0 border-l-4 border-indigo-500';
+    notification.innerHTML = `
+        <div class="flex items-start">
+            <img src="${senderImage}" 
+                 alt="${data.message.sender}" 
+                 class="w-12 h-12 rounded-full mr-3 object-cover border-2 border-indigo-200">
+            <div class="flex-grow min-w-0">
+                <h4 class="font-semibold text-gray-900 dark:text-gray-100 truncate">${data.message.sender}</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-300 truncate">${lastMessageContent}</p>
+            </div>
+            <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors duration-200 ml-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+    `;
+    document.body.appendChild(notification);
+
+    notification.querySelector('button').addEventListener('click', () => {
+        notification.remove();
+    });
+
+    // Animação de entrada
+    setTimeout(() => {
+        notification.style.transform = 'translate(0, 10px)';
+    }, 100);
+
+    // Animação de saída
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translate(0, -10px)';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 5000);
+}
+
+async function sendMessage(content) {
+    if (!currentInstanceKey || !currentChatId || !content.trim()) {
+        console.error('Missing required information to send message');
+        return;
+    }
+
+    try {
+        const response = await fetch('/chat/send-message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                instanceKey: currentInstanceKey,
+                chatId: currentChatId,
+                content: content.trim()
+            }),
+        });
+
+        if (response.ok) {
+            console.log('Message sent successfully');
+            const messageData = await response.json();
+
+            if (sendSoundToggle.checked) {
+                sendSound.play();
+            }
+
+            showPopup('Mensagem enviada');
+
+            messageInput.value = '';
+            mobileMessageInput.value = '';
+
+            // Atualizar o chat na lista com a nova mensagem
+            updateChatInList(currentChatId, {
+                type: 'text', // Assumindo que é uma mensagem de texto
+                content: content.trim(),
+                timestamp: Date.now() / 1000 // Timestamp atual em segundos
+            });
+
+            // Mover o chat para o topo da lista
+            moveChatToTop(currentChatId);
+
+            // Emitir a mensagem para o socket
+          /*/  socket.emit('send message', {
+                instanceKey: currentInstanceKey,
+                chatId: currentChatId,
+                content: content.trim()
+            });/*/
+
+            // Adicionar a mensagem à lista de mensagens atual
+           appendMessage({
+                fromMe: true,
+                sender: 'You', // ou o nome do usuário atual
+                content: content.trim(),
+                timestamp: Date.now() / 1000,
+                type: 'text'
+            });
+
+        } else {
+            console.error('Error sending message');
+            showPopup('Erro ao enviar mensagem', 'error');
+        }
+    } catch (error) {
+        console.error('Error sending message:', error);
+        showPopup('Erro ao enviar mensagem', 'error');
+    }
+}
+        function showPopup(message, type = 'success') {
+            const popup = document.createElement('div');
+            popup.className = `fixed top-4 right-4 px-4 py-2 rounded shadow-lg transform transition-all duration-300 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white`;
+            popup.textContent = message;
+            document.body.appendChild(popup);
+
+            setTimeout(() => {
+                popup.style.opacity = '0';
+                popup.style.transform = 'translateY(-20px)';
+                setTimeout(() => popup.remove(), 300);
+            }, 3000);
+        }
+
+        function filterChats(query) {
+            const filteredChats = chats.filter(chat =>
+                chat.name.toLowerCase().includes(query.toLowerCase()) ||
+                chat.lastMessage.toLowerCase().includes(query.toLowerCase())
+            );
+            renderChats(filteredChats);
+        }
+
+
+
+        wallpaperInput.addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.documentElement.style.setProperty('--chat-background', `url(${e.target.result})`);
+                    localStorage.setItem('chatWallpaper', e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Event Listeners
+        confirmInstance.addEventListener('click', () => {
+            if (currentInstanceKey) {
+                instanceModal.classList.remove('modal-open');
+                chatContainer.classList.remove('hidden');
+            //    loadChats(currentInstanceKey);
+                loadUserFunnels();
+            //    setInterval(() => updateChats(), 5000);
+            } else {
+                alert('Por favor, selecione uma instância antes de continuar.');
+            }
+        });
+
+        [sendButton, mobileSendButton].forEach(button => {
+            button.addEventListener('click', () => {
+                const input = button.id === 'sendButton' ? messageInput : mobileMessageInput;
+                sendMessage(input.value);
+            });
+        });
+
+        [messageInput, mobileMessageInput].forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage(input.value);
+                }
+            });
+        });
+
+        backButton.addEventListener('click', () => {
+            mobileMessages.classList.add('hidden');
+            mobileChats.classList.remove('hidden');
+        });
+
+        [refreshButton, mobileRefreshButton].forEach(button => {
+            button.addEventListener('click', () => {
+                updateChats();
+            });
+        });
+
+        [searchChat, mobileSearchChat].forEach(input => {
+            input.addEventListener('input', (e) => {
+                filterChats(e.target.value);
+            });
+        });
+
+        //document.getElementById('groupMembersButton').addEventListener('click', showGroupMembers);
+        //document.getElementById('mobileGroupMembersButton').addEventListener('click', showGroupMembers);
+
+       // document.querySelector('.close-modal').addEventListener('click', () => {
+         //   document.getElementById('groupMembersModal').style.display = 'none';
+       // });
+
+       // window.addEventListener('click', (event) => {
+       //     if (event.target === document.getElementById('groupMembersModal')) {
+        //        document.getElementById('groupMembersModal').style.display = 'none';
+       //     }
+      //  });
+
+
+
+        // Inicialização
+        loadInstances();
+
+        // Carregar configurações salvas
+        if (localStorage.getItem('sendSound') === 'false') {
+            sendSoundToggle.checked = false;
+        }
+        if (localStorage.getItem('receiveSound') === 'false') {
+            receiveSoundToggle.checked = false;
+        }
+        const savedWallpaper = localStorage.getItem('chatWallpaper');
+        if (savedWallpaper) {
+            document.documentElement.style.setProperty('--chat-background', `url(${savedWallpaper})`);
+        }
+
+        // Salvar configurações
+        sendSoundToggle.addEventListener('change', () => {
+            localStorage.setItem('sendSound', sendSoundToggle.checked);
+        });
+        receiveSoundToggle.addEventListener('change', () => {
+            localStorage.setItem('receiveSound', receiveSoundToggle.checked);
+        });
+
+        // Event listener para o botão de abrir relatório (caso não tenha sido adicionado antes)
+        document.addEventListener('DOMContentLoaded', () => {
+            const openFunnelReportBtn = document.getElementById('openFunnelReport');
+            if (openFunnelReportBtn) {
+                openFunnelReportBtn.addEventListener('click', openFunnelReportPopup);
+            }
+        });
+    </script>
+</body>
+
+</html>

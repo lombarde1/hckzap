@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador Telegram | HocketZap</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.6.0/dist/full.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/2.8.2/alpine.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.8/dist/sweetalert2.all.min.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen" x-data="telegramManager()">
+<!-- Menu Principal -->
+
+
+<!-- Menu do Hocket -->
+<div id="hocket-menu" 
+     class="menu-category" 
+     x-show="menuState.isHocketMenuOpen"
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0 transform -translate-y-2"
+     x-transition:enter-end="opacity-100 transform translate-y-0"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="opacity-100 transform translate-y-0"
+     x-transition:leave-end="opacity-0 transform -translate-y-2">
+    <!-- Conteúdo do menu do hocket -->
+</div>
+
+
+<button @click="toggleMenu('isHocketMenuOpen')" 
+        class="menu-toggle"
+        :class="{ 'active': menuState.isHocketMenuOpen }">
+    <i class="fas" :class="menuState.isHocketMenuOpen ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+</button>
+
+<!-- Sidebar Toggle -->
+<button @click="toggleSidebar" 
+   class="sidebar-toggle"
+   :class="{ 'collapsed': !menuState.isSidebarOpen }">
+<i class="fas" :class="menuState.isSidebarOpen ? 'fa-chevron-left' : 'fa-chevron-right'"></i>
+</button>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 text-sm">Total de Grupos</p>
+                        <h3 class="text-2xl font-bold" x-text="stats.totalGroups">0</h3>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                        <i class="fas fa-comments text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 text-sm">Mensagens Enviadas</p>
+                        <h3 class="text-2xl font-bold" x-text="stats.totalMessages">0</h3>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                        <i class="fas fa-user-check text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 text-sm">Total de Membros</p>
+                        <h3 class="text-2xl font-bold" x-text="stats.totalMembers">0</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Groups List -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="p-6 border-b">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-semibold">Grupos Gerenciados</h2>
+                    <div class="flex gap-4">
+                        <div class="form-control">
+                            <input type="text" placeholder="Buscar grupo..." 
+                                   class="input input-bordered w-full max-w-xs"
+                                   x-model="searchTerm"
+                                   @input="filterGroups()">
+                        </div>
+                        <select class="select select-bordered" x-model="filterStatus" @change="filterGroups()">
+                            <option value="">Todos os Status</option>
+                            <option value="active">Ativos</option>
+                            <option value="inactive">Inativos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="table w-full">
+                    <thead>
+                        <tr>
+                            <th>Grupo</th>
+                            <th>Membros</th>
+                            <th>Status</th>
+                            <th>Última Atualização</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="group in filteredGroups" :key="group._id">
+                            <tr>
+                                <td class="flex items-center gap-3">
+                                    <i class="fas fa-users-rectangle text-blue-500"></i>
+                                    <div>
+                                        <p class="font-medium" x-text="group.title"></p>
+                                        <span class="text-sm text-gray-500" x-text="group.telegramId"></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="font-semibold" x-text="group.stats.memberCount"></span>
+                                </td>
+                                <td>
+                                    <span :class="{
+                                        'badge badge-success': group.status === 'active',
+                                        'badge badge-error': group.status === 'inactive',
+                                        'badge badge-warning': group.status === 'unavailable'
+                                    }" x-text="group.status"></span>
+                                </td>
+                                <td x-text="formatDate(group.stats.lastUpdated)"></td>
+                                <td>
+                                    <div class="flex gap-2">
+                                        <button @click="openGroupDetails(group)" 
+                                                class="btn btn-square btn-sm btn-ghost">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button @click="openSchedulePost(group)" 
+                                                class="btn btn-square btn-sm btn-ghost">
+                                            <i class="fas fa-calendar-plus"></i>
+                                        </button>
+                                        <button @click="confirmDelete(group)" 
+                                                class="btn btn-square btn-sm btn-ghost text-red-500">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Group Modal -->
+    <div x-show="showAddGroupModal" 
+         class="modal modal-open"
+         @click.away="showAddGroupModal = false">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg mb-4">Adicionar Novo Grupo</h3>
+            <form @submit.prevent="addGroup">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">ID do Grupo Telegram</span>
+                    </label>
+                    <input type="text" x-model="newGroup.telegramId" 
+                           placeholder="-100123456789"
+                           class="input input-bordered" required>
+                    <label class="label">
+                        <span class="label-text-alt text-gray-500">
+                            Coloque o bot como admin do grupo antes de adicionar
+                        </span>
+                    </label>
+                </div>
+                
+                <div class="modal-action">
+                    <button type="button" 
+                            @click="showAddGroupModal = false" 
+                            class="btn btn-ghost">Cancelar</button>
+                    <button type="submit" 
+                            class="btn btn-primary">
+                        Adicionar Grupo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <!-- ... (headers anteriores permanecem iguais) ... -->
+    </head>
+    
+    <body class="bg-gray-50 min-h-screen" x-data="telegramManager()">
+        <!-- ... (resto do HTML permanece igual) ... -->
+    
+        <script>
+            function telegramManager() {
+                return {
+                    // Estados do menu
+                    menuState: {
+          
+            isHocketMenuOpen: false,
+            isConfigMenuOpen: false,
+            isToolsMenuOpen: false,
+            isPlanMenuOpen: false,
+            isMarketingMenuOpen: false,
+            isSidebarOpen: true
+        },
+    
+                    // Controle de menus
+                    toggleMenu(menuName) {
+                        this.menuState[menuName] = !this.menuState[menuName];
+                    },
+    
+                    closeAllMenus() {
+                        Object.keys(this.menuState).forEach(key => {
+                            if (key !== 'isSidebarOpen') {
+                                this.menuState[key] = false;
+                            }
+                        });
+                    },
+    
+                    // Seus estados existentes
+                    stats: {
+                        totalGroups: 0,
+                        totalMembers: 0,
+                        scheduledPosts: 0
+                    },
+                    groups: [],
+                    searchTerm: '',
+                    filterStatus: '',
+                    showAddGroupModal: false,
+                    newGroup: {
+                        telegramId: ''
+                    },
+    
+                    // Seus métodos existentes
+                    init() {
+                        this.loadGroups();
+                    },
+    
+                    formatDate(date) {
+                        if (!date) return '-';
+                        return new Date(date).toLocaleDateString('pt-BR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    },
+    
+                    // Formatar status
+                    formatStatus(status) {
+                        const statusMap = {
+                            'active': 'Ativo',
+                            'inactive': 'Inativo',
+                            'unavailable': 'Indisponível'
+                        };
+                        return statusMap[status] || status;
+                    },
+    
+                    // Métodos existentes
+                    init() {
+                        this.loadGroups();
+                    },
+    
+                    async loadGroups() {
+                        try {
+                            const response = await fetch('/telegram/groups');
+                            const data = await response.json();
+                            this.groups = data;
+                            this.updateStats();
+                        } catch (error) {
+                            console.error('Error loading groups:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Erro',
+                                text: 'Falha ao carregar grupos'
+                            });
+                        }
+                    },
+    
+                    updateStats() {
+                        this.stats.totalGroups = this.groups.length;
+                        this.stats.totalMembers = this.groups.reduce((acc, group) => 
+                            acc + (group.stats?.memberCount || 0), 0);
+                        this.stats.scheduledPosts = this.groups.reduce((acc, group) =>
+                            acc + (group.scheduledPosts?.length || 0), 0);
+                    },
+    
+                    get filteredGroups() {
+                        return this.groups.filter(group => {
+                            const matchesSearch = group.title?.toLowerCase()
+                                .includes(this.searchTerm.toLowerCase());
+                            const matchesStatus = !this.filterStatus || 
+                                group.status === this.filterStatus;
+                            return matchesSearch && matchesStatus;
+                        });
+                    },
+    
+                    async addGroup() {
+                        try {
+                            const response = await fetch('/telegram/groups', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(this.newGroup)
+                            });
+    
+                            if (!response.ok) {
+                                throw new Error('Falha ao adicionar grupo');
+                            }
+    
+                            const data = await response.json();
+                            this.groups.push(data);
+                            this.updateStats();
+                            this.showAddGroupModal = false;
+                            this.newGroup.telegramId = '';
+    
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Sucesso',
+                                text: 'Grupo adicionado com sucesso',
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                        } catch (error) {
+                            console.error('Error adding group:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Erro',
+                                text: error.message || 'Falha ao adicionar grupo'
+                            });
+                        }
+                    },
+    
+                    async confirmDeleteGroup(group) {
+                        const result = await Swal.fire({
+                            title: 'Confirmar exclusão',
+                            text: `Deseja realmente excluir o grupo "${group.title}"?`,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Sim, excluir',
+                            cancelButtonText: 'Cancelar',
+                            confirmButtonColor: '#dc2626',
+                            cancelButtonColor: '#6b7280'
+                        });
+    
+                        if (result.isConfirmed) {
+                            await this.deleteGroup(group._id);
+                        }
+                    },
+    
+                    async deleteGroup(groupId) {
+                        try {
+                            const response = await fetch(`/telegram/groups/${groupId}`, {
+                                method: 'DELETE'
+                            });
+    
+                            if (!response.ok) {
+                                throw new Error('Falha ao excluir grupo');
+                            }
+    
+                            this.groups = this.groups.filter(g => g._id !== groupId);
+                            this.updateStats();
+    
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Sucesso',
+                                text: 'Grupo excluído com sucesso',
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                        } catch (error) {
+                            console.error('Error deleting group:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Erro',
+                                text: error.message || 'Falha ao excluir grupo'
+                            });
+                        }
+                    }
+                };
+            }
+        </script>
+           <script>
+            document.addEventListener('alpine:init', () => {
+                // Event listener para fechar menus quando clicar fora
+                document.addEventListener('click', (event) => {
+                    const isMenuClick = event.target.closest('[x-data]');
+                    if (!isMenuClick) {
+                        const appState = Alpine.store('app');
+                        if (appState) {
+                            appState.closeAllMenus();
+                        }
+                    }
+                });
+            });
+        </script>
+    </body>
+    </html>
+</body>
+</html>

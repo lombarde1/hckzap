@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integração Personalizada Mercado Pago</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0F172A;
+        }
+
+        .noise {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.05;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .glass {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .input-focus {
+            transition: all 0.2s ease;
+        }
+
+        .input-focus:focus {
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .glow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.1), transparent 50%);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 relative overflow-x-hidden">
+    <div class="noise"></div>
+    <div class="glow"></div>
+
+    <div class="max-w-2xl mx-auto relative z-10">
+        <!-- Header Section -->
+        <div class="mb-8">
+            <div class="flex items-center space-x-3 mb-2">
+                <div class="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-link text-indigo-400"></i>
+                </div>
+                <h1 class="text-2xl font-semibold text-white">Mercado Pago</h1>
+            </div>
+            <p class="text-gray-400 text-sm ml-13">Configure sua integração com o Mercado Pago</p>
+        </div>
+
+        <!-- Main Form -->
+        <div class="glass rounded-2xl p-6 space-y-6">
+            <form id="mercadoPagoForm" class="space-y-6">
+                <!-- CSRF Token -->
+                <div class="space-y-2">
+                    <label for="xCsrfToken" class="block text-sm font-medium text-gray-300 flex items-center">
+                        <i class="fas fa-key text-indigo-400 mr-2 w-4"></i>
+                        Token CSRF
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="password" 
+                            id="xCsrfToken" 
+                            name="xCsrfToken" 
+                            value="<%= mercadoPagoConfig.xCsrfToken || '' %>"
+                            class="w-full bg-gray-900/50 border border-gray-700 rounded-lg py-2.5 px-4 text-gray-300 text-sm input-focus"
+                            required
+                        >
+                        <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Cookie -->
+                <div class="space-y-2">
+                    <label for="cookie" class="block text-sm font-medium text-gray-300 flex items-center">
+                        <i class="fas fa-cookie-bite text-indigo-400 mr-2 w-4"></i>
+                        Cookie
+                    </label>
+                    <textarea 
+                        id="cookie" 
+                        name="cookie" 
+                        rows="3"
+                        class="w-full bg-gray-900/50 border border-gray-700 rounded-lg py-2.5 px-4 text-gray-300 text-sm input-focus"
+                        required
+                    ><%= mercadoPagoConfig.cookie || '' %></textarea>
+                </div>
+
+                <!-- NewRelic ID -->
+                <div class="space-y-2">
+                    <label for="xNewRelicId" class="block text-sm font-medium text-gray-300 flex items-center">
+                        <i class="fas fa-fingerprint text-indigo-400 mr-2 w-4"></i>
+                        NewRelic ID
+                    </label>
+                    <input 
+                        type="text" 
+                        id="xNewRelicId" 
+                        name="xNewRelicId"
+                        value="<%= mercadoPagoConfig.xNewRelicId || '' %>"
+                        class="w-full bg-gray-900/50 border border-gray-700 rounded-lg py-2.5 px-4 text-gray-300 text-sm input-focus"
+                        required
+                    >
+                </div>
+
+                <!-- Submit Button -->
+                <button 
+                    type="submit"
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-4 rounded-lg transition duration-200 flex items-center justify-center space-x-2"
+                >
+                    <i class="fas fa-save"></i>
+                    <span>Salvar Configuração</span>
+                </button>
+            </form>
+
+            <!-- Test Integration Section -->
+            <div class="pt-6 border-t border-gray-800">
+                <button 
+                    id="testIntegration"
+                    class="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium py-2.5 px-4 rounded-lg transition duration-200 flex items-center justify-center space-x-2"
+                >
+                    <i class="fas fa-plug"></i>
+                    <span>Testar Integração</span>
+                </button>
+            </div>
+
+            <!-- Test Result -->
+            <div id="testResult" class="hidden rounded-lg p-4 text-sm"></div>
+        </div>
+    </div>
+
+    <script>
+        // Previous JavaScript code remains the same, just update the notification styling
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed bottom-4 right-4 p-4 rounded-lg glass flex items-center space-x-2 text-sm transform transition-all duration-300 ease-in-out ${
+                type === 'success' ? 'text-green-400' : 'text-red-400'
+            }`;
+            notification.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateY(20px)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Add toggle password visibility
+        document.querySelector('.fa-eye').parentElement.addEventListener('click', function() {
+            const input = document.getElementById('xCsrfToken');
+            const icon = this.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+    </script>
+    <script>
+        document.getElementById('mercadoPagoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const xCsrfToken = document.getElementById('xCsrfToken').value;
+            const cookie = document.getElementById('cookie').value;
+            const xNewRelicId = document.getElementById('xNewRelicId').value;
+
+            try {
+                const response = await axios.post('/integrations/mercadopago/save', { xCsrfToken, cookie, xNewRelicId });
+                showNotification('Configuração salva com sucesso!', 'success');
+            } catch (error) {
+                showNotification('Erro ao salvar configuração: ' + error.response.data.error, 'error');
+            }
+        });
+
+        function handleTestResult(response, resultDiv) {
+    const isSuccess = response.success && !response.data?.includes('<!DOCTYPE html');
+
+    const resultConfig = {
+        success: {
+            icon: 'check-circle',
+            message: 'Conexão bem-sucedida!',
+            className: 'mt-6 p-4 rounded-xl bg-green-900/50 backdrop-blur flex items-center justify-center text-green-200 pulse border border-green-800',
+            iconClass: 'text-green-400'
+        },
+        error: {
+            icon: 'exclamation-circle',
+            message: 'Erro na conexão',
+            className: 'mt-6 p-4 rounded-xl bg-red-900/50 backdrop-blur flex items-center justify-center text-red-200 border border-red-800',
+            iconClass: 'text-red-400'
+        }
+    };
+
+    const { icon, message, className, iconClass } = resultConfig[isSuccess ? 'success' : 'error'];
+
+    const errorDetail = response.data?.error || response.message || 'Erro inesperado na resposta';
+    const finalMessage = isSuccess ? message : `${message}: ${errorDetail}`;
+
+    resultDiv.innerHTML = `
+        <i class="fas fa-${icon} ${iconClass} mr-2"></i>
+        <span class="font-medium">${finalMessage}</span>
+    `;
+    
+    resultDiv.className = className;
+}
+
+// Uso no evento de teste
+document.getElementById('testIntegration').addEventListener('click', async () => {
+    const resultDiv = document.getElementById('testResult');
+    
+    // Estado de loading
+    resultDiv.innerHTML = `
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-circle-notch fa-spin text-indigo-400"></i>
+            <span class="text-gray-300">Testando conexão...</span>
+        </div>
+    `;
+    resultDiv.className = 'mt-6 p-4 rounded-xl bg-gray-800/50 backdrop-blur flex items-center justify-center border border-gray-700';
+    resultDiv.style.display = 'flex';
+
+    try {
+        const response = await axios.get('/integrations/mercadopago/test');
+        handleTestResult(response.data, resultDiv);
+    } catch (error) {
+        handleTestResult({
+            success: false,
+            data: {
+                error: error.response?.data?.error || error.message
+            }
+        }, resultDiv);
+    }
+});
+      
+    </script>
+</body>
+</html>

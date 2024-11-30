@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="/img/logohocket.png">
+    <!-- Para dispositivos Apple -->
+    <link rel="apple-touch-icon" href="/img/logohocket.png">
+    <title><%= typeof title !== 'undefined' ? title + ' - HocketZap' : 'HocketZap' %></title>
+     
+    <!-- Estilos principais -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.6.0/dist/full.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Scripts principais -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/2.8.2/alpine.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.4.8/sweetalert2.all.min.js"></script>
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        [x-cloak] { display: none !important; }
+
+        /* Estilos personalizados para o sidebar */
+        .sidebar {
+            background-color: #ffffff;
+            width: 260px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-collapsed {
+            width: 80px;
+        }
+
+        /* Estilos para os itens do menu */
+        .menu-category {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #94a3b8;
+            padding: 1rem 1.5rem 0.5rem;
+            font-weight: 600;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: #475569;
+            transition: all 0.2s ease;
+            border-radius: 0.5rem;
+            margin: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .menu-item:hover {
+            background-color: #f1f5f9;
+            color: #3b82f6;
+        }
+
+        .menu-item.active {
+            background-color: #eff6ff;
+            color: #3b82f6;
+        }
+
+        .menu-item i {
+            width: 1.5rem;
+            margin-right: 1rem;
+            font-size: 1.25rem;
+        }
+
+        /* Indicador de plano gratuito */
+        .free-plan-indicator {
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+        }
+
+        /* Notificações animadas */
+        @keyframes notification-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .notification-badge {
+            animation: notification-pulse 2s infinite;
+        }
+
+        [x-cloak] {
+        display: none !important;
+    }
+
+    /* Garante que os dropdowns comecem invisíveis */
+    .dropdown-content {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    /* Quando Alpine.js inicializa, ele remove esta classe */
+    .alpine-ready .dropdown-content {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    
+        /* Smooth scrollbar */
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #f1f5f9;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        /* Dropdown animations */
+        .dropdown-content {
+            transform-origin: top right;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .dropdown-content.hidden {
+            transform: scale(0.95);
+            opacity: 0;
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 antialiased" 
+      x-data="{ 
+          sidebarOpen: true, 
+          notificationCount: <%= typeof notifications !== 'undefined' ? notifications.length : 0 %>,
+          userMenuOpen: false,
+          darkMode: localStorage.getItem('darkMode') === 'true'
+      }">
+    
+    <!-- Overlay para mobile -->
+    <div x-show="sidebarOpen" 
+         @click="sidebarOpen = false" 
+         class="fixed inset-0 z-20 bg-black bg-opacity-50 lg:hidden"
+         x-cloak>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar fixed inset-y-0 left-0 z-30 flex flex-col border-r border-gray-200 shadow-sm"
+           :class="{ 'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen }"
+           @keydown.escape="sidebarOpen = false">
+        
+        <!-- Logo -->
+        <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+            <a href="/" class="flex items-center space-x-3">
+                <img src="/img/HocketZap.png" alt="HocketZap" class="h-18">
+            
+            </a>
+            <button @click="sidebarOpen = false" class="lg:hidden">
+                <i class="fas fa-times text-gray-500"></i>
+            </button>
+        </div>
+
+        <!-- Menu de Navegação -->
+        <nav class="flex-1 overflow-y-auto bg-[#F8F9FC] p-4">
+            <!-- PRINCIPAL -->
+            <div class="space-y-2">
+                <div class="text-base font-medium text-[#9197B3] pb-2">PRINCIPAL</div>
+                
+             
+                <a href="/" class="flex items-center text-[#7D8592] hover:text-blue-600 py-2">
+                    <i class="ph ph-chart-line text-lg mr-3"></i>
+                    <span class="text-base">Dashboard</span>
+                </a>
+        
+                <a href="/whatsapp" class="flex items-center text-[#7D8592] hover:text-blue-600 py-2">
+                    <i class="ph ph-whatsapp-logo text-lg mr-3"></i>
+                    <span class="text-base">Instâncias</span>
+                    <% if (user.whatsappInstances && user.whatsappInstances.length > 0) { %>
+                        <span class="ml-auto px-2 py-0.5 bg-[#E5F3FF] text-blue-600 text-xs rounded-full">
+                            <%= user.whatsappInstances.length %>
+                        </span>
+                    <% } %>
+                </a>
+        
+                <a href="/zap" class="flex items-center text-[#7D8592] hover:text-blue-600 py-2">
+                    <i class="ph ph-chats text-lg mr-3"></i>
+                    <span class="text-base">WhatsApp Web (Beta V2)</span>
+                    <span class="ml-auto text-xs text-blue-600 bg-[#E5F3FF] px-2 py-0.5 rounded-full">Beta</span>
+                </a>
+        
+                <a href="/funnels" class="flex items-center text-[#7D8592] hover:text-blue-600 py-2">
+                    <i class="ph ph-funnel text-lg mr-3"></i>
+                    <span class="text-base">Funis</span>
+                </a>
+        
+                <a href="/integrations/hospedar" class="flex items-center text-[#7D8592] hover:text-blue-600 py-2">
+                    <i class="ph ph-cloud-arrow-up text-lg mr-3"></i>
+                    <span class="text-base">Hospedar Mídia</span>
+                </a>
+        
+            
+            </div>
+        
+            <!-- HOCKET
+            <div class="space-y-2 mt-6">
+                <div class="text-base font-medium text-[#9197B3] pb-2">HOCKET</div>
+
+                <a href="/funnels/community" class="flex items-center text-[#7D8592] hover:text-blue-600 py-2">
+                    <i class="ph ph-users text-lg mr-3"></i>
+                    <span class="text-base">Comunidade de Funis</span>
+                </a>
+            </div> -->
+        
+            <!-- INTEGRAÇÕES -->
+            <div class="space-y-2 mt-6">
+                <div class="text-base font-medium text-[#9197B3] pb-2">INTEGRAÇÕES</div>
+        
+                <a href="/integracoes" class="flex items-center text-[#7D8592] hover:text-blue-600 py-2">
+                    <i class="ph ph-squares-four text-lg mr-3"></i>
+                    <span class="text-base">Integrações</span>
+                </a>
+        
+                <a href="/zapvoice/elevenlabs-whatsapp" class="flex items-center text-[#7D8592] hover:text-blue-600 py-2">
+                    <i class="ph ph-microphone text-lg mr-3"></i>
+                    <span class="text-base">Gerar Voz</span>
+                </a>
+            </div>
+        
+            <!-- AUTOMAÇÕES -->
+            <div class="space-y-2 mt-6">
+                <div class="text-base font-medium text-[#9197B3] pb-2">AUTOMAÇÕES</div>
+        
+                <a href="/contact-lists/painel" class="flex items-center text-[#7D8592] hover:text-blue-600 py-2">
+                    <i class="ph ph-address-book text-lg mr-3"></i>
+                    <span class="text-base">Listas de Contatos</span>
+                </a>
+        
+                <a href="/auto-response" class="flex items-center text-[#7D8592] hover:text-blue-600 py-2">
+                    <i class="ph ph-repeat text-lg mr-3"></i>
+                    <span class="text-base">Auto Resposta</span>
+                </a>
+        
+                <a href="/maturation" class="flex items-center text-[#7D8592] hover:text-blue-600 py-2">
+                    <i class="ph ph-device-mobile text-lg mr-3"></i>
+                    <span class="text-base">Aquecer Chip</span>
+                    <span class="ml-auto text-xs text-blue-600 bg-[#E5F3FF] px-2 py-0.5 rounded-full">BETA</span>
+                </a>
+        
+                <a href="/whatsapp/mass-message" class="flex items-center text-[#7D8592] hover:text-blue-600 py-2">
+                    <i class="ph ph-paper-plane-right text-lg mr-3"></i>
+                    <span class="text-base">Envio em Massa</span>
+                </a>
+        
+                <a href="/hocket-links/dashboard" class="flex items-center text-[#7D8592] hover:text-blue-600 py-2">
+                    <i class="ph ph-link text-lg mr-3"></i>
+                    <span class="text-base">Criador de Links</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- User Profile Section -->
+        <div class="border-t border-gray-200 p-4">
+            <div class="relative" x-data="{ isOpen: false }" x-cloak>
+                <!-- Botão do Perfil com Ícone de Seta -->
+                <button @click="isOpen = !isOpen" 
+                        class="flex items-center gap-3 px-3 py-4 w-full hover:bg-gray-50 transition-colors">
+                    <div class="relative">
+                        <img src="<%= user.profileImage || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y' %>" 
+                             alt="<%= user.name %>"
+                             class="w-10 h-10 rounded-full object-cover border-2 border-white">
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-900 truncate"><%= user.name %></p>
+                        <p class="text-xs text-gray-500 truncate"><%= user.plan.charAt(0).toUpperCase() + user.plan.slice(1) %></p>
+                    </div>
+                    <i class="ph" :class="isOpen ? 'ph-caret-up' : 'ph-caret-down'"></i>
+                </button>
+            
+                <!-- Modal de Logout -->
+                <div x-show="isOpen"
+                     x-cloak
+                     @click.away="isOpen = false"
+                     class="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-lg shadow-lg"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 transform translate-y-2"
+                     x-transition:enter-end="opacity-100 transform translate-y-0"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 transform translate-y-0"
+                     x-transition:leave-end="opacity-0 transform translate-y-2">
+                    
+                    <a href="/logout" class="flex items-center gap-2 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg">
+                        <i class="ph ph-sign-out text-lg"></i>
+                        <span class="text-sm font-medium">Sair</span>
+                    </a>
+                </div>
+            </div>
+              
+        </div>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="transition-all duration-200"
+    :class="sidebarOpen ? 'lg:ml-64' : 'lg:ml-20'">
+  
+  <!-- Top Navigation -->
+  <nav class="bg-white border-b border-gray-200 fixed right-0 left-0 z-20"
+       :class="sidebarOpen ? 'lg:left-64' : 'lg:left-20'">
+      <div class="px-4 mx-auto">
+          <div class="flex justify-between h-16">
+              <!-- Left Side -->
+              <div class="flex items-center">
+                  <button @click="sidebarOpen = !sidebarOpen"
+                          class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 focus:outline-none">
+                      <i class="fas" :class="sidebarOpen ? 'fa-chevron-left' : 'fa-chevron-right'"></i>
+                  </button>
+                  
+                  <!-- Breadcrumbs -->
+                  <nav class="hidden md:flex items-center ml-4 space-x-2">
+                      <% if (typeof breadcrumbs !== 'undefined') { %>
+                          <% breadcrumbs.forEach((item, index) => { %>
+                              <% if (index > 0) { %>
+                                  <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                              <% } %>
+                              <a href="<%= item.url %>" 
+                                 class="text-base <%= index === breadcrumbs.length - 1 ? 'text-gray-600 font-medium' : 'text-gray-500 hover:text-gray-700' %>">
+                                  <%= item.label %>
+                              </a>
+                          <% }) %>
+                      <% } %>
+                  </nav>
+              </div>
+
+              <!-- Right Side -->
+              <div class="flex items-center space-x-4">
+
+                <a href="/change-plan" class="flex items-center px-3 py-1.5 text-sm text-blue-600 bg-blue-50 rounded-full hover:bg-blue-100 transition-colors">
+                    <i class="ph ph-crown text-yellow-500 mr-2"></i>
+                    <span><%= user.plan %></span>
+                    <% if (user.validUntil) { %>
+                        <span class="ml-2 text-xs text-gray-500">
+                            <%= new Date(user.validUntil).toLocaleDateString() %>
+                        </span>
+                    <% } %>
+                </a>
+
+                  <!-- Search -->
+                  <div class="hidden md:flex items-center">
+                      <div class="relative" x-data="{ isOpen: false }">
+                          <button @click="isOpen = !isOpen"
+                                  class="p-2 text-gray-500 hover:bg-gray-100 rounded-lg focus:outline-none">
+                              <i class="fas fa-search"></i>
+                          </button>
+                          
+                          <!-- Search Modal -->
+                          <div x-show="isOpen" 
+                               x-cloak
+                               @click.away="isOpen = false"
+                               class="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg p-4 border"
+                               x-transition:enter="transition ease-out duration-100"
+                               x-transition:enter-start="transform opacity-0 scale-95"
+                               x-transition:enter-end="transform opacity-100 scale-100">
+                              <div class="flex items-center border rounded-lg overflow-hidden">
+                                  <input type="text" 
+                                         placeholder="Buscar..."
+                                         class="flex-1 px-4 py-2 focus:outline-none">
+                                  <button class="px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                      <i class="fas fa-search"></i>
+                                  </button>
+                              </div>
+                              
+                              <!-- Quick Links -->
+                              <div class="mt-4">
+                                  <h4 class="text-xs font-semibold text-gray-500 uppercase mb-2">Acesso Rápido</h4>
+                                  <div class="space-y-2">
+                                      <a href="/whatsapp" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
+                                          <i class="fab fa-whatsapp text-green-500"></i>
+                                          <span class="text-base text-gray-600">Gerenciar Instâncias</span>
+                                      </a>
+                                      <a href="/funnels" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
+                                          <i class="fas fa-filter text-blue-500"></i>
+                                          <span class="text-base text-gray-600">Meus Funis</span>
+                                      </a>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+
+                  <!-- Notifications -->
+                  <div class="relative" x-data="{ open: false }" x-cloak>
+                    <button @click="open = !open" 
+                              class="p-2 text-gray-500 hover:bg-gray-100 rounded-lg focus:outline-none">
+                          <i class="fas fa-bell"></i>
+                          <% if (typeof notifications !== 'undefined' && notifications.length > 0) { %>
+                              <span class="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 flex h-5 w-5">
+                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                  <span class="relative inline-flex rounded-full h-5 w-5 bg-red-500 text-white text-xs justify-center items-center">
+                                      <%= notifications.length %>
+                                  </span>
+                              </span>
+                          <% } %>
+                      </button>
+
+                      <!-- Notifications Dropdown -->
+                      <div x-show="open" 
+                           @click.away="open = false"
+                           class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg overflow-hidden border"
+                           x-transition:enter="transition ease-out duration-100"
+                           x-transition:enter-start="transform opacity-0 scale-95"
+                           x-transition:enter-end="transform opacity-100 scale-100">
+                          
+                          <div class="p-4 bg-gray-50 border-b">
+                              <div class="flex items-center justify-between">
+                                  <h3 class="text-base font-semibold text-gray-900">Notificações</h3>
+                                  <% if (typeof notifications !== 'undefined' && notifications.length > 0) { %>
+                                      <a href="/notifications" class="text-xs text-blue-600 hover:text-blue-800">
+                                          Ver todas
+                                      </a>
+                                  <% } %>
+                              </div>
+                          </div>
+
+                          <div class="divide-y divide-gray-100 max-h-96 overflow-y-auto">
+                              <% if (typeof notifications !== 'undefined' && notifications.length > 0) { %>
+                                  <% notifications.forEach(notification => { %>
+                                      <div class="p-4 hover:bg-gray-50">
+                                          <div class="flex items-start space-x-3">
+                                              <div class="flex-shrink-0">
+                                                  <% if (notification.type === 'success') { %>
+                                                      <i class="fas fa-check-circle text-green-500 text-lg"></i>
+                                                  <% } else if (notification.type === 'warning') { %>
+                                                      <i class="fas fa-exclamation-triangle text-yellow-500 text-lg"></i>
+                                                  <% } else if (notification.type === 'error') { %>
+                                                      <i class="fas fa-times-circle text-red-500 text-lg"></i>
+                                                  <% } else { %>
+                                                      <i class="fas fa-info-circle text-blue-500 text-lg"></i>
+                                                  <% } %>
+                                              </div>
+                                              <div class="flex-1 min-w-0">
+                                                  <p class="text-base font-medium text-gray-900">
+                                                      <%= notification.title %>
+                                                  </p>
+                                                  <p class="text-base text-gray-500 mt-1">
+                                                      <%= notification.message %>
+                                                  </p>
+                                                  <p class="text-xs text-gray-400 mt-1">
+                                                      <%= new Date(notification.timestamp).toLocaleString() %>
+                                                  </p>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  <% }) %>
+                              <% } else { %>
+                                  <div class="p-4 text-center text-gray-500">
+                                      <i class="fas fa-bell-slash text-4xl mb-2"></i>
+                                      <p class="text-base">Nenhuma notificação no momento</p>
+                                  </div>
+                              <% } %>
+                          </div>
+                      </div>
+                  </div>
+
+                  <!-- Help -->
+                  <button class="p-2 text-gray-500 hover:bg-gray-100 rounded-lg focus:outline-none"
+                          @click="$dispatch('show-help-modal')">
+                      <i class="fas fa-question-circle"></i>
+                  </button>
+
+                  <!-- User Menu -->
+                  <div class="relative" x-data="{ open: false }" x-cloak>
+                    <button @click="open = !open" 
+                              class="flex items-center space-x-3 p-2 hover:bg-gray-100 rounded-lg focus:outline-none">
+                          <img src="<%= user.profileImage || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y' %>"
+                               alt="Profile"
+                               class="w-8 h-8 rounded-full">
+                          <div class="hidden md:block text-left">
+                              <p class="text-base font-medium text-gray-900"><%= user.name %></p>
+                              <p class="text-xs text-gray-500"><%= user.plan %></p>
+                          </div>
+                          <i class="fas fa-chevron-down text-gray-500"></i>
+                      </button>
+
+                      <!-- User Dropdown -->
+                      <div x-show="open"
+                           @click.away="open = false"
+                           class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 divide-y divide-gray-100"
+                           x-transition:enter="transition ease-out duration-100"
+                           x-transition:enter-start="transform opacity-0 scale-95"
+                           x-transition:enter-end="transform opacity-100 scale-100">
+                          
+                          <div class="py-1">
+                              <a href="/profile" class="flex items-center px-4 py-2 text-base text-gray-700 hover:bg-gray-100">
+                                  <i class="fas fa-user-circle w-5 mr-3"></i>
+                                  Meu Perfil
+                              </a>
+                              <a href="/settings" class="flex items-center px-4 py-2 text-base text-gray-700 hover:bg-gray-100">
+                                  <i class="fas fa-cog w-5 mr-3"></i>
+                                  Configurações
+                              </a>
+                          </div>
+                          
+                          <div class="py-1">
+                              <a href="/logout" class="flex items-center px-4 py-2 text-base text-red-700 hover:bg-red-50">
+                                  <i class="fas fa-sign-out-alt w-5 mr-3"></i>
+                                  Sair
+                              </a>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </nav>
+
+  <!-- Main Content Area -->
+  <div class="pt-16 px-4 sm:px-6 lg:px-8">
+      <!-- Page Header -->
+      <% if (typeof pageTitle !== 'undefined') { %>
+          <div class="py-6">
+              <h1 class="text-2xl font-semibold text-gray-900"><%= pageTitle %></h1>
+              <% if (typeof pageDescription !== 'undefined') { %>
+                <p class="mt-2 text-base text-gray-600"><%= pageDescription %></p>
+                <% } %>
+            </div>
+        <% } %>
+
+        <!-- Page Content -->
+        <div class="py-6">
+            <%- body %>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-auto py-6 border-t border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-base text-gray-500">&copy; <%= new Date().getFullYear() %> HocketZap</span>
+                        <span class="text-gray-300">|</span>
+                        <a href="/terms" class="text-base text-gray-500 hover:text-gray-900">Termos</a>
+                        <a href="/privacy" class="text-base text-gray-500 hover:text-gray-900">Privacidade</a>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <a href="https://status.hocketzap.com" class="text-base text-gray-500 hover:text-gray-900">Status</a>
+                        <a href="/docs" class="text-base text-gray-500 hover:text-gray-900">API</a>
+                        <a href="/help" class="text-base text-gray-500 hover:text-gray-900">Ajuda</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</main>
+
+<!-- Help Modal -->
+<div x-data="{ open: false }"
+     @show-help-modal.window="open = true"
+     x-show="open"
+     class="fixed z-50 inset-0 overflow-y-auto"
+     x-cloak>
+    <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="fixed inset-0 bg-black opacity-30"></div>
+        
+        <div class="relative bg-white rounded-lg max-w-2xl w-full shadow-xl"
+             @click.away="open = false">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Central de Ajuda</h3>
+                    <button @click="open = false" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Quick Start Guide -->
+                    <div class="p-4 bg-blue-50 rounded-lg">
+                        <div class="flex items-center space-x-3 mb-3">
+                            <i class="fas fa-rocket text-blue-500"></i>
+                            <h4 class="font-medium text-blue-900">Guia Rápido</h4>
+                        </div>
+                        <p class="text-base text-blue-800 mb-3">Aprenda o básico do HocketZap em minutos</p>
+                        <a href="/quickstart" class="text-base text-blue-600 hover:text-blue-800">
+                            Ver guia <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+
+                    <!-- Documentation -->
+                    <div class="p-4 bg-purple-50 rounded-lg">
+                        <div class="flex items-center space-x-3 mb-3">
+                            <i class="fas fa-book text-purple-500"></i>
+                            <h4 class="font-medium text-purple-900">Documentação</h4>
+                        </div>
+                        <p class="text-base text-purple-800 mb-3">Explore nossa documentação completa</p>
+                        <a href="/docs" class="text-base text-purple-600 hover:text-purple-800">
+                            Ver documentação <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Popular Articles -->
+                <div class="mt-6">
+                    <h4 class="text-base font-semibold text-gray-900 mb-3">Artigos Populares</h4>
+                    <div class="space-y-3">
+                        <a href="/help/getting-started" class="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg">
+                            <i class="fas fa-play-circle text-gray-400"></i>
+                            <div>
+                                <p class="text-base font-medium text-gray-900">Começando com o HocketZap</p>
+                                <p class="text-xs text-gray-500">3 min de leitura</p>
+                            </div>
+                        </a>
+                        <a href="/help/whatsapp-setup" class="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg">
+                            <i class="fab fa-whatsapp text-gray-400"></i>
+                            <div>
+                                <p class="text-base font-medium text-gray-900">Configurando o WhatsApp</p>
+                                <p class="text-xs text-gray-500">5 min de leitura</p>
+                            </div>
+                        </a>
+                        <a href="/help/funnels" class="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg">
+                            <i class="fas fa-filter text-gray-400"></i>
+                            <div>
+                                <p class="text-base font-medium text-gray-900">Criando seu primeiro funil</p>
+                                <p class="text-xs text-gray-500">7 min de leitura</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Contact Support -->
+                <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <h4 class="text-base font-semibold text-gray-900 mb-2">Precisa de mais ajuda?</h4>
+                    <p class="text-base text-gray-600 mb-3">
+                        Nossa equipe de suporte está disponível 24/7 para ajudar você.
+                    </p>
+                    <a href="/support" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                        Contatar Suporte
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Global Toast Container -->
+<div id="toast-container" 
+     class="fixed bottom-4 right-4 z-50"
+     x-data="{ toasts: [] }"
+     @show-toast.window="toasts.push($event.detail); setTimeout(() => { toasts.shift() }, 3000)">
+    <template x-for="(toast, index) in toasts" :key="index">
+        <div class="mb-3 bg-white rounded-lg shadow-lg overflow-hidden flex items-center p-4"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform translate-y-2"
+             x-transition:enter-end="opacity-100 transform translate-y-0"
+             x-transition:leave="transition ease-in duration-100"
+             x-transition:leave-start="opacity-100 transform translate-y-0"
+             x-transition:leave-end="opacity-0 transform translate-y-2">
+            <div class="flex-shrink-0 mr-3">
+                <i class="fas" :class="{
+                    'fa-check-circle text-green-500': toast.type === 'success',
+                    'fa-exclamation-circle text-red-500': toast.type === 'error',
+                    'fa-exclamation-triangle text-yellow-500': toast.type === 'warning',
+                    'fa-info-circle text-blue-500': toast.type === 'info'
+                }"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-base font-medium text-gray-900" x-text="toast.title"></p>
+                <p class="text-base text-gray-500" x-text="toast.message"></p>
+            </div>
+            <button @click="toasts.splice(index, 1)" class="ml-4 text-gray-400 hover:text-gray-500">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </template>
+</div>
+
+<!-- Init Script -->
+<script>
+
+    
+    document.addEventListener('alpine:init', () => {
+        document.body.classList.add('alpine-ready');
+        // Show toast message
+        window.showToast = (title, message, type = 'info') => {
+            window.dispatchEvent(new CustomEvent('show-toast', {
+                detail: { title, message, type }
+            }));
+        };
+
+        // Active menu item highlighting
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.menu-item').forEach(item => {
+            if (item.getAttribute('href') === currentPath) {
+                item.classList.add('active');
+            }
+        });
+    });
+</script>
+</body>
+</html>

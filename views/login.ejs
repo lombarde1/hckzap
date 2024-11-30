@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HocketZap - Login</title>
+    
+    <!-- Meta tags otimizadas -->
+    <meta name="description" content="HocketZap: Entre na sua conta e revolucione seu marketing no WhatsApp">
+    <meta name="keywords" content="WhatsApp, marketing, automação, login, CRM">
+    <link rel="icon" type="image/png" href="/img/logohock.png">
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    
+    <!-- Fontes -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS Core -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.5.0/dist/full.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Scripts Core -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/parallax/3.1.0/parallax.min.js"></script>
+
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #00A884 0%, #128C7E 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #111B21;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .glass-morphism {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: var(--card-shadow);
+        }
+
+        .gradient-text {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(0, 168, 132, 0.15) 0%, transparent 30%),
+                radial-gradient(circle at 90% 80%, rgba(18, 140, 126, 0.15) 0%, transparent 30%);
+        }
+
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: #00A884;
+            box-shadow: 0 0 0 2px rgba(0, 168, 132, 0.2);
+        }
+
+        .input-group label {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .input-group input:focus ~ label,
+        .input-group input:not(:placeholder-shown) ~ label {
+            top: 0;
+            font-size: 0.75rem;
+            background: #111B21;
+            padding: 0 0.5rem;
+        }
+
+        .success-animation {
+            animation: successPulse 1s ease-out;
+        }
+
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg" id="scene">
+        <div data-depth="0.2" class="layer">
+            <div class="gradient-circle"></div>
+        </div>
+    </div>
+
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="container mx-auto max-w-6xl flex flex-col lg:flex-row items-center gap-12">
+            
+            <!-- Seção Esquerda - Depoimentos -->
+            <div class="lg:w-1/2 animate__animated animate__fadeInLeft">
+                <div class="glass-morphism rounded-3xl p-8 text-white">
+                    <div class="mb-8 text-center">
+                        <h2 class="text-3xl font-bold mb-4 gradient-text">Transforme seu Negócio</h2>
+                        <p class="text-gray-300">Junte-se a milhares de empresas e micro-empresarios que já aumentaram suas vendas</p>
+                    </div>
+
+                    <div class="testimonial-carousel relative">
+                        <!-- Depoimentos aqui (seu código atual) -->
+                    </div>
+
+                    <div class="mt-8">
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div class="p-4 glass-morphism rounded-xl">
+                                <h3 class="text-2xl font-bold gradient-text">500+</h3>
+                                <p class="text-sm text-gray-400">Clientes Ativos</p>
+                            </div>
+                            <div class="p-4 glass-morphism rounded-xl">
+                                <h3 class="text-2xl font-bold gradient-text">98%</h3>
+                                <p class="text-sm text-gray-400">Satisfação</p>
+                            </div>
+                            <div class="p-4 glass-morphism rounded-xl">
+                                <h3 class="text-2xl font-bold gradient-text">24/7</h3>
+                                <p class="text-sm text-gray-400">Suporte</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:w-1/2 animate__animated animate__fadeInRight">
+                <div class="glass-morphism rounded-3xl p-8 md:p-12">
+                    <div class="text-center mb-8">
+                        <div class="floating">
+                            <i class="fas fa-robot text-6xl gradient-text mb-4"></i>
+                        </div>
+                        <h1 class="text-4xl font-bold text-white mb-2">HocketZap</h1>
+                        <p class="text-gray-400">Faça login para acessar sua conta</p>
+                    </div>
+            
+                    <!-- Mensagem de erro -->
+                    <% if (typeof error !== 'undefined' && error) { %>
+                        <div class="error-message bg-red-500/10 border-l-4 border-red-500 text-red-100 p-4 mb-6 rounded-r" role="alert">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-circle text-xl mr-3"></i>
+                                <p><%= error %></p>
+                            </div>
+                        </div>
+                    <% } %>
+            
+                    <!-- Formulário com sua lógica original -->
+                    <form id="loginForm" action="/login" method="POST" class="space-y-6">
+                        <div class="input-group">
+                            <input 
+                                type="text" 
+                                id="login" 
+                                name="login" 
+                                required 
+                                class="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all text-white" 
+                                placeholder="Username / Email / Telefone"
+                            >
+                        </div>
+            
+                        <div class="input-group relative">
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                required 
+                                class="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all text-white" 
+                                placeholder="Senha"
+                            >
+                            <button 
+                                type="button" 
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                                onclick="togglePassword()"
+                            >
+                                <i class="far fa-eye"></i>
+                            </button>
+                        </div>
+            
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <input 
+                                    type="checkbox" 
+                                    id="remember" 
+                                    class="w-4 h-4 rounded border-gray-700 text-green-500 focus:ring-green-500/20"
+                                >
+                                <label for="remember" class="ml-2 text-sm text-gray-400">Lembrar-me</label>
+                            </div>
+                            <a href="/reset-password" class="text-sm text-green-500 hover:text-green-400 transition-colors">
+                                Esqueceu a senha?
+                            </a>
+                        </div>
+            
+                        <button 
+                            type="submit" 
+                            class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-lg font-medium transition-all hover:shadow-lg hover:from-green-600 hover:to-green-700"
+                        >
+                            <i class="fas fa-sign-in-alt mr-2"></i>
+                            Entrar
+                        </button>
+                    </form>
+            
+                    <p class="mt-8 text-center text-gray-400">
+                        Não tem uma conta? 
+                        <a href="/register" class="text-green-500 hover:text-green-400 font-medium">
+                            Criar conta
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Inicializa o efeito parallax
+        var scene = document.getElementById('scene');
+        var parallaxInstance = new Parallax(scene);
+
+        // Remove todo o código de evento do formulário existente e substitua por:
+
+// Script de login simples e direto
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    // O form será submetido normalmente via POST para /login
+    // Não precisamos prevenir o comportamento padrão pois queremos que o form seja enviado
+    
+    // Adiciona feedback visual do botão
+    const button = this.querySelector('button[type="submit"]');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Entrando...';
+    button.disabled = true;
+
+    // Após 2 segundos, restaura o botão caso o form não tenha sido submetido
+    setTimeout(() => {
+        if (!this.submitted) {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }, 2000);
+
+    // Marca o form como submetido
+    this.submitted = true;
+});
+
+// Toggle de visibilidade da senha
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const icon = document.querySelector('.fa-eye');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+// Animações GSAP mantidas
+gsap.from(".glass-morphism", {
+    opacity: 0,
+    y: 50,
+    duration: 1,
+    ease: "power3.out",
+    stagger: 0.2
+});
+
+// Efeito de digitação nos inputs
+const inputs = document.querySelectorAll('input');
+inputs.forEach(input => {
+    input.addEventListener('focus', function() {
+        gsap.to(this, {
+            scale: 1.02,
+            duration: 0.3,
+            ease: "power2.out"
+        });
+    });
+
+    input.addEventListener('blur', function() {
+        gsap.to(this, {
+            scale: 1,
+            duration: 0.3,
+            ease: "power2.out"
+        });
+    });
+});
+
+
+    </script>
+</body>
+</html>

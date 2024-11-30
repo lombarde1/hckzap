@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Links • HocketZap</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
+    
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <!-- AOS Animations -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <style>
+        .form-input {
+            @apply block w-full rounded-xl border-gray-200 shadow-sm
+                   focus:border-indigo-500 focus:ring focus:ring-indigo-200 
+                   focus:ring-opacity-50 transition-all duration-200 dark:bg-gray-700 
+                   dark:border-gray-600 dark:focus:border-indigo-400 dark:text-gray-100;
+        }
+    
+        .btn-primary {
+            @apply px-6 py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 
+                   text-white font-medium rounded-xl shadow-lg 
+                   hover:from-indigo-600 hover:to-indigo-700 
+                   focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 
+                   transform hover:scale-[1.02] transition-all duration-200
+                   flex items-center justify-center gap-2;
+        }
+    
+        .btn-secondary {
+            @apply px-6 py-3 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200
+                   font-medium rounded-xl border border-gray-200 dark:border-gray-600
+                   hover:bg-gray-50 dark:hover:bg-gray-600
+                   focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-500
+                   transition-all duration-200
+                   flex items-center justify-center gap-2;
+        }
+    
+        .gradient-text {
+            @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-indigo-600;
+        }
+    
+        .hover-scale {
+            @apply transition-transform duration-300 hover:scale-[1.02];
+        }
+    
+        .glass-effect {
+            @apply bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg
+                   border border-white/20 dark:border-gray-700/20;
+        }
+    
+        .custom-shadow {
+            @apply shadow-lg shadow-indigo-500/10;
+        }
+    
+        .modal-overlay {
+            @apply fixed inset-0 bg-black/50 backdrop-blur-sm
+                   flex items-center justify-center z-50
+                   transition-all duration-300;
+        }
+    
+        .modal-content {
+            @apply bg-white dark:bg-gray-800 rounded-2xl shadow-2xl
+                   w-full max-w-2xl transform transition-all duration-300
+                   p-6 m-4 relative;
+        }
+    
+        .stat-card {
+            @apply glass-effect rounded-2xl p-6 hover-scale custom-shadow
+                   flex items-start justify-between space-y-2;
+        }
+    
+        .icon-badge {
+            @apply w-12 h-12 rounded-xl flex items-center justify-center
+                   text-white text-xl;
+        }
+    
+        .redirect-item {
+            @apply p-3 bg-gray-50 dark:bg-gray-700 rounded-xl
+                   transition-all duration-200 hover:bg-gray-100
+                   dark:hover:bg-gray-600;
+        }
+    
+        .data-grid {
+            @apply grid grid-cols-1 md:grid-cols-2 gap-8;
+        }
+    
+        .input-group {
+            @apply relative flex items-center;
+        }
+    
+        .input-icon {
+            @apply absolute left-3 top-1/2 transform -translate-y-1/2
+                   text-gray-400 pointer-events-none;
+        }
+    
+        .animated-gradient {
+            background: linear-gradient(-45deg, #6366F1, #4F46E5, #3B82F6, #2563EB);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+    
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+    
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+    
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+    
+        /* Personalizações do SweetAlert2 */
+        .swal2-popup {
+            @apply rounded-2xl font-sans;
+        }
+    
+        .swal2-title {
+            @apply !font-sans !font-bold;
+        }
+    
+        .swal2-confirm {
+            @apply !bg-gradient-to-r !from-indigo-500 !to-indigo-600
+                   !rounded-xl !shadow-lg !px-6 !py-3
+                   hover:!from-indigo-600 hover:!to-indigo-700;
+        }
+    
+        .swal2-cancel {
+            @apply !bg-white !text-gray-700 !border !border-gray-200
+                   !rounded-xl !shadow-sm !px-6 !py-3
+                   hover:!bg-gray-50;
+        }
+    </style>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #F8FAFC;
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .gradient-purple {
+            background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+        }
+
+        .gradient-card-1 { background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); }
+        .gradient-card-2 { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
+        .gradient-card-3 { background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); }
+        .gradient-card-4 { background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); }
+
+        .hover-scale {
+            transition: all 0.3s ease;
+        }
+
+        .hover-scale:hover {
+            transform: translateY(-5px);
+        }
+
+        .custom-shadow {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body x-data="hocketLinks" class="min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header Section com Gradiente -->
+        <div class="rounded-3xl gradient-purple p-8 mb-10 relative overflow-hidden" data-aos="fade-up">
+            <div class="flex justify-between items-center relative z-10">
+                <div>
+                    <h1 class="text-3xl font-bold text-white mb-2">Links Hocket</h1>
+                    <p class="text-indigo-100 opacity-90">Gerencie seus links de redirecionamento</p>
+                </div>
+                <button @click="openCreateModal()" 
+                        class="bg-white text-indigo-600 px-6 py-3 rounded-xl hover:bg-indigo-50 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <i class="ri-add-line text-lg"></i>
+                    Novo Link
+                </button>
+            </div>
+            <div class="absolute right-0 bottom-0 opacity-10">
+                <i class="ri-link-m text-[200px] text-white transform rotate-45"></i>
+            </div>
+        </div>
+
+        <!-- Cards de Estatísticas -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10" data-aos="fade-up" data-aos-delay="100">
+            <div class="glass-effect hover-scale rounded-2xl p-6 custom-shadow">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h3 class="text-gray-500 text-sm mb-1">Total de Links</h3>
+                        <p class="text-3xl font-bold text-gray-900" x-text="stats.totalLinks || 0"></p>
+                    </div>
+                    <div class="w-12 h-12 gradient-card-1 rounded-xl flex items-center justify-center">
+                        <i class="ri-links-line text-xl text-white"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-effect hover-scale rounded-2xl p-6 custom-shadow">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h3 class="text-gray-500 text-sm mb-1">Cliques Totais</h3>
+                        <p class="text-3xl font-bold text-gray-900" x-text="stats.totalClicks || 0"></p>
+                    </div>
+                    <div class="w-12 h-12 gradient-card-2 rounded-xl flex items-center justify-center">
+                        <i class="ri-mouse-line text-xl text-white"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-effect hover-scale rounded-2xl p-6 custom-shadow">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h3 class="text-gray-500 text-sm mb-1">Cliques Hoje</h3>
+                        <p class="text-3xl font-bold text-gray-900" x-text="getTodayClicks()"></p>
+                    </div>
+                    <div class="w-12 h-12 gradient-card-3 rounded-xl flex items-center justify-center">
+                        <i class="ri-calendar-check-line text-xl text-white"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-effect hover-scale rounded-2xl p-6 custom-shadow">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h3 class="text-gray-500 text-sm mb-1">Links Ativos</h3>
+                        <p class="text-3xl font-bold text-gray-900" x-text="activeLinks"></p>
+                    </div>
+                    <div class="w-12 h-12 gradient-card-4 rounded-xl flex items-center justify-center">
+                        <i class="ri-check-double-line text-xl text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Links -->
+        <div class="glass-effect rounded-2xl overflow-hidden custom-shadow" data-aos="fade-up" data-aos-delay="200">
+            <table class="min-w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Link</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Números</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliques</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <template x-for="link in links" :key="link._id">
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900" x-text="link.name"></div>
+                                <div class="text-sm text-gray-500" x-text="link.redirectType"></div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <span class="text-sm text-blue-600" x-text="'dev.hocketzap.com/r/' + link.customPath"></span>
+                                    <button @click="copyLink(link.customPath)" class="ml-2 text-gray-400 hover:text-gray-600">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-sm" x-text="link.numbers.length + ' números'"></span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-sm font-medium" x-text="link.stats.clicks"></span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span 
+                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                    :class="link.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                                    x-text="link.isActive ? 'Ativo' : 'Inativo'">
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm font-medium">
+                                <button @click="editLink(link)" class="text-blue-600 hover:text-blue-900 mr-3">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button @click="openStatsModal(link)" class="text-green-600 hover:text-green-900 mr-3">
+                                    <i class="fas fa-chart-bar"></i>
+                                </button>
+                                <button @click="deleteLink(link._id)" class="text-red-600 hover:text-red-900">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+ <!-- Create/Edit Modal -->
+<div x-show="showModal" 
+x-transition:enter="transition ease-out duration-300"
+x-transition:enter-start="opacity-0 transform translate-y-4"
+x-transition:enter-end="opacity-100 transform translate-y-0"
+x-transition:leave="transition ease-in duration-200"
+x-transition:leave-start="opacity-100 transform translate-y-0"
+x-transition:leave-end="opacity-0 transform translate-y-4"
+class="fixed inset-0 z-50 overflow-y-auto"
+style="background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px);">
+<div class="flex items-center justify-center min-h-screen px-4">
+    <div class="relative bg-white w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden">
+        <!-- Modal Header com gradiente -->
+        <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 p-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xl font-semibold text-white" x-text="editingLink ? 'Editar Link' : 'Novo Link'"></h2>
+                <button @click="closeModal" class="text-white/80 hover:text-white transition-colors">
+                    <i class="ri-close-line text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+            <form @submit.prevent="saveLink" class="space-y-4">
+                <!-- Nome & Caminho (Grid 2 colunas) -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">Nome</label>
+                        <div class="mt-1 relative rounded-lg shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="ri-edit-line text-gray-400"></i>
+                            </div>
+                            <input type="text" x-model="formData.name" required
+                                class="block w-full pl-10 pr-3 py-2.5 text-sm border-0 bg-gray-50 rounded-lg focus:ring-2 focus:ring-indigo-500 transition-all">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">Caminho</label>
+                        <div class="mt-1 relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-xs">
+                                /r/
+                            </div>
+                            <input type="text" x-model="formData.customPath" required
+                                @input="checkPathAvailability"
+                                class="block w-full pl-8 pr-3 py-2.5 text-sm border-0 bg-gray-50 rounded-lg focus:ring-2 focus:ring-indigo-500 transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Números WhatsApp -->
+                <div>
+                    <label class="text-sm font-medium text-gray-700 mb-2 block">Números WhatsApp</label>
+                    <div class="space-y-2">
+                        <template x-for="(number, index) in formData.numbers" :key="index">
+                            <div class="flex items-center gap-2">
+                                <div class="relative flex-1">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="ri-whatsapp-line text-gray-400"></i>
+                                    </div>
+                                    <input type="tel" x-model="formData.numbers[index]"
+                                        class="block w-full pl-10 pr-10 py-2.5 text-sm border-0 bg-gray-50 rounded-lg focus:ring-2 focus:ring-indigo-500 transition-all"
+                                        placeholder="+55 (00) 00000-0000">
+                                    <button type="button" @click="removeNumber(index)"
+                                        class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                        <i class="ri-close-circle-line text-gray-400 hover:text-red-500 transition-colors"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                        <button type="button" @click="addNumber"
+                            class="inline-flex items-center px-3 py-1.5 text-sm text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors">
+                            <i class="ri-add-line mr-1"></i>
+                            Adicionar Número
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tipo & Delay (Grid 2 colunas) -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">Redirecionamento</label>
+                        <div class="mt-1 relative">
+                            <select x-model="formData.redirectType"
+                                class="block w-full pl-10 pr-3 py-2.5 text-sm border-0 bg-gray-50 rounded-lg focus:ring-2 focus:ring-indigo-500 transition-all appearance-none">
+                                <option value="random">Aleatório</option>
+                                <option value="rotative">Rotativo</option>
+                            </select>
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="ri-shuffle-line text-gray-400"></i>
+                            </div>
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <i class="ri-arrow-down-s-line text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">Delay (segundos)</label>
+                        <div class="mt-1 relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="ri-time-line text-gray-400"></i>
+                            </div>
+                            <input type="number" x-model="formData.messageDelay" min="0" max="10"
+                                class="block w-full pl-10 pr-3 py-2.5 text-sm border-0 bg-gray-50 rounded-lg focus:ring-2 focus:ring-indigo-500 transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mensagem Personalizada -->
+                <div>
+                    <label class="text-sm font-medium text-gray-700">Mensagem Personalizada</label>
+                    <div class="mt-1 relative">
+                        <div class="absolute left-3 top-3 pointer-events-none">
+                            <i class="ri-message-3-line text-gray-400"></i>
+                        </div>
+                        <textarea x-model="formData.customMessage"
+                            class="block w-full pl-10 pr-3 py-2.5 text-sm border-0 bg-gray-50 rounded-lg focus:ring-2 focus:ring-indigo-500 transition-all"
+                            rows="3"
+                            placeholder="Digite sua mensagem aqui..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Meta Tags - Collapsible -->
+                <div x-data="{ showMeta: false }">
+                    <button type="button" 
+                        @click="showMeta = !showMeta"
+                        class="flex items-center justify-between w-full px-4 py-2.5 text-sm text-left text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <span class="font-medium">Meta Tags</span>
+                        <i class="ri-arrow-down-s-line" :class="{ 'rotate-180': showMeta }"></i>
+                    </button>
+                    
+                    <div x-show="showMeta" 
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 transform -translate-y-2"
+                        x-transition:enter-end="opacity-100 transform translate-y-0"
+                        class="mt-2 space-y-3 bg-gray-50 p-4 rounded-lg">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="ri-heading-line text-gray-400"></i>
+                            </div>
+                            <input type="text" x-model="formData.metaTags.title" 
+                                placeholder="Título"
+                                class="block w-full pl-10 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 transition-all">
+                        </div>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="ri-text-wrap-line text-gray-400"></i>
+                            </div>
+                            <input type="text" x-model="formData.metaTags.description"
+                                placeholder="Descrição"
+                                class="block w-full pl-10 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 transition-all">
+                        </div>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="ri-image-line text-gray-400"></i>
+                            </div>
+                            <input type="url" x-model="formData.metaTags.image"
+                                placeholder="URL da Imagem"
+                                class="block w-full pl-10 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 transition-all">
+                        </div>
+                    </div>
+                </div>
+                <div class="border-t border-gray-100 pt-4 mt-6">
+                    <div class="flex justify-end gap-3">
+                        <button type="button" @click="closeModal"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-gray-200 transition-all">
+                            Cancelar
+                        </button>
+                        <button type="submit"
+                            class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg hover:from-indigo-600 hover:to-indigo-700 focus:ring-2 focus:ring-indigo-500 transition-all inline-flex items-center">
+                            <i class="ri-save-line mr-1.5"></i>
+                            Salvar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Modal Footer -->
+     
+    </div>
+</div>
+</div>
+
+<!-- Stats Modal -->
+<div x-show="showStatsModal" 
+x-transition:enter="transition ease-out duration-300"
+x-transition:enter-start="opacity-0 transform scale-95"
+x-transition:enter-end="opacity-100 transform scale-100"
+x-transition:leave="transition ease-in duration-200"
+x-transition:leave-start="opacity-100 transform scale-100"
+x-transition:leave-end="opacity-0 transform scale-95"
+class="fixed inset-0 z-50 overflow-y-auto" 
+style="background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px);">
+<div class="flex items-center justify-center min-h-screen p-4">
+   <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-4xl w-full shadow-2xl glass-effect" data-aos="fade-up">
+       <div class="border-b border-gray-100 dark:border-gray-700 pb-4 mb-6">
+           <div class="flex justify-between items-center">
+               <h2 class="text-2xl font-bold gradient-text">Estatísticas do Link</h2>
+               <button @click="closeStatsModal" class="text-gray-400 hover:text-gray-600 transition-colors">
+                   <i class="ri-close-circle-line text-2xl"></i>
+               </button>
+           </div>
+       </div>
+
+       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+           <div class="glass-effect rounded-2xl p-6 hover-scale custom-shadow" data-aos="fade-up" data-aos-delay="100">
+               <div class="flex items-start justify-between">
+                   <div>
+                       <h3 class="text-sm text-gray-500 mb-1">Total de Cliques</h3>
+                       <p class="text-3xl font-bold gradient-text" x-text="currentStats.totalClicks || 0"></p>
+                   </div>
+                   <div class="w-12 h-12 gradient-card-1 rounded-xl flex items-center justify-center">
+                       <i class="ri-click-line text-xl text-white"></i>
+                   </div>
+               </div>
+           </div>
+
+           <div class="glass-effect rounded-2xl p-6 hover-scale custom-shadow" data-aos="fade-up" data-aos-delay="200">
+               <div class="flex items-start justify-between">
+                   <div>
+                       <h3 class="text-sm text-gray-500 mb-1">Último Clique</h3>
+                       <p class="text-lg font-medium" x-text="formatDate(currentStats.lastClick)"></p>
+                   </div>
+                   <div class="w-12 h-12 gradient-card-2 rounded-xl flex items-center justify-center">
+                       <i class="ri-time-line text-xl text-white"></i>
+                   </div>
+               </div>
+           </div>
+
+           <div class="glass-effect rounded-2xl p-6 hover-scale custom-shadow" data-aos="fade-up" data-aos-delay="300">
+               <div class="flex items-start justify-between">
+                   <div>
+                       <h3 class="text-sm text-gray-500 mb-1">Média Diária</h3>
+                       <p class="text-3xl font-bold gradient-text" x-text="calculateDailyAverage()"></p>
+                   </div>
+                   <div class="w-12 h-12 gradient-card-3 rounded-xl flex items-center justify-center">
+                       <i class="ri-bar-chart-line text-xl text-white"></i>
+                   </div>
+               </div>
+           </div>
+       </div>
+
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+           <!-- Cliques por Número -->
+           <div class="glass-effect rounded-2xl p-6">
+               <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                   <i class="ri-phone-line text-indigo-500"></i>
+                   Cliques por Número
+               </h3>
+               <div class="space-y-3">
+                   <template x-for="(clicks, number) in currentStats.clicksByNumber" :key="number">
+                       <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                           <span class="text-sm font-medium" x-text="formatPhone(number)"></span>
+                           <span class="text-sm font-bold px-3 py-1 bg-indigo-100 text-indigo-600 rounded-lg" x-text="clicks"></span>
+                       </div>
+                   </template>
+               </div>
+           </div>
+
+           <!-- Últimos Redirecionamentos -->
+           <div class="glass-effect rounded-2xl p-6">
+               <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                   <i class="ri-history-line text-indigo-500"></i>
+                   Últimos Redirecionamentos
+               </h3>
+               <div class="space-y-3">
+                   <template x-for="redirect in currentStats.recentRedirects" :key="redirect.timestamp">
+                       <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                           <div class="flex justify-between items-center mb-1">
+                               <span class="text-sm font-medium" x-text="formatPhone(redirect.number)"></span>
+                               <span class="text-xs text-gray-500" x-text="formatDate(redirect.timestamp)"></span>
+                           </div>
+                           <div class="text-xs text-gray-500 flex items-center gap-1">
+                               <i class="ri-computer-line"></i>
+                               <span x-text="redirect.userAgent"></span>
+                           </div>
+                       </div>
+                   </template>
+               </div>
+           </div>
+       </div>
+   </div>
+</div>
+</div>
+</div>
+
+<script>
+      AOS.init({
+            duration: 800,
+            once: true
+        });
+
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('hocketLinks', () => ({
+            links: [],
+            stats: {},
+            showModal: false,
+            showStatsModal: false,
+            editingLink: null,
+            currentStats: {},
+            pathAvailable: true,
+            pathAvailabilityMessage: '',
+            formData: {
+                name: '',
+                customPath: '',
+                numbers: [''],
+                redirectType: 'random',
+                customMessage: '',
+                messageDelay: 0,
+                metaTags: {
+                    title: '',
+                    description: '',
+                    image: ''
+                }
+            },
+
+            async init() {
+                await this.loadLinks();
+                await this.loadStats();
+            },
+
+            async loadLinks() {
+                try {
+                    const response = await fetch('/hocket-links');
+                    const data = await response.json();
+                    if (data.success) {
+                        this.links = data.data;
+                    }
+                } catch (error) {
+                    console.error('Error loading links:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro',
+                        text: 'Falha ao carregar links'
+                    });
+                }
+            },
+
+            async loadStats() {
+                try {
+                    const response = await fetch('/hocket-links/stats/overview');
+                    const data = await response.json();
+                    if (data.success) {
+                        this.stats = data.data;
+                    }
+                } catch (error) {
+                    console.error('Error loading stats:', error);
+                }
+            },
+
+            async checkPathAvailability() {
+                if (!this.formData.customPath) {
+                    this.pathAvailabilityMessage = '';
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/hocket-links/check-path/${this.formData.customPath}`);
+                    const data = await response.json();
+                    
+                    this.pathAvailable = data.available;
+                    this.pathAvailabilityMessage = data.available ? 
+                        'Caminho disponível!' : 
+                        'Este caminho já está em uso';
+                } catch (error) {
+                    console.error('Error checking path:', error);
+                }
+            },
+
+            async saveLink() {
+                if (!this.pathAvailable && !this.editingLink) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro',
+                        text: 'Por favor, escolha outro caminho personalizado'
+                    });
+                    return;
+                }
+
+                try {
+                    const url = this.editingLink ? 
+                        `/hocket-links/${this.editingLink._id}` : 
+                        '/hocket-links';
+                    
+                    const response = await fetch(url, {
+                        method: this.editingLink ? 'PUT' : 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(this.formData)
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        await this.loadLinks();
+                        this.closeModal();
+                        Swal.fire({
+                            icon: 'success',
+                            title: this.editingLink ? 'Link atualizado!' : 'Link criado!',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error saving link:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro',
+                        text: 'Falha ao salvar link'
+                    });
+                }
+            },
+
+            async deleteLink(id) {
+                const result = await Swal.fire({
+                    title: 'Tem certeza?',
+                    text: "Esta ação não pode ser desfeita!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Sim, deletar!',
+                    cancelButtonText: 'Cancelar'
+                });
+
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`/hocket-links/${id}`, {
+                            method: 'DELETE'
+                        });
+                        
+                        if (response.ok) {
+                            await this.loadLinks();
+                            Swal.fire(
+                                'Deletado!',
+                                'O link foi removido com sucesso.',
+                                'success'
+                            );
+                        }
+                    } catch (error) {
+                        console.error('Error deleting link:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erro',
+                            text: 'Falha ao deletar link'
+                        });
+                    }
+                }
+            },
+
+            async openStatsModal(link) {
+                try {
+                    const response = await fetch(`/hocket-links/${link._id}/stats`);
+                    const data = await response.json();
+                    if (data.success) {
+                        this.currentStats = data.data;
+                        this.showStatsModal = true;
+                    }
+                } catch (error) {
+                    console.error('Error loading link stats:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro',
+                        text: 'Falha ao carregar estatísticas'
+                    });
+                }
+            },
+
+            copyLink(customPath) {
+                const link = `https://dev.hocketzap.com/r/${customPath}`;
+                navigator.clipboard.writeText(link).then(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Link copiado!',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                });
+            },
+
+            openCreateModal() {
+                this.editingLink = null;
+                this.formData = {
+                    name: '',
+                    customPath: '',
+                    numbers: [''],
+                    redirectType: 'random',
+                    customMessage: '',
+                    messageDelay: 0,
+                    metaTags: {
+                        title: '',
+                        description: '',
+                        image: ''
+                    }
+                };
+                this.showModal = true;
+            },
+
+            editLink(link) {
+                this.editingLink = link;
+                this.formData = {
+                    name: link.name,
+                    customPath: link.customPath,
+                    numbers: [...link.numbers.map(n => n.whatsappNumber)],
+                    redirectType: link.redirectType,
+                    customMessage: link.customMessage || '',
+                    messageDelay: link.messageDelay || 0,
+                    metaTags: {
+                        title: link.metaTags?.title || '',
+                        description: link.metaTags?.description || '',
+                        image: link.metaTags?.image || ''
+                    }
+                };
+                this.showModal = true;
+            },
+
+            closeModal() {
+                this.showModal = false;
+                this.editingLink = null;
+                this.pathAvailabilityMessage = '';
+            },
+
+            closeStatsModal() {
+                this.showStatsModal = false;
+                this.currentStats = {};
+            },
+
+            addNumber() {
+                this.formData.numbers.push('');
+            },
+
+            removeNumber(index) {
+                if (this.formData.numbers.length > 1) {
+                    this.formData.numbers.splice(index, 1);
+                }
+            },
+
+            formatDate(date) {
+                if (!date) return 'N/A';
+                return new Date(date).toLocaleString();
+            },
+
+            formatPhone(number) {
+                if (!number) return 'N/A';
+                return number.replace(/(\d{2})(\d{2})(\d{4,5})(\d{4})/, '+$1 ($2) $3-$4');
+            },
+
+            getTodayClicks() {
+                const today = new Date().toISOString().split('T')[0];
+                return this.stats.clicksByDay?.[today] || 0;
+            },
+
+            calculateDailyAverage() {
+                if (!this.currentStats.totalClicks) return 0;
+                const days = Object.keys(this.currentStats.clicksByDay || {}).length || 1;
+                return Math.round(this.currentStats.totalClicks / days);
+            },
+
+            get activeLinks() {
+                return this.links.filter(link => link.isActive).length;
+            }
+        }));
+    });
+</script>
+</div>
+</body>
+</html>

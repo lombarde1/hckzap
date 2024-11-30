@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comunidade de Funis - HocketZap</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.6.0/dist/full.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.14/lottie.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans" x-data="app()">
+    <nav class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Comunidade de Funis</h1>
+            <div class="space-x-4 flex items-center">
+                <button @click="showMyPosts()" class="btn btn-ghost">
+                    <i class="fas fa-user-circle mr-1"></i> Meus Posts
+                </button>
+                <button @click="showLikedPosts()" class="btn btn-ghost">
+                    <i class="fas fa-heart mr-1"></i> Curtidos
+                </button>
+                <button @click="openShareModal()" class="btn btn-primary">
+                    <i class="fas fa-share-alt mr-1"></i> Compartilhar Funil
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold mb-4 text-purple-600">Filtros e Busca</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="searchInput" class="label">Buscar funis</label>
+                    <input type="text" id="searchInput" x-model="searchTerm" @input="fetchFunnels()" placeholder="Digite para buscar..." class="input input-bordered w-full">
+                </div>
+                <div>
+                    <label for="categoryFilter" class="label">Categoria</label>
+                    <select id="categoryFilter" x-model="selectedCategory" @change="fetchFunnels()" class="select select-bordered w-full">
+                        <option value="">Todas as categorias</option>
+                        <template x-for="category in categories" :key="category">
+                            <option :value="category" x-text="category"></option>
+                        </template>
+                    </select>
+                </div>
+                <div>
+                    <label for="sortFilter" class="label">Ordenar por</label>
+                    <select id="sortFilter" x-model="sortBy" @change="fetchFunnels()" class="select select-bordered w-full">
+                        <option value="recent">Mais recentes</option>
+                        <option value="popular">Mais populares</option>
+                        <option value="downloads">Mais baixados</option>
+                        <option value="likes">Mais curtidos</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="funnelList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <template x-for="funnel in funnels" :key="funnel._id">
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <img :src="funnel.author.profileImage || '/img/default-avatar.png'" :alt="funnel.author.name" class="w-10 h-10 rounded-full mr-3 object-cover">
+                                <div>
+                                    <h2 class="card-title text-purple-600" x-text="funnel.name"></h2>
+                                    <p class="text-sm text-gray-500" x-text="'Por ' + funnel.author.name"></p>
+                                </div>
+                            </div>
+                            <span class="text-sm text-gray-500" x-text="new Date(funnel.createdAt).toLocaleDateString()"></span>
+                        </div>
+                        <p class="text-gray-600 mb-4" x-text="funnel.description"></p>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-sm text-gray-500">
+                                <i class="fas fa-download mr-1"></i>
+                                <span x-text="funnel.downloads + ' downloads'"></span>
+                            </span>
+                            <button @click="likeFunnel(funnel._id)" class="btn btn-ghost btn-circle" :class="{ 'text-red-500': funnel.likes.includes(currentUser._id) }">
+                                <i class="far fa-heart" :class="{ 'fas': funnel.likes.includes(currentUser._id) }"></i>
+                                <span x-text="funnel.likes.length"></span>
+                            </button>
+                        </div>
+                        <div class="flex flex-wrap mb-4">
+                            <template x-for="tag in funnel.tags" :key="tag">
+                                <span class="badge badge-accent mr-2 mb-2" x-text="tag"></span>
+                            </template>
+                        </div>
+                        <p x-show="funnel.price > 0" class="text-lg font-bold text-green-600 mb-2" x-text="'R$ ' + funnel.price.toFixed(2)"></p>
+                        <p x-show="funnel.requiredPlan" class="text-sm text-blue-600 mb-2" x-text="'Plano requerido: ' + funnel.requiredPlan"></p>
+                        <div class="card-actions justify-between items-center mt-4">
+                            <button @click="downloadFunnel(funnel._id)" class="btn btn-primary">
+                                <i class="fas fa-download mr-1"></i>
+                                <span x-text="funnel.price > 0 ? 'Comprar' : 'Baixar'"></span>
+                            </button>
+                            <button @click="showComments(funnel._id)" class="btn btn-ghost">
+                                <i class="fas fa-comment mr-1"></i> Comentários
+                            </button>
+                        </div>
+                        <button x-show="currentUser.role === 'admin' || currentUser._id === funnel.author._id" @click="deleteFunnel(funnel._id)" class="btn btn-error mt-2">
+                            <i class="fas fa-trash mr-1"></i> Apagar Funil
+                        </button>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div id="loadMoreContainer" class="mt-6 flex justify-center" x-show="hasMorePages">
+            <button @click="loadMoreFunnels()" class="btn btn-primary">
+                <i class="fas fa-sync-alt mr-1"></i> Carregar mais
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal para compartilhar funil -->
+    <div id="shareModal" class="modal" :class="{ 'modal-open': isShareModalOpen }">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg mb-4">Compartilhar Funil</h3>
+            <div class="space-y-4">
+                <div>
+                    <div x-if="userFunnels.length > 0">
+                        <label for="funnelSelect" class="label">Selecione um funil</label>
+                        <select id="funnelSelect" x-model="selectedFunnelId" @change="loadFunnelDetails()" class="select select-bordered w-full">
+                            <option value="">Selecione um funil</option>
+                            <template x-for="(funnel, index) in userFunnels" :key="index">
+                                <option :value="funnel.id" x-text="funnel.name"></option>
+                            </template>
+                        </select>
+                    </div>
+                <div>
+                    <label for="funnelName" class="label">Nome do Funil</label>
+                    <input type="text" id="funnelName" x-model="shareForm.name" class="input input-bordered w-full">
+                </div>
+                <div>
+                    <label for="funnelDescription" class="label">Descrição</label>
+                    <textarea id="funnelDescription" x-model="shareForm.description" rows="3" class="textarea textarea-bordered w-full"></textarea>
+                </div>
+                <div>
+                    <label for="funnelCategory" class="label">Categoria</label>
+                    <input type="text" id="funnelCategory" x-model="shareForm.category" class="input input-bordered w-full">
+                </div>
+                <div>
+                    <label for="funnelTags" class="label">Tags (separadas por vírgula)</label>
+                    <input type="text" id="funnelTags" x-model="shareForm.tags" class="input input-bordered w-full">
+                </div>
+                <div x-show="currentUser.role === 'admin'">
+                    <div>
+                        <label for="funnelPrice" class="label">Preço (opcional)</label>
+                        <input type="number" id="funnelPrice" x-model="shareForm.price" step="0.01" min="0" class="input input-bordered w-full">
+                    </div>
+                    <div>
+                        <label for="funnelRequiredPlan" class="label">Plano Requerido (opcional)</label>
+                        <select id="funnelRequiredPlan" x-model="shareForm.requiredPlan" class="select select-bordered w-full">
+                            <option value="">Nenhum</option>
+                            <option value="basic">Básico</option>
+                            <option value="pro">Pro</option>
+                            <option value="enterprise">Enterprise</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-action">
+                <button @click="shareFunnel()" class="btn btn-primary">Compartilhar</button>
+                <button @click="closeShareModal()" class="btn">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function app() {
+            return {
+                funnels: [],
+                categories: [],
+                currentPage: 1,
+                hasMorePages: true,
+                currentUser: JSON.parse('<%- JSON.stringify(user) %>'),
+                searchTerm: '',
+                selectedCategory: '',
+                sortBy: 'recent',
+                isShareModalOpen: false,
+                userFunnels: [],
+                selectedFunnelId: '',
+                shareForm: {
+                    name: '',
+                    description: '',
+                    category: '',
+                    tags: '',
+                    price: 0,
+                    requiredPlan: ''
+                },
+
+                init() {
+                    this.fetchCategories();
+                    this.fetchFunnels();
+                },
+
+                async fetchCategories() {
+                    try {
+                        const response = await fetch('/funnels/api/community/categories');
+                        this.categories = await response.json();
+                    } catch (error) {
+                        console.error('Erro ao buscar categorias:', error);
+                        this.showErrorToast('Erro ao carregar categorias');
+                    }
+                },
+
+                async fetchFunnels(resetPage = true) {
+                    if (resetPage) {
+                        this.currentPage = 1;
+                        this.funnels = [];
+                    }
+
+                    try {
+                        const response = await fetch(`/funnels/api/community/list?page=${this.currentPage}&search=${this.searchTerm}&category=${this.selectedCategory}&sort=${this.sortBy}`);
+                        const data = await response.json();
+                        this.funnels = [...this.funnels, ...data.funnels];
+                        this.hasMorePages = this.currentPage < data.totalPages;
+                        this.currentPage = data.currentPage;
+                    } catch (error) {
+                        console.error('Erro ao buscar funis:', error);
+                        this.showErrorToast('Erro ao carregar funis');
+                    }
+                },
+
+                loadMoreFunnels() {
+                    this.currentPage++;
+                    this.fetchFunnels(false);
+                },
+
+                async likeFunnel(funnelId) {
+                    try {
+                        const response = await fetch(`/funnels/api/community/like/${funnelId}`, { method: 'POST' });
+                        const data = await response.json();
+                        const funnelIndex = this.funnels.findIndex(f => f._id === funnelId);
+                        if (funnelIndex !== -1) {
+                            this.funnels[funnelIndex].likes = data.likes;
+                            if (data.liked) {
+                                this.funnels[funnelIndex].likes.push(this.currentUser._id);
+                            } else {
+                                this.funnels[funnelIndex].likes = this.funnels[funnelIndex].likes.filter(id => id !== this.currentUser._id);
+                            }
+                        }
+                        this.showSuccessToast(data.message);
+                    } catch (error) {
+                        console.error('Erro ao curtir funil:', error);
+                        this.showErrorToast('Erro ao curtir funil');
+                    }
+                },
+
+                async downloadFunnel(funnelId) {
+                    try {
+                        const response = await fetch(`/funnels/api/community/download/${funnelId}`);
+                        const data = await response.json();
+
+                        if (response.ok) {
+                            this.performDownload(data.funnel);
+                        } else if (response.status === 402 || (response.status === 403 && data.requiresPurchase)) {
+                            this.initiatePurchase(funnelId, data.price);
+                        } else {
+                            throw new Error(data.error || 'Falha ao baixar o funil');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao baixar funil:', error);
+                        this.showErrorToast('Erro ao baixar funil: ' + error.message);
+                    }
+                },
+
+                performDownload(funnel) {
+                    const jsonString = JSON.stringify(funnel, null, 2);
+                    const blob = new Blob([jsonString], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `funnel_${funnel.name}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    this.incrementDownloadCount(funnel._id);
+                    this.showSuccessToast('Funil baixado com sucesso!');
+                },
+
+                async incrementDownloadCount(funnelId) {
+                    try {
+                        const response = await fetch(`/funnels/api/community/increment-download/${funnelId}`, {
+                            method: 'POST'
+                        });
+                        if (!response.ok) {
+                            throw new Error('Falha ao incrementar contagem de downloads');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao incrementar contagem de downloads:', error);
+                    }
+                },
+
+                openShareModal() {
+                    this.isShareModalOpen = true;
+                    if (this.userFunnels.length === 0) {
+                        this.loadUserFunnels();
+                    }
+                },
+
+                closeShareModal() {
+                    this.isShareModalOpen = false;
+                    this.resetShareForm();
+                },
+
+                resetShareForm() {
+                    this.selectedFunnelId = '';
+                    this.shareForm = {
+                        name: '',
+                        description: '',
+                        category: '',
+                        tags: '',
+                        price: 0,
+                        requiredPlan: ''
+                    };
+                },
+
+                async loadUserFunnels() {
+                    try {
+                        const response = await fetch('/funnels/api/list');
+                        if (response.ok) {
+                            this.userFunnels = await response.json();
+                        } else {
+                            throw new Error('Falha ao carregar funis do usuário');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao carregar funis do usuário:', error);
+                        this.showErrorToast('Erro ao carregar seus funis');
+                    }
+                },
+
+                async loadFunnelDetails() {
+                    if (!this.selectedFunnelId) return;
+
+                    try {
+                        const response = await fetch(`/funnels/api/details/${this.selectedFunnelId}`);
+                        if (response.ok) {
+                            const funnelDetails = await response.json();
+                            this.shareForm = {
+                                name: funnelDetails.name,
+                                description: funnelDetails.description,
+                                category: funnelDetails.category,
+                                tags: funnelDetails.tags.join(', '),
+                                price: funnelDetails.price || 0,
+                                requiredPlan: funnelDetails.requiredPlan || ''
+                            };
+                        } else {
+                            throw new Error('Falha ao carregar detalhes do funil');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao carregar detalhes do funil:', error);
+                        this.showErrorToast('Erro ao carregar detalhes do funil');
+                    }
+                },
+
+                async shareFunnel() {
+                    const shareData = {
+                        funnelId: this.selectedFunnelId,
+                        ...this.shareForm,
+                        tags: this.shareForm.tags.split(',').map(tag => tag.trim())
+                    };
+
+                    try {
+                        const response = await fetch('/funnels/api/community/share', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(shareData),
+                        });
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            this.closeShareModal();
+                            this.fetchFunnels(true);
+                            this.showSuccessToast('Funil compartilhado com sucesso!');
+                        } else {
+                            throw new Error('Falha ao compartilhar funil');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao compartilhar funil:', error);
+                        this.showErrorToast('Erro ao compartilhar funil');
+                    }
+                },
+
+                async deleteFunnel(funnelId) {
+                    const result = await Swal.fire({
+                        title: 'Tem certeza?',
+                        text: "Você não poderá reverter esta ação!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Sim, apagar!',
+                        cancelButtonText: 'Cancelar'
+                    });
+
+                    if (result.isConfirmed) {
+                        try {
+                            const response = await fetch(`/funnels/api/community/delete/${funnelId}`, { 
+                                method: 'DELETE'
+                            });
+                            
+                            if (!response.ok) {
+                                throw new Error('Falha ao apagar o funil');
+                            }
+                            
+                            this.funnels = this.funnels.filter(funnel => funnel._id !== funnelId);
+                            this.showSuccessToast('O funil foi apagado com sucesso.');
+                        } catch (error) {
+                            console.error('Erro ao apagar funil:', error);
+                            this.showErrorToast('Erro ao apagar funil');
+                        }
+                    }
+                },
+
+                showSuccessToast(message) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: message,
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                    });
+                },
+
+                showErrorToast(message) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: message,
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - HocketZap</title>
+    
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.5.0/dist/full.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <!-- Lottie -->
+    <script src="https://unpkg.com/lottie-web@5.7.8/build/player/lottie.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .stat-card {
+            @apply bg-white rounded-xl shadow-sm p-6 transition-all duration-300;
+        }
+        
+        .stat-card {
+    transition: all 0.3s ease-in-out;
+}
+
+.alert-warning {
+    background: linear-gradient(45deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1px solid #fcd34d;
+    animation: pulse-warning 2s infinite;
+}
+
+.alert-critical {
+    background: linear-gradient(45deg, #fff7ed 0%, #ffedd5 100%);
+    border: 1px solid #fb923c;
+    animation: pulse-critical 2s infinite;
+}
+
+
+@keyframes pulse-warning {
+    0% {
+        box-shadow: 0 0 0 0 rgba(251, 211, 141, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(251, 211, 141, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(251, 211, 141, 0);
+    }
+}
+
+@keyframes pulse-critical {
+    0% {
+        box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(248, 113, 113, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(248, 113, 113, 0);
+    }
+}
+
+.usage-text-warning {
+    color: #c05621;
+    font-weight: 600;
+}
+
+.usage-text-critical {
+    color: #e53e3e;
+    font-weight: 600;
+}
+
+.alert-icon {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+
+.alert-warning .alert-icon {
+    color: #b45309;
+    border: 1px solid #fcd34d;
+}
+
+.alert-critical .alert-icon {
+    color: #ea580c;
+    border: 1px solid #fb923c;
+}
+.alert-icon-text {
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+        .stat-card:hover {
+            @apply shadow-md transform -translate-y-1;
+        }
+
+        .stat-value {
+            @apply text-3xl font-bold text-gray-800;
+        }
+
+        .stat-label {
+            @apply text-sm font-medium text-gray-500;
+        }
+
+        .progress-ring {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-50" x-data="dashboardData()">
+       
+      
+        <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script> 
+
+        <!-- Main Content -->
+        <main class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="dashboardData">
+            <!-- Seção de Boas-vindas -->
+            <div class="bg-gradient-to-br from-white to-indigo-50 rounded-2xl shadow-lg p-6 md:p-8 mb-8 border border-indigo-100/50">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                  <!-- Animação Lottie -->
+                  <div class="flex-shrink-0 mb-6 md:mb-0">
+                    <dotlottie-player 
+                        src="anims/astronot.json" 
+                        background="transparent" 
+                        speed="1" 
+                        class="w-48 h-48 md:w-72 md:h-72 -mt-4 md:-mt-8 -mb-4 md:-mb-8"
+                        loop 
+                        autoplay>
+                    </dotlottie-player>
+                  </div>
+              
+                  <!-- Mensagem e Informações -->
+                  <div class="flex-1 space-y-6">
+                    <div class="space-y-3 text-center md:text-left">
+                      <h2 class="text-2xl md:text-3xl font-bold text-gray-800">
+                        Olá, <span x-text="userPlan.name"></span>! 👋
+                        
+                      </h2>
+                      <div class="flex flex-wrap justify-center md:justify-start gap-4">
+                        <div class="flex items-center px-4 py-2 bg-indigo-100/50 rounded-lg border border-indigo-200/50">
+                          <i class="fas fa-crown text-indigo-600 mr-2"></i>
+                          <span class="text-indigo-600 font-medium" x-text="'Plano ' + userPlan.plan"></span>
+                        </div>
+                        <div class="flex items-center px-4 py-2 bg-emerald-100/50 rounded-lg border border-emerald-200/50">
+                          <i class="fas fa-calendar text-emerald-600 mr-2"></i>
+                          <span class="text-emerald-600 font-medium">
+                            Válido até <span x-text="new Date(userPlan.validUntil).toLocaleDateString()"></span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+              
+                <!-- Métricas do Plano -->
+                <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    <!-- Instâncias -->
+                    <div class="bg-white/50 backdrop-blur-sm rounded-xl p-4 border border-indigo-100/50 relative"
+                         :class="{
+                             'alert-warning': !isUnlimited('instances') && (stats.totalInstances / limits.instances) >= 0.7 && (stats.totalInstances / limits.instances) < 0.9,
+                             'alert-critical': !isUnlimited('instances') && (stats.totalInstances / limits.instances) >= 0.9
+                         }">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-sm font-medium text-gray-600">Instâncias</p>
+                            <i class="fas fa-server text-indigo-500"></i>
+                        </div>
+                        <p class="text-lg font-bold text-gray-800">
+                            <span x-text="stats.totalInstances"></span>/<span x-text="formatLimit(limits.instances)"></span>
+                        </p>
+                    </div>
+                
+                    <!-- Auto Respostas -->
+                    <div class="bg-white/50 backdrop-blur-sm rounded-xl p-4 border border-indigo-100/50 relative"
+                         :class="{
+                             'alert-warning': !isUnlimited('autoResponses') && (stats.todayAutoResponses / limits.autoResponses) >= 0.7 && (stats.todayAutoResponses / limits.autoResponses) < 0.9,
+                             'alert-critical': !isUnlimited('autoResponses') && (stats.todayAutoResponses / limits.autoResponses) >= 0.9
+                         }">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-sm font-medium text-gray-600">Auto Respostas</p>
+                            <i class="fas fa-robot text-indigo-500"></i>
+                        </div>
+                        <p class="text-lg font-bold text-gray-800">
+                            <span x-text="stats.todayAutoResponses"></span>/<span x-text="formatLimit(limits.autoResponses)"></span>
+                        </p>
+                    </div>
+                
+                    <!-- Envios em Massa -->
+                    <div class="bg-white/50 backdrop-blur-sm rounded-xl p-4 border border-indigo-100/50 relative"
+                         :class="{
+                             'alert-warning': !isUnlimited('dailySpamMessages') && (stats.todaySpamMessages / limits.dailySpamMessages) >= 0.7 && (stats.todaySpamMessages / limits.dailySpamMessages) < 0.9,
+                             'alert-critical': !isUnlimited('dailySpamMessages') && (stats.todaySpamMessages / limits.dailySpamMessages) >= 0.9
+                         }">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-sm font-medium text-gray-600">Envios em Massa</p>
+                            <i class="fas fa-message text-indigo-500"></i>
+                        </div>
+                        <p class="text-lg font-bold text-gray-800">
+                            <span x-text="stats.todaySpamMessages"></span>/<span x-text="formatLimit(limits.dailySpamMessages)"></span>
+                        </p>
+                    </div>
+                
+                    <!-- Funis -->
+                    <div class="bg-white/50 backdrop-blur-sm rounded-xl p-4 border border-indigo-100/50 relative"
+                         :class="{
+                             'alert-warning': !isUnlimited('funnels') && (stats.activeFunnels / limits.funnels) >= 0.7 && (stats.activeFunnels / limits.funnels) < 0.9,
+                             'alert-critical': !isUnlimited('funnels') && (stats.activeFunnels / limits.funnels) >= 0.9
+                         }">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-sm font-medium text-gray-600">Funis</p>
+                            <i class="fas fa-filter text-indigo-500"></i>
+                        </div>
+                        <p class="text-lg font-bold text-gray-800">
+                            <span x-text="stats.activeFunnels"></span>/<span x-text="formatLimit(limits.funnels)"></span>
+                        </p>
+                    </div>
+                </div>
+              
+                    <!-- Quick Actions -->
+                    <div class="flex flex-col sm:flex-row gap-3 mt-4 justify-center md:justify-start">
+                        <a href="/whatsapp" class="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200">
+                            <i class="fas fa-plus mr-2"></i>
+                            Nova Instância
+                        </a>
+                        
+                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+        
+            <!-- Painel de Instâncias -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100">
+                <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-server mr-3 text-blue-500"></i>
+                    Suas Instâncias
+                </h3>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" x-data>
+        <template x-for="instance in instances" :key="instance.name">
+            <div class="bg-white rounded-xl p-6 transform transition-all duration-300 hover:scale-102 hover:shadow-lg border border-gray-100">
+                <!-- Cabeçalho da Instância -->
+                <div class="flex items-center space-x-4 mb-4">
+                    <div class="relative">
+                        <img :src="instance.profileImage" 
+                             class="w-14 h-14 rounded-xl object-cover border-2 border-white shadow-md"
+                             :alt="instance.name">
+                        <div :class="instance.isConnected ? 'bg-green-500' : 'bg-red-500'"
+                             class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white"></div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-semibold text-gray-900 truncate" x-text="instance.name"></h4>
+                        <p class="text-sm text-gray-500 truncate" x-text="instance.whatsappName"></p>
+                        <p class="text-sm text-gray-500 truncate" x-text="instance.number"></p>
+                    </div>
+                    <div :class="instance.isConnected ? 'bg-green-100 ring-green-500' : 'bg-red-100 ring-red-500'"
+                         class="px-3 py-1.5 rounded-lg ring-1 ring-opacity-20">
+                        <span :class="instance.isConnected ? 'text-green-700' : 'text-red-700'"
+                              class="text-sm font-medium"
+                              x-text="instance.isConnected ? 'Online' : 'Offline'">
+                        </span>
+                    </div>
+                </div>
+    
+                <!-- Métricas Principais -->
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="text-center p-4 bg-blue-50 rounded-xl">
+                        <p class="text-sm font-medium text-blue-600 mb-1">Mensagens</p>
+                        <p class="text-lg font-bold text-blue-700" x-text="formatNumber(instance.messageCount)"></p>
+                    </div>
+                    <div class="text-center p-4 bg-purple-50 rounded-xl">
+                        <p class="text-sm font-medium text-purple-600 mb-1">Chats Ativos</p>
+                        <p class="text-lg font-bold text-purple-700" x-text="formatNumber(instance.activeChats)"></p>
+                    </div>
+                </div>
+    
+                <!-- Métricas Secundárias -->
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="text-center p-3 bg-gray-50 rounded-lg">
+                        <p class="text-xs font-medium text-gray-500">Contatos</p>
+                        <p class="text-sm font-semibold text-gray-700" x-text="formatNumber(instance.contactCount)"></p>
+                    </div>
+                    <div class="text-center p-3 bg-gray-50 rounded-lg">
+                        <p class="text-xs font-medium text-gray-500">Total Chats</p>
+                        <p class="text-sm font-semibold text-gray-700" x-text="formatNumber(instance.chatCount)"></p>
+                    </div>
+                    <div class="text-center p-3 bg-gray-50 rounded-lg">
+                        <p class="text-xs font-medium text-gray-500">Respostas Auto</p>
+                        <p class="text-sm font-semibold text-gray-700" x-text="formatNumber(instance.totalResponses)"></p>
+                    </div>
+                </div>
+    
+                <!-- Última Conexão -->
+                <div class="mt-4 text-center">
+                    <p class="text-xs text-gray-500">
+                        Última atualização da API: 
+                        <span x-text="instance.lastConnection ? new Date(instance.lastConnection).toLocaleString() : 'N/A'"></span>
+                    </p>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
+
+<!-- Seção de Integrações Ativas -->
+<!-- Seção de Integrações -->
+<div class="bg-gradient-to-br from-white to-blue-50 rounded-3xl shadow-lg p-8 mb-8">
+    <div class="flex justify-between items-center mb-8">
+        <h3 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <i class="fas fa-puzzle-piece text-blue-600"></i>
+            <span class="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">Integrações</span>
+        </h3>
+        <a href="/integracoes" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all duration-300 text-sm font-medium">
+            <span>Gerenciar Integrações</span>
+            <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <template x-for="integration in integrations" :key="integration.name">
+            <div class="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 p-6 flex flex-col items-center text-center cursor-pointer hover:-translate-y-1"
+                :class="{'ring-2 ring-blue-500': integration.active, 'ring-1 ring-gray-200': !integration.active}">
+                
+                <!-- Ícones com efeito de gradiente e transição -->
+                <div class="relative mb-6 w-16 h-16">
+                    <!-- Ícone principal com círculo de fundo -->
+                    <div class="absolute inset-0 rounded-full"
+                        :class="integration.active ? `bg-gradient-to-br ${integration.bgGradient} opacity-10` : 'bg-gray-100'">
+                    </div>
+                    
+                    <div class="absolute inset-0 flex items-center justify-center transform transition-transform duration-300 group-hover:scale-110">
+                        <i :class="[integration.icon, integration.active ? `bg-gradient-to-br ${integration.bgGradient} bg-clip-text text-transparent` : 'text-gray-400']" 
+                           class="text-3xl"></i>
+                    </div>
+                    
+                    <!-- Ícone secundário com efeito de fade -->
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-x-1 translate-y-1">
+                        <i :class="[integration.iconSecondary, integration.active ? `bg-gradient-to-br ${integration.bgGradient} bg-clip-text text-transparent` : 'text-gray-400']" 
+                           class="text-2xl"></i>
+                    </div>
+                </div>
+
+                <h4 class="font-bold text-gray-800 text-xl mb-3" x-text="integration.name"></h4>
+                
+                <p class="text-sm text-gray-600 mb-4 line-clamp-2" x-text="integration.description"></p>
+                
+                <span :class="{
+                    'bg-gradient-to-r': integration.active,
+                    [integration.bgGradient]: integration.active,
+                    'text-white': integration.active,
+                    'bg-gray-100 text-gray-600': !integration.active
+                }" 
+                class="inline-flex items-center justify-center px-4 py-1.5 rounded-full text-sm font-medium">
+                    <i :class="{
+                        'fas fa-check-circle': integration.active,
+                        'fas fa-cog animate-spin-slow': !integration.active
+                    }" class="mr-2"></i>
+                    <span x-text="integration.active ? 'Ativo' : 'Não configurado'"></span>
+                </span>
+            </div>
+        </template>
+    </div>
+</div>
+
+<style>
+.animate-spin-slow {
+    animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+</style>
+
+
+<!-- Últimas Atividades -->
+<div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+    <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+        <i class="fas fa-clock mr-3 text-indigo-500"></i>
+        Últimas Atividades
+    </h3>
+    <div class="overflow-x-auto">
+        <table class="min-w-full">
+            <thead>
+                <tr class="border-b border-gray-200">
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Instância
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Tipo
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Detalhes
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Horário
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200" id="activitiesTable">
+                <!-- Será preenchido via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+         
+
+        </main>
+    </div>
+            <!-- Adicione antes do fechamento do body -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment"></script>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('dashboardData', () => ({
+            // Estado inicial melhorado
+            activeIntegrations: [],
+            activities: [],
+            instances: [],
+            integrations: [],
+            stats: {
+                totalInstances: 0,
+                connectedInstances: 0,
+                todayMessages: 0,
+                activeFunnels: 0,
+                todayAutoResponses: 0,
+                todaySpamMessages: 0
+            },
+            limits: {
+                instances: 0,
+                dailySpamMessages: 0,
+                funnels: 0,
+                autoResponses: 0
+            },
+            userPlan: {
+                name: 'Carregando...',
+                email: '',
+                plan: 'Carregando...',
+                validUntil: new Date(),
+                usage: {
+                    funnels: 0,
+                    total: 0
+                }
+            },
+
+            // Inicialização
+            init() {
+                this.loadAllData();
+                this.loadIntegrationsStatus();
+                setInterval(() => this.loadAllData(), 30000);
+            },
+
+            isUnlimited(feature) {
+        return this.limits[feature] >= Number.MAX_SAFE_INTEGER;
+    },
+
+    // Função para formatar o limite
+    formatLimit(limit) {
+        return limit >= Number.MAX_SAFE_INTEGER ? '∞' : limit;
+    },
+    
+        // Add integration status loader
+        async loadIntegrationsStatus() {
+            try {
+                const response = await fetch('/integrations/status');
+                const integrationStatus = await response.json();
+                
+                this.integrations = [
+                    {
+                        name: 'ElevenLabs',
+                        description: 'Integração com o ElevenLabs para geração de voz',
+                        icon: 'fas fa-microphone-alt',
+                        iconSecondary: 'fas fa-waveform',
+                        active: integrationStatus.elevenlabs,
+                        bgGradient: 'from-purple-500 to-blue-500'
+                    },
+                    {
+                        name: 'Cartpanda',
+                        description: 'Integração com checkout cartpanda',
+                        icon: 'fas fa-shopping-cart',
+                        iconSecondary: 'fas fa-credit-card',
+                        active: integrationStatus.cartpanda,
+                        bgGradient: 'from-green-500 to-teal-500'
+                    },
+                    {
+                        name: 'Pushinpay',
+                        description: 'Integração para receber pagamentos',
+                        icon: 'fas fa-wallet',
+                        iconSecondary: 'fas fa-hand-holding-dollar',
+                        active: integrationStatus.pushinpay,
+                        bgGradient: 'from-blue-500 to-indigo-500'
+                    }
+                ];
+            } catch (error) {
+                console.error('Erro ao carregar status das integrações:', error);
+                notifications.show('Erro ao carregar integrações', 'error');
+            }
+        },
+
+        // Carregamento de dados atualizado
+        async loadAllData() {
+                try {
+                    const [userStatsRes, instancesStatusRes, autoResponseRes, messagesRes] = await Promise.allSettled([
+                        fetch('/api/v1/user/stats'),
+                        fetch('/api/v1/instances/status'),
+                        fetch('/api/v1/autoresponse/metrics'),
+                        fetch('/api/v1/messages/metrics')
+                    ]);
+
+                    // Verify and process userStats
+                    if (userStatsRes.status === 'fulfilled' && userStatsRes.value.ok) {
+                        const userStats = await userStatsRes.value.json();
+                        if (userStats && userStats.user) {
+                            const PLAN_NAME_REPLACERS = {
+                                gratuito: 'Gratuito',
+                                basico_monthly: 'Básico Mensal',
+                                basico_quarterly: 'Básico Trimestral',
+                                basico_semiannual: 'Básico Semestral',
+                                plus_monthly: 'Plus Mensal',
+                                plus_quarterly: 'Plus Trimestral',
+                                plus_semiannual: 'Plus Semestral',
+                                premium_monthly: 'Premium Mensal',
+                                premium_quarterly: 'Premium Trimestral',
+                                premium_semiannual: 'Premium Semestral'
+                            };
+
+                            const userPlanName = PLAN_NAME_REPLACERS[userStats.user.plan] || userStats.user.plan;
+
+                            // Update user plan info safely
+                            this.userPlan = {
+                name: userStats.user.name || 'Usuário',
+                email: userStats.user.email || '',
+                plan: userPlanName,
+                validUntil: new Date(userStats.user.validUntil || Date.now())
+            };
+
+                            // Update limits safely
+                            this.limits = {
+                instances: userStats.instances.limit,
+                dailySpamMessages: userStats.usage.daily.spamMessages.limit,
+                autoResponses: userStats.usage.daily.autoResponses.limit,
+                funnels: userStats.funnels.limit
+            };
+                            // Update stats safely
+                            this.stats = {
+                totalInstances: userStats.instances.total,
+                connectedInstances: userStats.instances.active,
+                todayMessages: userStats.usage.daily.spamMessages.used,
+                activeFunnels: userStats.funnels.total,
+                todayAutoResponses: userStats.usage.daily.autoResponses.used,
+                todaySpamMessages: userStats.usage.daily.spamMessages.used
+            };
+                        }
+                    }
+
+                    // Process instances
+                    try {
+                        const whatsappResponse = await fetch('/whatsapp/list');
+                        if (whatsappResponse.ok) {
+                            const whatsappInstances = await whatsappResponse.json();
+                            this.instances = whatsappInstances.map(instance => ({
+                                name: instance.name || 'Sem nome',
+                                whatsappName: instance.whatsappName || instance.name || 'Sem nome',
+                                isConnected: instance.isConnected || false,
+                                profileImage: instance.foto || '/img/default-profile.png',
+                                number: instance.number || '',
+                                messageCount: instance.messageCount || 0,
+                                contactCount: instance.contactCount || 0,
+                                chatCount: instance.chatCount || 0,
+                                lastConnection: instance.updatedAt || new Date()
+                            }));
+                        }
+                    } catch (error) {
+                        console.error('Erro ao carregar instâncias:', error);
+                        this.instances = [];
+                    }
+
+                    // Update UI safely
+                    this.$nextTick(() => {
+                        this.updateProgressBars();
+                        this.animateNumbers(this.stats);
+                        this.updateActivitiesTable();
+                    });
+
+                } catch (error) {
+                    console.error('Erro ao carregar dados:', error);
+                    notifications.show('Erro ao atualizar dashboard', 'error');
+                }
+            },
+        
+            // Funções auxiliares
+            formatNumber(number) {
+                return new Intl.NumberFormat().format(number || 0);
+            },
+    
+            updateActivitiesTable() {
+        const table = document.getElementById('activitiesTable');
+        if (!table) return;
+
+        // Limpa a tabela atual
+        table.innerHTML = '';
+
+        // Adiciona as novas atividades
+        this.activities.forEach(activity => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-gray-50 transition-colors duration-200';
+            
+            // Define o ícone e cor baseado no tipo de atividade
+            const typeInfo = this.getActivityTypeInfo(activity.type);
+            
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 h-8 w-8 flex items-center justify-center rounded-lg ${typeInfo.bgColor}">
+                            <i class="${typeInfo.icon} ${typeInfo.iconColor}"></i>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-sm font-medium text-gray-900">
+                                ${activity.details?.instanceName || 'Sistema'}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${typeInfo.badgeColor} ${typeInfo.textColor}">
+                        ${typeInfo.label}
+                    </span>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="text-sm text-gray-900">${activity.description}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="flex items-center">
+                        <i class="far fa-clock mr-2"></i>
+                        <span>${activity.timeAgo}</span>
+                    </div>
+                </td>
+            `;
+            
+            table.appendChild(row);
+        });
+    },
+
+    // Função para obter informações visuais baseadas no tipo de atividade
+    getActivityTypeInfo(type) {
+        const types = {
+            auto_response: {
+                icon: 'fas fa-robot',
+                label: 'Auto Resposta',
+                bgColor: 'bg-blue-100',
+                iconColor: 'text-blue-600',
+                badgeColor: 'bg-blue-100',
+                textColor: 'text-blue-800'
+            },
+            mass_message: {
+                icon: 'fas fa-paper-plane',
+                label: 'Envio em Massa',
+                bgColor: 'bg-green-100',
+                iconColor: 'text-green-600',
+                badgeColor: 'bg-green-100',
+                textColor: 'text-green-800'
+            },
+            funnel_edit: {
+                icon: 'fas fa-filter',
+                label: 'Edição de Funil',
+                bgColor: 'bg-purple-100',
+                iconColor: 'text-purple-600',
+                badgeColor: 'bg-purple-100',
+                textColor: 'text-purple-800'
+            },
+            instance_connection: {
+                icon: 'fas fa-plug',
+                label: 'Conexão',
+                bgColor: 'bg-yellow-100',
+                iconColor: 'text-yellow-600',
+                badgeColor: 'bg-yellow-100',
+                textColor: 'text-yellow-800'
+            },
+            campaign_update: {
+                icon: 'fas fa-bullhorn',
+                label: 'Campanha',
+                bgColor: 'bg-indigo-100',
+                iconColor: 'text-indigo-600',
+                badgeColor: 'bg-indigo-100',
+                textColor: 'text-indigo-800'
+            },
+            contact_list: {
+                icon: 'fas fa-address-book',
+                label: 'Lista de Contatos',
+                bgColor: 'bg-pink-100',
+                iconColor: 'text-pink-600',
+                badgeColor: 'bg-pink-100',
+                textColor: 'text-pink-800'
+            },
+            settings_update: {
+                icon: 'fas fa-cog',
+                label: 'Configurações',
+                bgColor: 'bg-gray-100',
+                iconColor: 'text-gray-600',
+                badgeColor: 'bg-gray-100',
+                textColor: 'text-gray-800'
+            }
+        };
+
+        return types[type] || {
+            icon: 'fas fa-info-circle',
+            label: 'Outro',
+            bgColor: 'bg-gray-100',
+            iconColor: 'text-gray-600',
+            badgeColor: 'bg-gray-100',
+            textColor: 'text-gray-800'
+        };
+    },
+    
+            updateProgressBars() {
+                const progressBars = {
+                    instances: this.stats.totalInstances / this.limits.instances,
+                    messages: this.stats.todayMessages / this.limits.dailySpamMessages,
+                    autoResponses: this.stats.todayAutoResponses / this.limits.autoResponses,
+                    funnels: this.stats.activeFunnels / this.limits.funnels
+                };
+    
+                Object.entries(progressBars).forEach(([key, value]) => {
+                    const bar = document.querySelector(`#progress-${key}`);
+                    if (bar) {
+                        const percentage = Math.min(value * 100, 100);
+                        bar.style.width = `${percentage}%`;
+                    }
+                });
+            },
+    
+            animateNumbers(newStats) {
+                Object.keys(newStats).forEach(key => {
+                    if (this.stats[key] !== newStats[key]) {
+                        gsap.to(this.stats, {
+                            duration: 1,
+                            [key]: newStats[key],
+                            roundProps: key,
+                            ease: "power2.out"
+                        });
+                    }
+                });
+            },
+    
+            getActivityTypeClass(type) {
+                const classes = {
+                    'message': 'bg-green-100 text-green-800',
+                    'autoResponse': 'bg-blue-100 text-blue-800',
+                    'funnel': 'bg-purple-100 text-purple-800',
+                    'connection': 'bg-yellow-100 text-yellow-800',
+                    'error': 'bg-red-100 text-red-800'
+                };
+                return classes[type] || 'bg-gray-100 text-gray-800';
+            }
+        }))
+    });
+    
+    // Sistema de Notificações
+    const notifications = {
+        show(message, type = 'info') {
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-yellow-500',
+                info: 'bg-blue-500'
+            };
+    
+            const notif = document.createElement('div');
+            notif.className = `fixed bottom-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-y-20 opacity-0`;
+            notif.textContent = message;
+    
+            document.body.appendChild(notif);
+    
+            setTimeout(() => {
+                notif.classList.remove('translate-y-20', 'opacity-0');
+            }, 100);
+    
+            setTimeout(() => {
+                notif.classList.add('translate-y-20', 'opacity-0');
+                setTimeout(() => notif.remove(), 300);
+            }, 3000);
+        }
+    };
+    </script>
+
+<!-- Fechamento do body e html -->
+    </div>
+</body>
+</html>
